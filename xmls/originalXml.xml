@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<grafo>
+    <nodo>
+        <nome>primo</nome>
+    </nodo>
+    <nodo>
+        <nome>secondo</nome>
+    </nodo>
+    <nodo>
+        <nome>terzo</nome>
+    </nodo>
+    
+    <transizione>
+        <nome>A</nome>
+        <osservabile>Y</osservabile>
+        <from>primo</from>
+        <to>secondo</to>
+    </transizione>
+    <transizione>
+        <nome>B</nome>
+        <osservabile>N</osservabile>
+        <from>primo</from>
+        <to>terzo</to>
+    </transizione>
+</grafo>
