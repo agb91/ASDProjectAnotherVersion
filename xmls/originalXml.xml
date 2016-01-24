@@ -11,15 +11,31 @@
     </nodo>
     
     <transizione>
-        <nome>A</nome>
-        <osservabile>Y</osservabile>
+        <nome>t0</nome>
+        <evento>A</evento>
+        <osservabile>y</osservabile>
+        <from>primo</from>
+        <to>primo</to>
+    </transizione>
+    <transizione>
+        <nome>t1</nome>
+        <evento>A</evento>
+        <osservabile>n</osservabile>
         <from>primo</from>
         <to>secondo</to>
     </transizione>
     <transizione>
-        <nome>B</nome>
-        <osservabile>N</osservabile>
-        <from>primo</from>
+        <nome>t2</nome>
+        <evento>B</evento>
+        <osservabile>Y</osservabile>
+        <from>secondo</from>
         <to>terzo</to>
+    </transizione>
+    <transizione>
+        <nome>t3</nome>
+        <evento>B</evento>
+        <osservabile>n</osservabile>
+        <from>terzo</from>
+        <to>primo</to>
     </transizione>
 </grafo>

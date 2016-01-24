@@ -20,6 +20,7 @@ public class Main {
 		
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	db.readXml();
+    	db.checkRequirements();
     	
 		
 		

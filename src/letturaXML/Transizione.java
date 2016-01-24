@@ -4,12 +4,14 @@ public class Transizione {
 	
 	private String nome;
 	private String oss;
+	private String evento;
 	private String from;
 	private String to;
 
-	public Transizione(String _nome, String _oss, String _from, String _to)
+	public Transizione(String _nome, String _evento, String _oss, String _from, String _to)
 	{
 		setNome(_nome);
+		setEvento(_evento);
 		setOss(_oss);
 		setFrom(_from);
 		setTo(_to);
@@ -45,6 +47,14 @@ public class Transizione {
 
 	public void setTo(String to) {
 		this.to = to;
+	}
+
+	public String getEvento() {
+		return evento;
+	}
+
+	public void setEvento(String evento) {
+		this.evento = evento;
 	}
 
 }

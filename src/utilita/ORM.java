@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.SerializationUtils;
+import org.neo4j.cypher.internal.compiler.v1_9.commands.AllRelationships;
 import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
 import org.neo4j.graphdb.Direction;
@@ -38,18 +40,113 @@ public class ORM {
 	
 	private static String DB_PATH = "";
 	private static GraphDatabaseService graphDb;
-	Vector<Node> nodi = new Vector<Node>();
+	private static Vector <Node> allNodes = new Vector<Node>();
+	private static Vector <Relationship> allRelations = new Vector<Relationship>();
 	
 	public ORM(String p)
 	{
 		DB_PATH = p;
 	    clean(DB_PATH);
 		graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-		setLabelSystem();
-		
-		
-		
+		setLabelSystem();	
 	}
+	
+	public void checkRequirements()
+	{
+		//ogni stato ha almeno una transizione uscente
+		checkOutComing();
+		
+		//i metodi add gestiscono già eventuali doppioni;
+		//più transizioni possono avere lo stesso evento
+		
+		//grafo è ciclico 
+		// ogni ciclo deve avere almeno un evento osservabile
+		controlCycleRequirements();
+	}
+	
+	private static void checkOutComing()
+	{
+		for(int i=0; i<allNodes.size(); i++)
+		{
+			Node n = allNodes.get(i);
+			hasRelationsOut(n,false);
+		}
+	}
+
+	//	questo nodo ha una relazione uscente?
+    private static boolean hasRelationsOut(Node n, boolean verbose)
+    {
+    	try ( Transaction tx = graphDb.beginTx() )
+		{
+	    	int a=0;
+	    	String nomeNodo = n.getProperties("name").values().toString();
+	    	while(a<allRelations.size())
+	    	{
+	    	   Relationship r = allRelations.get(a);	
+	    	   String from = r.getProperties("from").values().toString();
+	    	   if(verbose)
+	    	   {
+	    		   System.out.println("confronto: "+ nomeNodo + "   con: " + from);
+	    	   }
+	    	   if(nomeNodo.contains(from) || from.contains(nomeNodo))
+	    	   {
+	    		   return true;
+	    	   }
+	    	   a++;
+	    	}   
+		tx.success();
+		System.out.println("ci sono nodi senza relazioni uscenti, ad esempio: "+ nomeNodo + ", esco");
+		System.exit(2);
+		}	
+  
+	    return false;
+    }	
+	
+	private static void checkAllCycleOsservable(Vector<Relationship> c, String extreme)
+	{
+		try ( Transaction tx = graphDb.beginTx() )
+		{
+			boolean safe = false;
+			int a=0;
+			while(!safe & a<c.size()) //NB per risparmiare se questo ciclo ha una relazione osservabile
+				//non è necessario checkare le altre
+			{
+				if(c.get(a).getProperties("oss").values().toString().toLowerCase().contains("y"))
+				{
+					safe = true;
+				}
+				a++;
+			}
+			if(!safe)
+			{
+				System.out.println("ci sono cicli senza relazioni osservabili: ad esempio");
+				System.out.println("dal nodo al nodo: " + extreme);
+				for(int i=0; i<c.size(); i++)
+				{
+					Relationship thisR = c.get(i);
+					System.out.println(thisR.getProperty("type").toString());
+				}
+				System.exit(2);
+				//NB per risparmiare se mi accorgo che anche un solo ciclo è compromesso
+				// mi fermo
+			}
+			tx.success();
+		}
+	}
+		
+	public Vector<Cycle> controlCycleRequirements()
+	{
+		Vector<Cycle> cycles = new Vector<Cycle>();
+		Vector<Cycle> rels = new Vector<Cycle>();
+		for(int i=0; i<allNodes.size(); i++)
+		{
+		   Node n = allNodes.get(i);
+		   //System.out.println("STO ESAMINANDO IL NODO: " +i);
+		   findPathRels(n,n, false);
+		}
+		return cycles;
+	}
+
 	
 	public void readXml()
 	{
@@ -67,11 +164,12 @@ public class ORM {
 			Transizione appoggio = t.get(i);
             String nome = appoggio.getNome();
             String osservabile = appoggio.getOss();
+            String evento = appoggio.getEvento();
             String from = appoggio.getFrom();
             String to = appoggio.getTo();
             Node nFrom = findNodeByName(from);
             Node nTo = findNodeByName(to);
-            addRelation(nFrom, nTo,nome,osservabile);
+            addRelation(nFrom, nTo,nome,osservabile, evento);
 		}	
 	}
 	
@@ -154,7 +252,25 @@ public class ORM {
 		return false;
 	}
 	
-	//classe grezza: trova un generico path mettendo sia nodi sia relazioni in raw
+	public static boolean inNodes(Node ago, Vector<Node> pagliaio)
+	{
+		try ( Transaction tx = graphDb.beginTx() )
+		{
+			for(int i=0; i<pagliaio.size(); i++)
+			{
+				String idAgo = ago.getProperties("name").values().toString();
+				String idPagliaioi = pagliaio.get(i).getProperties("name").values().toString();
+				if(idAgo.equalsIgnoreCase(idPagliaioi))
+				{
+					return true;
+				}
+			}
+			tx.success();
+		}	
+		return false;
+	}
+	
+	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
 	private static Iterator<Path> findPath(Node s, Node e)
 	{
 		Iterator<Path> iteratore = null;
@@ -172,70 +288,76 @@ public class ORM {
 	}
 	
 	//restituisci solo le relazioni, scegli se stamparle 
-	public static Iterator<Relationship> findPathRels(Node s, Node e, Boolean haveToWrite)
+	//RESTITUISCI ogni possiblie percorso BASTA CHE SIA DIVERSO DA PERCORSO VUOTO
+	public static void findPathRels(Node s, Node e, Boolean haveToWrite)
 	{
+		boolean isCyclic = false;
 		Iterator<Path> iteratore = findPath(s,e);
 		Iterator<Relationship> result = null;
+		Vector<Relationship> ris = new Vector<Relationship>();
 		try ( Transaction tx = graphDb.beginTx() )
 		{
 			//LO SO ANCHE IO CHE È UN CAZZO DI WHILE DENTRO UN WHILE MA TENUTO
 			//CONTO DEL FATTO CHE PUÒ TROVARE TANTI PERCORSI ALTERNATIVI
 			//È MEGLIO COSÌ
-			if(haveToWrite)
+			do
 			{
-				do
+				Path path = iteratore.next();
+				result = path.relationships().iterator();
+				int a=0;
+				if(result.hasNext()) //se è vuoto non mi interessa..
 				{
-					Path path = iteratore.next();
-					result = path.relationships().iterator();
-						System.out.println("\n\n\n\n Ecco un possibile path di Relazioni:");
-						System.out.println("Relazioni: ");
-		                do
-		                {
-							if(result.hasNext())
-							{
-								System.out.println(result.next().getProperty("type"));
-							}
-		                }while(result.hasNext());	
-				}while(iteratore.hasNext());
-			}	
+					ris.clear();
+					isCyclic = true;
+	                do
+	                {
+						ris.addElement(result.next());
+	                }while(result.hasNext());
+	                if(haveToWrite)
+	                {
+	                	writeVector(ris,s,e);
+	                }
+                	checkAllCycleOsservable(ris, e.getProperties("name").toString());
+				}    
+			}while(iteratore.hasNext());
+			
+			if(!isCyclic)
+			{
+				System.out.println("this graph is not cyclic, I stop the program");
+				System.exit(2);
+			}
 			tx.success();
 		}
-		return result;
 	}
 	
-	public static Iterator<Node> findPathNodes(Node s, Node e, Boolean haveToWrite)
+	private static void writeVector(Vector<Relationship> v, Node s, Node e)
 	{
-		Iterator<Path> iteratore = findPath(s,e);
-		Iterator<Node> result = null;
-		try ( Transaction tx = graphDb.beginTx() )
+		System.out.println("ecco un possibile path tra " + s.getProperties("name") + 
+				" ed " + e.getProperties("name"));
+		try( Transaction tx = graphDb.beginTx() )
 		{
-			//LO SO ANCHE IO CHE È UN CAZZO DI WHILE DENTRO UN WHILE MA TENUTO
-			//CONTO DEL FATTO CHE PUÒ TROVARE TANTI PERCORSI ALTERNATIVI
-			//È MEGLIO COSÌ
-			if(haveToWrite)
+			for(int i=0; i<v.size(); i++)
 			{
-				do
-				{
-					Path path = iteratore.next();
-					result = path.nodes().iterator();
-						System.out.println("\n\n\n\n Ecco un possibile path di Nodi:");
-						System.out.println("Nodi: ");
-		                do
-		                {
-							if(result.hasNext())
-							{
-								System.out.println(result.next().getProperty("name"));
-							}
-		                }while(result.hasNext());
-						
-				}while(iteratore.hasNext());
-			}	
+				System.out.println(v.get(i).getProperties("type").values().toString());
+			}
 			tx.success();
 		}
-		return result; 
 	}
 	
-	public static Relationship addRelation(Node n1, Node n2, String nome, String oss)
+	private static void writeVector(Vector<Relationship> v)
+	{
+		System.out.println("ecco un possibile path");
+		try( Transaction tx = graphDb.beginTx() )
+		{
+			for(int i=0; i<v.size(); i++)
+			{
+				System.out.println(v.get(i).getProperties("type").values().toString());
+			}
+			tx.success();
+		}
+	}
+	
+	public static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev)
 	{
 		Relationship relationship;
 		try ( Transaction tx = graphDb.beginTx() )
@@ -243,9 +365,23 @@ public class ORM {
 			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
 			relationship.setProperty( "type", nome );
 			relationship.setProperty( "oss", oss );
+			relationship.setProperty("event", ev);
+			String nomeN1 = n1.getProperties("name").values().toString();
+			String nomeN2 = n2.getProperties("name").values().toString();	
+			relationship.setProperty("from", nomeN1);
+			relationship.setProperty("to", nomeN2);
 			tx.success();
 		}	
-		System.out.println("arc created");
+		if(!inRel(relationship, allRelations))
+		{
+			allRelations.addElement(relationship);
+			System.out.println("arc created: " + nome + ";");
+
+		}
+		else
+		{
+			System.out.println("rilevo doppioni nelle relazioni, tengo solo le prime");
+		}
 		return relationship;
 	}
 	
@@ -258,7 +394,7 @@ public class ORM {
 			e.printStackTrace();
 		}
 	}
-	
+		
 	private static Node findNodeByName(String nameToFind)
 	{
 		ArrayList<Node> userNodes = new ArrayList<>();
@@ -273,10 +409,10 @@ public class ORM {
 		            userNodes.add( users.next() );
 		        }
 
-		        for ( Node node : userNodes )
+		        /*for ( Node node : userNodes )
 		        {
 		            System.out.println( "trovato nodo: " + node.getProperty( "name" ) );
-		        }
+		        }*/
 		    }
 		}
 		return userNodes.get(0);
@@ -304,15 +440,24 @@ public class ORM {
 	
 	public static Node addNode(String name)
 	{
-		Node userNode;
+		Node userNode = null;
 		try ( Transaction tx = graphDb.beginTx() )
 		{
 		    Label label = DynamicLabel.label( "Nome" );
 	        userNode = graphDb.createNode( label );
 	        userNode.setProperty( "name", name);
-		    System.out.println( "node created" );
 		    tx.success();
-		}
+		}    
+        if(!inNodes(userNode,allNodes))
+        {
+	        allNodes.addElement(userNode);
+		    System.out.println( "node created: " + name );
+        }
+        else
+        {
+        	System.out.println("rilevo doppioni nei nodi: tengo solo il primo");
+        	return null;
+        }
 		return userNode;
 	}
 	
