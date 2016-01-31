@@ -4,12 +4,13 @@ import java.util.Vector;
 
 import letturaXML.Graficatore;
 import letturaXML.readXmlGraph;
+import talkToDb.CheckRequirements;
+import talkToDb.ORM;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import utilita.ORM;
 
 public class Main {
 	
@@ -19,40 +20,16 @@ public class Main {
 		
 		
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
-    	db.readXml();
-    	db.checkRequirements();
+    	db.readXml();// legge l'xml e lo scrive nel db di neo4j
+    	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
+    	Vector<Node> vn = db.getNodes();
+    	//Vector<Relationship> vr = db.getRelationships();
+    	Vector<Node> vn2 = db.getNodes();
+    	vn2.clear();
+    	System.out.println("vn1: "+vn.size());
+    	System.out.println("vn2: "+vn2.size());
     	
-		
-		
-		/*Node a = ORM.addNode("primo");
-		Node b = ORM.addNode("secondo");
-		Node c = ORM.addNode("terzo");
-		
-		Relationship r1 = ORM.addRelation(a,b, "r1");
-		Relationship r2 = ORM.addRelation(b,c, "r2");
-		Relationship r3 = ORM.addRelation(c,a, "r3");
-		
-		Vector <Relationship> insieme1 = new Vector<Relationship>();
-		insieme1.addElement(r1);
-		insieme1.addElement(r2);
-		
-		Vector <Relationship> insieme2 = new Vector<Relationship>();
-		insieme2.addElement(r2);
-		insieme2.addElement(r3);	
-		
-		Vector <Relationship> insiemeUnione = ORM.unione(insieme1,insieme2);
-		insiemeUnione = ORM.unione(insiemeUnione,insieme2);
-		
-		System.out.println("mi aspetto r1 r2 r3");
-		ORM.scriviVettore(insiemeUnione);
-		
-		Vector <Relationship> insiemeIntersezione = ORM.intersezione(insiemeUnione,insieme2);
-		insiemeIntersezione = ORM.intersezione(insiemeIntersezione, insieme1);
-		insiemeIntersezione = ORM.intersezione(insiemeIntersezione, insieme1);
-		
-		System.out.println("mi aspetto r2");
-		ORM.scriviVettore(insiemeIntersezione);*/
-
+    	
 	}
 
 }

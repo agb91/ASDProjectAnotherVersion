@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <grafo>
-    <nodo>
+    <nodo><!-- IPOTESI: IL PRIMO NODO È LA RADICE PER DEFINIZIONE -->
         <nome>primo</nome>
     </nodo>
     <nodo>
@@ -10,7 +10,7 @@
         <nome>terzo</nome>
     </nodo>
     
-    <transizione>
+   <transizione>
         <nome>t0</nome>
         <evento>A</evento>
         <osservabile>y</osservabile>
@@ -27,15 +27,15 @@
     <transizione>
         <nome>t2</nome>
         <evento>B</evento>
-        <osservabile>Y</osservabile>
+        <osservabile>N</osservabile>
         <from>secondo</from>
         <to>terzo</to>
     </transizione>
-    <transizione>
+     <transizione>
         <nome>t3</nome>
         <evento>B</evento>
-        <osservabile>n</osservabile>
+        <osservabile>y</osservabile>
         <from>terzo</from>
         <to>primo</to>
-    </transizione>
+    </transizione> -->
 </grafo>
