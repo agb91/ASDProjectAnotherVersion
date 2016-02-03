@@ -51,6 +51,21 @@ public class ORM {
 		setLabelSystem();	
 	}
 	
+	// setta tutte le transizione ad "osservabile", nient'altro
+	public void createBadTwinLevel1()
+	{
+		try ( Transaction tx = graphDb.beginTx() )
+		{
+			for(int i=0; i<allRelations.size(); i++)
+			{
+				Relationship attuale = allRelations.get(i);
+				attuale.setProperty("oss", "y");
+			}
+			System.out.println("created bad twin level 1");
+			tx.success();
+		}	
+	}
+	
 	public Vector<Node> getNodes()
 	{
 		Vector<Node> ris = new Vector<Node>();
@@ -156,6 +171,7 @@ public class ORM {
 		Relationship relationship;
 		try ( Transaction tx = graphDb.beginTx() )
 		{
+
 			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
 			relationship.setProperty( "type", nome );
 			relationship.setProperty( "oss", oss );

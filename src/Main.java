@@ -14,17 +14,16 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 public class Main {
 	
-	private static String DB_PATH = "/home/andrea/Scrivania/springExample/ZanellaProjectLast/dbtest";
+	private static String DB_PATH = "/home/andrea/Scrivania/springExample/ZanellaProjectLast/dbBad";
 	
 	public static void main(String[] args) {
-		
 		
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
-    	Vector<Node> vn = db.getNodes();
-    	Vector<Relationship> vr = db.getRelationships();
-    	  	
+    	//Vector<Node> vn = db.getNodes();
+    	//Vector<Relationship> vr = db.getRelationships();
+    	db.createBadTwinLevel1();   	  	
     	
 	}
 
