@@ -23,12 +23,8 @@ public class Main {
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	Vector<Node> vn = db.getNodes();
-    	//Vector<Relationship> vr = db.getRelationships();
-    	Vector<Node> vn2 = db.getNodes();
-    	vn2.clear();
-    	System.out.println("vn1: "+vn.size());
-    	System.out.println("vn2: "+vn2.size());
-    	
+    	Vector<Relationship> vr = db.getRelationships();
+    	  	
     	
 	}
 

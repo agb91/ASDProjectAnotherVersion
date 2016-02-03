@@ -14,6 +14,7 @@
         <nome>t0</nome>
         <evento>A</evento>
         <osservabile>y</osservabile>
+        <guasto>n</guasto>
         <from>primo</from>
         <to>primo</to>
     </transizione>
@@ -21,6 +22,7 @@
         <nome>t1</nome>
         <evento>A</evento>
         <osservabile>n</osservabile>
+        <guasto>y</guasto>
         <from>primo</from>
         <to>secondo</to>
     </transizione>
@@ -28,6 +30,7 @@
         <nome>t2</nome>
         <evento>B</evento>
         <osservabile>N</osservabile>
+        <guasto>n</guasto>
         <from>secondo</from>
         <to>terzo</to>
     </transizione>
@@ -35,6 +38,7 @@
         <nome>t3</nome>
         <evento>B</evento>
         <osservabile>y</osservabile>
+        <guasto>n</guasto>
         <from>terzo</from>
         <to>primo</to>
     </transizione> -->

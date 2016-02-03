@@ -76,9 +76,10 @@ public class readXmlGraph {
 				  String nome = transizione.getElementsByTagName("nome").item(0).getTextContent();
 				  String evento = transizione.getElementsByTagName("evento").item(0).getTextContent();
 				  String osservabile = transizione.getElementsByTagName("osservabile").item(0).getTextContent();
+				  String guasto = transizione.getElementsByTagName("guasto").item(0).getTextContent();
 				  String from = transizione.getElementsByTagName("from").item(0).getTextContent();
 				  String to = transizione.getElementsByTagName("to").item(0).getTextContent();
-				  Transizione tr = new Transizione(nome, evento, osservabile, from, to);
+				  Transizione tr = new Transizione(nome, evento, osservabile, guasto, from, to);
 				  transizioni.addElement(tr);
 			  }
 	    } catch (Exception e) {
