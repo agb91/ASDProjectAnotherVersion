@@ -40,14 +40,19 @@ public class ORM {
 	
 	private static String DB_PATH = "";
 	private static GraphDatabaseService graphDb;
+	private static GraphDatabaseService graphDbGood;
 	private static Vector <Node> allNodes = new Vector<Node>();
 	private static Vector <Relationship> allRelations = new Vector<Relationship>();
+	private static Vector <Node> allNodesGood = new Vector<Node>();
+	private static Vector <Relationship> allRelationsGood = new Vector<Relationship>();
 	
 	public ORM(String p)
 	{
 		DB_PATH = p;
-	    clean(DB_PATH);
+		clean(DB_PATH);
+	    clean(DB_PATH+"/dbGood");
 		graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+		graphDbGood = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH+"/dbGood");
 		setLabelSystem();	
 	}
 	
@@ -64,6 +69,89 @@ public class ORM {
 			System.out.println("created bad twin level 1");
 			tx.success();
 		}	
+	}
+	
+	//prima creo un grafo identico al bad twin dello stesso livello (questa parte viene fatta a runtime)
+	//rimuovo tutte le transizioni guaste
+	//rimuovo tutti gli stati non raggiungibili dallo stato iniziale
+	public void createGoodTwinLevel1()
+	{
+		try ( Transaction tx = graphDbGood.beginTx() )
+		{
+			removeGuasti();
+			//removeIsolatedStates();
+			TODOTODOTOD RIGA SOPRA
+			tx.success();
+		}	
+		System.out.println("dimensione good rels: " +allNodesGood.size());
+		System.out.println("dimensione bad rels: " +allNodes.size());
+	}
+	
+	private void removeIsolatedStates()
+	{
+		Vector<Node> appoggio = new Vector<Node>();
+		appoggio.add(allNodesGood.get(0));
+		boolean raggiungibile = false;
+		for(int i=1; i<allNodesGood.size(); i++)
+		{
+			raggiungibile = checkPathFromRoot(allNodesGood.get(i));
+			if(raggiungibile)
+			{
+				appoggio.add(allNodesGood.get(i));
+			}
+			else
+			{
+				Node attuale = allNodesGood.get(i);
+				attuale.delete();
+			}	
+		}
+		allNodesGood.clear();
+		allNodesGood.addAll(appoggio);
+	}
+	
+	private static boolean checkPathFromRoot(Node n)
+	{
+		boolean raggiungibile = false;
+		System.out.println("analizzo il nodo : " + n.getProperties("name").values().toString());
+		
+		Node root = allNodesGood.get(0);
+		Iterator<Path> iteratore = findPath(root,n);
+		while(iteratore.hasNext() && !raggiungibile)
+		{
+			Path path = iteratore.next();
+			if(path.relationships().iterator().hasNext()) 
+			{
+				raggiungibile = true;
+			}
+		}
+		return raggiungibile;
+	}
+	
+	private static Iterator<Path> findPath(Node s, Node e)
+	{
+		Iterator<Path> iteratore = null;
+		PathFinder<Path> finder =
+				GraphAlgoFactory.allPaths(PathExpanders.forDirection(
+						Direction.OUTGOING ), 15 );
+		Iterable<Path> paths = finder.findAllPaths( s, e );
+		
+		iteratore = paths.iterator();
+		return iteratore;
+	}
+	
+	private void removeGuasti()
+	{
+		for(int i=0; i<allRelationsGood.size(); i++)
+		{
+			Relationship attuale = allRelationsGood.get(i);
+			String guasto = attuale.getProperties("guasto").values().toString();
+			if(guasto.contains("y"))
+			{
+				attuale.delete();
+				allRelationsGood.remove(i);
+				i--;
+			}
+		}
 	}
 	
 	public Vector<Node> getNodes()
@@ -95,7 +183,8 @@ public class ORM {
 		{
 			Nodo appoggio = n.get(i);
             String nNode = appoggio.getNome();
-            addNode(nNode);
+            addNode(nNode, "bad");
+            addNode(nNode, "good");
 		}	
 		for(int i=0; i<t.size(); i++)
 		{
@@ -107,8 +196,11 @@ public class ORM {
             String from = appoggio.getFrom();
             String to = appoggio.getTo();
             Node nFrom = findNodeByName(from);
+            Node nFromGood = findNodeByNameGood(from);
             Node nTo = findNodeByName(to);
-            addRelation(nFrom, nTo,nome,osservabile, evento, guasto);
+            Node nToGood = findNodeByNameGood(to);
+            addRelation(nFrom, nTo,nome,osservabile, evento, guasto, "bad");
+            addRelation(nFromGood, nToGood,nome,osservabile, evento, guasto, "good");
 		}	
 		CheckRequirements.prepare(allNodes,allRelations, graphDb);
 	}
@@ -166,32 +258,42 @@ public class ORM {
 		return false;
 	}
 	
-	public static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
+	public static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu, String who)
 	{
-		Relationship relationship;
-		try ( Transaction tx = graphDb.beginTx() )
+		Relationship relationship = null;
+		if(who.equalsIgnoreCase("bad"))
 		{
-
-			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-			relationship.setProperty( "type", nome );
-			relationship.setProperty( "oss", oss );
-			relationship.setProperty("event", ev);
-			relationship.setProperty("guasto", gu);
-			String nomeN1 = n1.getProperties("name").values().toString();
-			String nomeN2 = n2.getProperties("name").values().toString();	
-			relationship.setProperty("from", nomeN1);
-			relationship.setProperty("to", nomeN2);
-			tx.success();
-		}	
-		if(!inRel(relationship, allRelations))
-		{
-			allRelations.addElement(relationship);
-			System.out.println("arc created: " + nome + ";");
-
+			try ( Transaction tx = graphDb.beginTx() )
+			{
+				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+				relationship.setProperty( "type", nome );
+				relationship.setProperty( "oss", oss );
+				relationship.setProperty("event", ev);
+				relationship.setProperty("guasto", gu);
+				String nomeN1 = n1.getProperties("name").values().toString();
+				String nomeN2 = n2.getProperties("name").values().toString();	
+				relationship.setProperty("from", nomeN1);
+				relationship.setProperty("to", nomeN2);
+				tx.success();
+				allRelations.addElement(relationship);
+			}	
 		}
 		else
 		{
-			System.out.println("rilevo doppioni nelle relazioni, tengo solo le prime");
+			try ( Transaction tx = graphDbGood.beginTx() )
+			{
+				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+				relationship.setProperty( "type", nome );
+				relationship.setProperty( "oss", oss );
+				relationship.setProperty("event", ev);
+				relationship.setProperty("guasto", gu);
+				String nomeN1 = n1.getProperties("name").values().toString();
+				String nomeN2 = n2.getProperties("name").values().toString();	
+				relationship.setProperty("from", nomeN1);
+				relationship.setProperty("to", nomeN2);
+				tx.success();
+				allRelationsGood.addElement(relationship);
+			}
 		}
 		return relationship;
 	}
@@ -230,6 +332,25 @@ public class ORM {
 
 	}
 	
+	private static Node findNodeByNameGood(String nameToFind)
+	{
+		ArrayList<Node> userNodes = new ArrayList<>();
+		Label label = DynamicLabel.label( "Nome" );
+		try ( Transaction tx = graphDbGood.beginTx() )
+		{
+		    try ( ResourceIterator<Node> users =
+		            graphDbGood.findNodes( label, "name", nameToFind ) )
+		    {
+		        while ( users.hasNext() )
+		        {
+		            userNodes.add( users.next() );
+		        }
+		    }
+		}
+		return userNodes.get(0);
+	}
+
+	
 	public static void setLabelSystem()
 	{
 		IndexDefinition indexDefinition;
@@ -249,29 +370,34 @@ public class ORM {
 		}		
 	}
 	
-	public static Node addNode(String name)
+	public static Node addNode(String name, String who)
 	{
 		Node userNode = null;
-		try ( Transaction tx = graphDb.beginTx() )
+		if(who.equalsIgnoreCase("bad"))
 		{
-		    Label label = DynamicLabel.label( "Nome" );
-	        userNode = graphDb.createNode( label );
-	        userNode.setProperty( "name", name);
-		    tx.success();
-		}    
-        if(!inNodes(userNode,allNodes))
-        {
-	        allNodes.addElement(userNode);
-		    System.out.println( "node created: " + name );
-        }
-        else
-        {
-        	System.out.println("rilevo doppioni nei nodi: tengo solo il primo");
-        	return null;
-        }
+			try ( Transaction tx = graphDb.beginTx() )
+			{
+			    Label label = DynamicLabel.label( "Nome" );
+		        userNode = graphDb.createNode( label );
+		        userNode.setProperty( "name", name);
+		        allNodes.addElement(userNode);
+			    tx.success();
+			}    
+
+		}
+		else
+		{
+			try ( Transaction tx = graphDbGood.beginTx() )
+			{
+			    Label label = DynamicLabel.label( "Nome" );
+		        userNode = graphDbGood.createNode( label );
+		        userNode.setProperty( "name", name);
+		        allNodesGood.addElement(userNode);
+			    tx.success();
+	        }
+		}
 		return userNode;
 	}
-	
 	
 	private static void registerShutdownHook( final GraphDatabaseService graphDb )
 	{
