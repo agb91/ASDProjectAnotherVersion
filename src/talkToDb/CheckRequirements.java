@@ -64,7 +64,34 @@ public class CheckRequirements {
 		
 		//I expect that all "guasted" relations are not observable
 		checkGuastoNonOsservabile();
+		
+		//I expect that all non obs haven't event
+		checkUnOsservable();
 	
+	}
+	
+	private static void checkUnOsservable()
+	{
+		try ( Transaction tx = graphDb.beginTx() )
+		{
+			for(int i=0; i<allRelations.size(); i++)
+			{
+				Relationship attuale = allRelations.get(i);
+				String osservabile = attuale.getProperties("oss").values().toString();
+				if(osservabile.contains("n"))
+				{
+					String evento = attuale.getProperties("event").values().toString();
+					if(evento.length()!=2)
+					{
+						String nome = attuale.getProperties("type").values().toString();
+						System.out.println("evento: " + evento);
+						System.out.println("la relazione " + nome + "è non osservabile ma ha un evento: non ha senso, esco");
+						System.exit(2);
+					}
+				}
+			}
+			tx.success();
+		}
 	}
 	
 	private static void checkGuastoNonOsservabile()

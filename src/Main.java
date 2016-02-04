@@ -22,8 +22,8 @@ public class Main {
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	db.createBadTwinLevel1();  
-    	db.createGoodTwinLevel1();
-    	
+    	//db.createGoodTwinLevel1();
+    	System.out.println("ho finito");
 	}
 
 }

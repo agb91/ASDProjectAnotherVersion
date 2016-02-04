@@ -56,19 +56,186 @@ public class ORM {
 		setLabelSystem();	
 	}
 	
+	private String pulisci(String s)
+	{
+		String ris;
+		if(s.startsWith("["))
+		{
+		   ris = s.substring(1,s.length()-1);
+		}
+		else
+		{
+		  ris = s;
+		}
+		return ris;
+	}
+	
+	private void updateDb(Vector<String> nuovo)
+	{
+		//System.out.println("vecchio : " + allRelations.size());
+		//System.out.println("nuovo : " + nuovo.size());
+		for(int i=0; i<allRelations.size(); i++)
+		{
+			Relationship attuale = allRelations.get(i);
+			String nomeAttuale = pulisci(attuale.getProperties("type").values().toString());
+			boolean accettabile = false;
+			for(int a=0; a<nuovo.size(); a++)
+			{
+				String nomeAccettabile = pulisci(nuovo.get(a));
+				//System.out.println(nomeAccettabile + "---" + nomeAttuale);
+				if(nomeAccettabile.toLowerCase().contains(nomeAttuale))
+				{
+					accettabile = true;
+				}
+			}
+			if(!accettabile)
+			{
+				allRelations.get(i).delete();
+				allRelations.remove(i);
+				i--;
+			}
+			//System.out.println("-------------------------------------------------");
+		}
+	}
+	
+	private Vector<String> riempiTPrimo()
+	{
+		Vector<String> ris = new Vector<String>();
+		for(int i=0; i<allRelations.size(); i++)
+		{
+			Relationship attuale = allRelations.get(i);
+			String osservabilita = attuale.getProperties("oss").values().toString();
+			if(osservabilita.contains("y"))
+			{
+				String nome = attuale.getProperties("type").values().toString();
+				ris.add(nome);
+			}
+		}
+		return ris;
+	}
+		
 	// setta tutte le transizione ad "osservabile", nient'altro
 	public void createBadTwinLevel1()
 	{
 		try ( Transaction tx = graphDb.beginTx() )
 		{
-			for(int i=0; i<allRelations.size(); i++)
+			Vector<String> tPrimo = new Vector<String>();
+			tPrimo = riempiTPrimo();
+			for(int i=0; i<allNodes.size(); i++)
 			{
-				Relationship attuale = allRelations.get(i);
-				attuale.setProperty("oss", "y");
-			}
+				Node nodoAttuale = allNodes.get(i);
+				String nomeNodo = nodoAttuale.getProperties("name").values().toString();
+				//System.out.println("nodo: " + nomeNodo);
+				for(int a=0; a<allRelations.size(); a++)
+				{
+					Relationship transazioneAttuale = allRelations.get(a);
+					String from = transazioneAttuale.getProperties("from").values().toString();
+					Node destinazione = transazioneAttuale.getEndNode();
+					String osservabilita = transazioneAttuale.getProperties("oss").values().toString();
+					//System.out.println("frommmm: " + from);
+					//System.out.println("nomenodo: " + nomeNodo);
+					//System.out.println("oss:  " + osservabilita);
+					//System.out.println("--------------------------------");
+					if(from.contains(nomeNodo) && osservabilita.toLowerCase().contains("n"))
+					{
+						//System.out.println("arrivo qua");
+						boolean fault;
+						String guasto = transazioneAttuale.getProperties("guasto").values().toString();
+						if(guasto.contains("y"))
+						{
+							fault = true;
+						}
+						else
+						{
+							fault = false;
+						}
+						String eventoNullo = "";
+						// il grafo A è già definito globalmente
+						Vector<Tripletta> insiemeTriplette = find(destinazione,1,fault,eventoNullo); 
+						for(int k = 0; k<insiemeTriplette.size(); k++)
+						{
+							Tripletta triplettaAttuale = insiemeTriplette.get(k);
+							String guastoAttuale = "n";
+							if(triplettaAttuale.isFaultPrimo())
+							{
+								guastoAttuale = "y";
+							}
+							String id = "t"+k+i+a;
+							addRelation(nodoAttuale, triplettaAttuale.getsDestinazione(), 
+									id, "y", triplettaAttuale.getEvento() 
+									, guastoAttuale, "bad");
+							tPrimo.add(id);
+						}
+					}
+				}
+			}			
+			updateDb(tPrimo);
+			//removeIsolatedStates();
 			System.out.println("created bad twin level 1");
 			tx.success();
 		}	
+	}
+	
+	private int getCardinalita(String e)
+	{
+		int ris;
+		ris = e.split("//").length;
+		return ris;
+	}
+	
+	private Vector<Tripletta> find (Node s, int n, boolean fault, String eventoNullo)
+	{
+		Vector<Tripletta> risultato = new Vector<Tripletta>();
+		for(int q=0; q<allRelations.size(); q++)
+		{
+			Relationship transazioneAttuale = allRelations.get(q);
+			String fromRichiesto = s.getProperties("name").values().toString();
+			String fromTransazioneAttuale = transazioneAttuale.getProperties("from").values().toString();
+			//System.out.println("fromRichiesto:  " + fromRichiesto);
+			//System.out.println("transazione attuale from : " + fromTransazioneAttuale);
+			if(fromTransazioneAttuale.contains(fromRichiesto))
+			{
+				boolean faultPrimo;
+				String guasto = transazioneAttuale.getProperties("guasto").values().toString();
+				String osservabile = transazioneAttuale.getProperties("oss").values().toString();
+				String evento = transazioneAttuale.getProperties("event").values().toString();
+				Node sPrimo = transazioneAttuale.getEndNode();
+				int cardinalitaEvento = getCardinalita(evento);
+				//System.out.println("trovo cardinalità == : " + cardinalitaEvento);
+				if(guasto.toLowerCase().contains("y"))
+				{
+					faultPrimo=true;
+				}
+				else
+				{
+					faultPrimo = fault;
+				}
+				if(osservabile.toLowerCase().contains("y") && cardinalitaEvento <= n)
+				{
+					String eventoTripletta = evento;
+					if(eventoNullo.length()!=0)
+					{
+						eventoTripletta = eventoTripletta + "//" + eventoNullo;
+					}
+					if(n==cardinalitaEvento)
+					{
+						Tripletta aggiungi = new Tripletta(eventoTripletta, sPrimo, faultPrimo );
+						risultato.addElement(aggiungi);
+					}
+					else
+					{
+						Vector<Tripletta> aggiunta = find(sPrimo, (n-cardinalitaEvento), faultPrimo, eventoTripletta);
+						risultato.addAll(aggiunta);
+					}
+				}
+				if(osservabile.toLowerCase().contains("n"))
+				{
+					Vector<Tripletta> aggiunta = find(sPrimo, n, faultPrimo, eventoNullo);
+					risultato.addAll(aggiunta);
+				}
+			}
+		}
+		return risultato;
 	}
 	
 	//prima creo un grafo identico al bad twin dello stesso livello (questa parte viene fatta a runtime)
@@ -288,6 +455,7 @@ public class ORM {
 				relationship.setProperty("to", nomeN2);
 				tx.success();
 				allRelations.addElement(relationship);
+				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}	
 		}
 		else

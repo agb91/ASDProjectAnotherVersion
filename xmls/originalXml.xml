@@ -21,7 +21,7 @@
     </transizione>
     <transizione>
         <nome>t1</nome>
-        <evento>A</evento>
+        <evento></evento>
         <osservabile>n</osservabile>
         <guasto>y</guasto>
         <from>primo</from>
@@ -29,7 +29,7 @@
     </transizione>
     <transizione>
         <nome>t2</nome>
-        <evento>B</evento>
+        <evento></evento>
         <osservabile>N</osservabile>
         <guasto>n</guasto>
         <from>secondo</from>
@@ -42,5 +42,5 @@
         <guasto>n</guasto>
         <from>terzo</from>
         <to>primo</to>
-    </transizione> -->
+    </transizione> 
 </grafo>
