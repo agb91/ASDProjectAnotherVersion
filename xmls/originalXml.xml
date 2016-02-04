@@ -10,6 +10,7 @@
         <nome>terzo</nome>
     </nodo>
     
+    
    <transizione>
         <nome>t0</nome>
         <evento>A</evento>

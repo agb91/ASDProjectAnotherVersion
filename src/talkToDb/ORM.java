@@ -79,8 +79,7 @@ public class ORM {
 		try ( Transaction tx = graphDbGood.beginTx() )
 		{
 			removeGuasti();
-			//removeIsolatedStates();
-			TODOTODOTOD RIGA SOPRA
+			removeIsolatedStates();
 			tx.success();
 		}	
 		System.out.println("dimensione good rels: " +allNodesGood.size());
@@ -89,24 +88,37 @@ public class ORM {
 	
 	private void removeIsolatedStates()
 	{
-		Vector<Node> appoggio = new Vector<Node>();
-		appoggio.add(allNodesGood.get(0));
 		boolean raggiungibile = false;
 		for(int i=1; i<allNodesGood.size(); i++)
 		{
+			System.out.println("check del nodo: " + allNodesGood.get(i));
 			raggiungibile = checkPathFromRoot(allNodesGood.get(i));
-			if(raggiungibile)
+			if(!raggiungibile)
 			{
-				appoggio.add(allNodesGood.get(i));
+				killNode(allNodesGood.get(i), i);
+				i--;
 			}
-			else
-			{
-				Node attuale = allNodesGood.get(i);
-				attuale.delete();
-			}	
 		}
-		allNodesGood.clear();
-		allNodesGood.addAll(appoggio);
+	}
+	
+	//prima elimino tutte le relazioni che partono da n
+	//poi elimino n
+	private void killNode(Node n, int index)
+	{
+		allNodesGood.remove(index);
+		String nomeNode = n.getProperties("name").values().toString();
+		for(int a=0; a<allRelationsGood.size(); a++)
+		{
+			Relationship r = allRelationsGood.get(a);
+			String fromr = r.getProperties("from").values().toString();
+			if(fromr.contains(nomeNode))
+			{
+				allRelationsGood.get(a).delete();
+				allRelationsGood.remove(a);
+				a--;		
+			}
+		}
+		n.delete();
 	}
 	
 	private static boolean checkPathFromRoot(Node n)
@@ -115,10 +127,10 @@ public class ORM {
 		System.out.println("analizzo il nodo : " + n.getProperties("name").values().toString());
 		
 		Node root = allNodesGood.get(0);
-		Iterator<Path> iteratore = findPath(root,n);
-		while(iteratore.hasNext() && !raggiungibile)
+		Iterator<Path> tuttiIPath = findPath(root,n);
+		while(tuttiIPath.hasNext() && !raggiungibile)
 		{
-			Path path = iteratore.next();
+			Path path = tuttiIPath.next();
 			if(path.relationships().iterator().hasNext()) 
 			{
 				raggiungibile = true;
