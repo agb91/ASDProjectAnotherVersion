@@ -163,7 +163,7 @@ public class CheckRequirements {
 	
 	private static void rootCanArrive()
 	{
-		for(int i=0; i<allNodes.size(); i++)
+		for(int i=1; i<allNodes.size(); i++)
 		{
 			checkPathFromRoot(allNodes.get(i));
 		}

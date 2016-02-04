@@ -1,46 +1,113 @@
 <?xml version="1.0"?>
 <grafo>
     <nodo><!-- IPOTESI: IL PRIMO NODO È LA RADICE PER DEFINIZIONE -->
-        <nome>primo</nome>
+        <nome>inizio</nome>
     </nodo>
     <nodo>
-        <nome>secondo</nome>
+        <nome>A</nome>
     </nodo>
     <nodo>
-        <nome>terzo</nome>
+        <nome>B</nome>
     </nodo>
-    
-    
-   <transizione>
-        <nome>t0</nome>
-        <evento>A</evento>
-        <osservabile>y</osservabile>
-        <guasto>n</guasto>
-        <from>primo</from>
-        <to>primo</to>
-    </transizione>
+    <nodo>
+        <nome>C</nome>
+    </nodo>
+    <nodo>
+        <nome>D</nome>
+    </nodo>
+    <nodo>
+        <nome>E</nome>
+    </nodo>
+    <nodo>
+        <nome>F</nome>
+    </nodo>
+
     <transizione>
-        <nome>t1</nome>
+        <nome>T0</nome>
         <evento></evento>
         <osservabile>n</osservabile>
-        <guasto>y</guasto>
-        <from>primo</from>
-        <to>secondo</to>
-    </transizione>
-    <transizione>
-        <nome>t2</nome>
-        <evento></evento>
-        <osservabile>N</osservabile>
         <guasto>n</guasto>
-        <from>secondo</from>
-        <to>terzo</to>
-    </transizione>
-     <transizione>
-        <nome>t3</nome>
+        <from>inizio</from>
+        <to>A</to>
+    </transizione> 
+    <transizione>
+        <nome>T1</nome>
         <evento>B</evento>
         <osservabile>y</osservabile>
         <guasto>n</guasto>
-        <from>terzo</from>
-        <to>primo</to>
+        <from>A</from>
+        <to>B</to>
     </transizione> 
+    <transizione>
+        <nome>T2</nome>
+        <evento></evento>
+        <osservabile>n</osservabile>
+        <guasto>n</guasto>
+        <from>B</from>
+        <to>A</to>
+    </transizione> 
+    <transizione>
+        <nome>T3</nome>
+        <evento></evento>
+        <osservabile>n</osservabile>
+        <guasto>n</guasto>
+        <from>B</from>
+        <to>D</to>
+    </transizione> 
+    <transizione>
+        <nome>T4</nome>
+        <evento>C</evento>
+        <osservabile>Y</osservabile>
+        <guasto>n</guasto>
+        <from>D</from>
+        <to>D</to>
+    </transizione> 
+    <transizione>
+        <nome>T5</nome>
+        <evento>A</evento>
+        <osservabile>Y</osservabile>
+        <guasto>n</guasto>
+        <from>A</from>
+        <to>C</to>
+    </transizione> 
+    <transizione>
+        <nome>T6</nome>
+        <evento>D</evento>
+        <osservabile>Y</osservabile>
+        <guasto>n</guasto>
+        <from>C</from>
+        <to>E</to>
+    </transizione>
+    <transizione>
+        <nome>T7</nome>
+        <evento></evento>
+        <osservabile>n</osservabile>
+        <guasto>n</guasto>
+        <from>E</from>
+        <to>A</to>
+    </transizione>
+    <transizione>
+        <nome>T8</nome>
+        <evento></evento>
+        <osservabile>N</osservabile>
+        <guasto>Y</guasto>
+        <from>E</from>
+        <to>F</to>
+    </transizione>   
+    <transizione>
+        <nome>T9</nome>
+        <evento></evento>
+        <osservabile>N</osservabile>
+        <guasto>N</guasto>
+        <from>C</from>
+        <to>F</to>
+    </transizione>
+    <transizione>
+        <nome>T10</nome>
+        <evento>C</evento>
+        <osservabile>Y</osservabile>
+        <guasto>N</guasto>
+        <from>F</from>
+        <to>F</to>
+    </transizione>      
 </grafo>

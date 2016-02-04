@@ -72,29 +72,17 @@ public class ORM {
 	
 	private void updateDb(Vector<String> nuovo)
 	{
-		//System.out.println("vecchio : " + allRelations.size());
-		//System.out.println("nuovo : " + nuovo.size());
-		for(int i=0; i<allRelations.size(); i++)
+		for(int i=1; i<allRelations.size(); i++)
 		{
 			Relationship attuale = allRelations.get(i);
-			String nomeAttuale = pulisci(attuale.getProperties("type").values().toString());
-			boolean accettabile = false;
-			for(int a=0; a<nuovo.size(); a++)
+			String osservabilita = attuale.getProperties("oss").values().toString();
+			if(osservabilita.toLowerCase().contains("n"))
 			{
-				String nomeAccettabile = pulisci(nuovo.get(a));
-				//System.out.println(nomeAccettabile + "---" + nomeAttuale);
-				if(nomeAccettabile.toLowerCase().contains(nomeAttuale))
-				{
-					accettabile = true;
-				}
-			}
-			if(!accettabile)
-			{
+				System.out.println("cancello la relazione: " + allRelations.get(i).getStartNode() + "--->" + allRelations.get(i).getEndNode());
 				allRelations.get(i).delete();
 				allRelations.remove(i);
 				i--;
 			}
-			//System.out.println("-------------------------------------------------");
 		}
 	}
 	
@@ -121,12 +109,12 @@ public class ORM {
 		{
 			Vector<String> tPrimo = new Vector<String>();
 			tPrimo = riempiTPrimo();
-			for(int i=0; i<allNodes.size(); i++)
+			for(int i=1; i<allNodes.size(); i++)
 			{
 				Node nodoAttuale = allNodes.get(i);
 				String nomeNodo = nodoAttuale.getProperties("name").values().toString();
 				//System.out.println("nodo: " + nomeNodo);
-				for(int a=0; a<allRelations.size(); a++)
+				for(int a=1; a<allRelations.size(); a++)
 				{
 					Relationship transazioneAttuale = allRelations.get(a);
 					String from = transazioneAttuale.getProperties("from").values().toString();
@@ -186,7 +174,7 @@ public class ORM {
 	private Vector<Tripletta> find (Node s, int n, boolean fault, String eventoNullo)
 	{
 		Vector<Tripletta> risultato = new Vector<Tripletta>();
-		for(int q=0; q<allRelations.size(); q++)
+		for(int q=1; q<allRelations.size(); q++)
 		{
 			Relationship transazioneAttuale = allRelations.get(q);
 			String fromRichiesto = s.getProperties("name").values().toString();
@@ -246,7 +234,7 @@ public class ORM {
 		try ( Transaction tx = graphDbGood.beginTx() )
 		{
 			removeGuasti();
-			removeIsolatedStates();
+			//removeIsolatedStates();
 			tx.success();
 		}	
 		System.out.println("dimensione good rels: " +allNodesGood.size());
