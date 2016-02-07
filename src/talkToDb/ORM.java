@@ -28,273 +28,73 @@ import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.io.fs.FileUtils;
 import org.neo4j.kernel.GraphDatabaseAPI;
 
+import global.Globals;
 import letturaXML.Graficatore;
 import letturaXML.Nodo;
 import letturaXML.Transizione;
+import usefullAbstract.GenericGraphHandler;
 
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
 
 
-public class ORM {
+public class ORM extends GenericGraphHandler {
 	
 	private static String DB_PATH = "";
-	private static GraphDatabaseService graphDb;
-	private static GraphDatabaseService graphDbGood;
-	private static Vector <Node> allNodes = new Vector<Node>();
-	private static Vector <Relationship> allRelations = new Vector<Relationship>();
-	private static Vector <Node> allNodesGood = new Vector<Node>();
-	private static Vector <Relationship> allRelationsGood = new Vector<Relationship>();
-	
+		
 	public ORM(String p)
 	{
 		DB_PATH = p;
 		clean(DB_PATH);
 	    clean(DB_PATH+"/dbGood");
-		graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-		graphDbGood = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH+"/dbGood");
+		Globals.graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+		Globals.graphDbGood = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH+"/dbGood");
 		setLabelSystem();	
 	}
 	
-	private String pulisci(String s)
+	/*public static String pulisci(String s)
 	{
-		String ris;
-		if(s.startsWith("["))
+		String ris = s;
+		for(int i=0; i<2; i++)
 		{
-		   ris = s.substring(1,s.length()-1);
-		}
-		else
-		{
-		  ris = s;
+			if(ris.startsWith("["))
+			{
+			   ris = ris.substring(1,ris.length()-1);
+			}
 		}
 		return ris;
-	}
+	}*/
 	
-	private void updateDb(Vector<String> nuovo)
+	public static void updateDb(Vector<String> nuovo)
 	{
-		for(int i=1; i<allRelations.size(); i++)
+		for(int i=1; i<Globals.allRelations.size(); i++)
 		{
-			Relationship attuale = allRelations.get(i);
+			Relationship attuale = Globals.allRelations.get(i);
 			String osservabilita = attuale.getProperties("oss").values().toString();
 			if(osservabilita.toLowerCase().contains("n"))
 			{
-				System.out.println("cancello la relazione: " + allRelations.get(i).getStartNode() + "--->" + allRelations.get(i).getEndNode());
-				allRelations.get(i).delete();
-				allRelations.remove(i);
+				//System.out.println("cancello la relazione: " + Globals.allRelations.get(i).getStartNode() + "--->" + Globals.allRelations.get(i).getEndNode());
+				Globals.allRelations.get(i).delete();
+				Globals.allRelations.remove(i);
 				i--;
 			}
 		}
 	}
 	
-	private Vector<String> riempiTPrimo()
-	{
-		Vector<String> ris = new Vector<String>();
-		for(int i=0; i<allRelations.size(); i++)
-		{
-			Relationship attuale = allRelations.get(i);
-			String osservabilita = attuale.getProperties("oss").values().toString();
-			if(osservabilita.contains("y"))
-			{
-				String nome = attuale.getProperties("type").values().toString();
-				ris.add(nome);
-			}
-		}
-		return ris;
-	}
-		
-	// setta tutte le transizione ad "osservabile", nient'altro
-	public void createBadTwinLevel1()
-	{
-		try ( Transaction tx = graphDb.beginTx() )
-		{
-			Vector<String> tPrimo = new Vector<String>();
-			tPrimo = riempiTPrimo();
-			for(int i=1; i<allNodes.size(); i++)
-			{
-				Node nodoAttuale = allNodes.get(i);
-				String nomeNodo = nodoAttuale.getProperties("name").values().toString();
-				//System.out.println("nodo: " + nomeNodo);
-				for(int a=1; a<allRelations.size(); a++)
-				{
-					Relationship transazioneAttuale = allRelations.get(a);
-					String from = transazioneAttuale.getProperties("from").values().toString();
-					Node destinazione = transazioneAttuale.getEndNode();
-					String osservabilita = transazioneAttuale.getProperties("oss").values().toString();
-					//System.out.println("frommmm: " + from);
-					//System.out.println("nomenodo: " + nomeNodo);
-					//System.out.println("oss:  " + osservabilita);
-					//System.out.println("--------------------------------");
-					if(from.contains(nomeNodo) && osservabilita.toLowerCase().contains("n"))
-					{
-						//System.out.println("arrivo qua");
-						boolean fault;
-						String guasto = transazioneAttuale.getProperties("guasto").values().toString();
-						if(guasto.contains("y"))
-						{
-							fault = true;
-						}
-						else
-						{
-							fault = false;
-						}
-						String eventoNullo = "";
-						// il grafo A è già definito globalmente
-						Vector<Tripletta> insiemeTriplette = find(destinazione,1,fault,eventoNullo); 
-						for(int k = 0; k<insiemeTriplette.size(); k++)
-						{
-							Tripletta triplettaAttuale = insiemeTriplette.get(k);
-							String guastoAttuale = "n";
-							if(triplettaAttuale.isFaultPrimo())
-							{
-								guastoAttuale = "y";
-							}
-							String id = "t"+k+i+a;
-							addRelation(nodoAttuale, triplettaAttuale.getsDestinazione(), 
-									id, "y", triplettaAttuale.getEvento() 
-									, guastoAttuale, "bad");
-							tPrimo.add(id);
-						}
-					}
-				}
-			}			
-			updateDb(tPrimo);
-			//removeIsolatedStates();
-			System.out.println("created bad twin level 1");
-			tx.success();
-		}	
-	}
 	
-	private int getCardinalita(String e)
-	{
-		int ris;
-		ris = e.split("//").length;
-		return ris;
-	}
 	
-	private Vector<Tripletta> find (Node s, int n, boolean fault, String eventoNullo)
-	{
-		Vector<Tripletta> risultato = new Vector<Tripletta>();
-		for(int q=1; q<allRelations.size(); q++)
-		{
-			Relationship transazioneAttuale = allRelations.get(q);
-			String fromRichiesto = s.getProperties("name").values().toString();
-			String fromTransazioneAttuale = transazioneAttuale.getProperties("from").values().toString();
-			//System.out.println("fromRichiesto:  " + fromRichiesto);
-			//System.out.println("transazione attuale from : " + fromTransazioneAttuale);
-			if(fromTransazioneAttuale.contains(fromRichiesto))
-			{
-				boolean faultPrimo;
-				String guasto = transazioneAttuale.getProperties("guasto").values().toString();
-				String osservabile = transazioneAttuale.getProperties("oss").values().toString();
-				String evento = transazioneAttuale.getProperties("event").values().toString();
-				Node sPrimo = transazioneAttuale.getEndNode();
-				int cardinalitaEvento = getCardinalita(evento);
-				//System.out.println("trovo cardinalità == : " + cardinalitaEvento);
-				if(guasto.toLowerCase().contains("y"))
-				{
-					faultPrimo=true;
-				}
-				else
-				{
-					faultPrimo = fault;
-				}
-				if(osservabile.toLowerCase().contains("y") && cardinalitaEvento <= n)
-				{
-					String eventoTripletta = evento;
-					if(eventoNullo.length()!=0)
-					{
-						eventoTripletta = eventoTripletta + "//" + eventoNullo;
-					}
-					if(n==cardinalitaEvento)
-					{
-						Tripletta aggiungi = new Tripletta(eventoTripletta, sPrimo, faultPrimo );
-						risultato.addElement(aggiungi);
-					}
-					else
-					{
-						Vector<Tripletta> aggiunta = find(sPrimo, (n-cardinalitaEvento), faultPrimo, eventoTripletta);
-						risultato.addAll(aggiunta);
-					}
-				}
-				if(osservabile.toLowerCase().contains("n"))
-				{
-					Vector<Tripletta> aggiunta = find(sPrimo, n, faultPrimo, eventoNullo);
-					risultato.addAll(aggiunta);
-				}
-			}
-		}
-		return risultato;
-	}
+	
 	
 	//prima creo un grafo identico al bad twin dello stesso livello (questa parte viene fatta a runtime)
 	//rimuovo tutte le transizioni guaste
 	//rimuovo tutti gli stati non raggiungibili dallo stato iniziale
-	public void createGoodTwinLevel1()
-	{
-		try ( Transaction tx = graphDbGood.beginTx() )
-		{
-			removeGuasti();
-			//removeIsolatedStates();
-			tx.success();
-		}	
-		System.out.println("dimensione good rels: " +allNodesGood.size());
-		System.out.println("dimensione bad rels: " +allNodes.size());
-	}
 	
-	private void removeIsolatedStates()
-	{
-		boolean raggiungibile = false;
-		for(int i=1; i<allNodesGood.size(); i++)
-		{
-			System.out.println("check del nodo: " + allNodesGood.get(i));
-			raggiungibile = checkPathFromRoot(allNodesGood.get(i));
-			if(!raggiungibile)
-			{
-				killNode(allNodesGood.get(i), i);
-				i--;
-			}
-		}
-	}
 	
-	//prima elimino tutte le relazioni che partono da n
-	//poi elimino n
-	private void killNode(Node n, int index)
-	{
-		allNodesGood.remove(index);
-		String nomeNode = n.getProperties("name").values().toString();
-		for(int a=0; a<allRelationsGood.size(); a++)
-		{
-			Relationship r = allRelationsGood.get(a);
-			String fromr = r.getProperties("from").values().toString();
-			if(fromr.contains(nomeNode))
-			{
-				allRelationsGood.get(a).delete();
-				allRelationsGood.remove(a);
-				a--;		
-			}
-		}
-		n.delete();
-	}
 	
-	private static boolean checkPathFromRoot(Node n)
-	{
-		boolean raggiungibile = false;
-		System.out.println("analizzo il nodo : " + n.getProperties("name").values().toString());
-		
-		Node root = allNodesGood.get(0);
-		Iterator<Path> tuttiIPath = findPath(root,n);
-		while(tuttiIPath.hasNext() && !raggiungibile)
-		{
-			Path path = tuttiIPath.next();
-			if(path.relationships().iterator().hasNext()) 
-			{
-				raggiungibile = true;
-			}
-		}
-		return raggiungibile;
-	}
 	
-	private static Iterator<Path> findPath(Node s, Node e)
+	
+	
+	/*public static Iterator<Path> findPath(Node s, Node e)
 	{
 		Iterator<Path> iteratore = null;
 		PathFinder<Path> finder =
@@ -304,29 +104,16 @@ public class ORM {
 		
 		iteratore = paths.iterator();
 		return iteratore;
-	}
+	}*/
 	
-	private void removeGuasti()
-	{
-		for(int i=0; i<allRelationsGood.size(); i++)
-		{
-			Relationship attuale = allRelationsGood.get(i);
-			String guasto = attuale.getProperties("guasto").values().toString();
-			if(guasto.contains("y"))
-			{
-				attuale.delete();
-				allRelationsGood.remove(i);
-				i--;
-			}
-		}
-	}
+	
 	
 	public Vector<Node> getNodes()
 	{
 		Vector<Node> ris = new Vector<Node>();
-		for(int i=0; i<allNodes.size(); i++)
+		for(int i=0; i<Globals.allNodes.size(); i++)
 		{
-			ris.addElement(allNodes.get(i));
+			ris.addElement(Globals.allNodes.get(i));
 		}
 		return ris;
 	}
@@ -334,9 +121,9 @@ public class ORM {
 	public Vector<Relationship> getRelationships()
 	{
 		Vector<Relationship> ris = new Vector<Relationship>();
-		for(int i=0; i<allRelations.size(); i++)
+		for(int i=0; i<Globals.allRelations.size(); i++)
 		{
-			ris.addElement(allRelations.get(i));
+			ris.addElement(Globals.allRelations.get(i));
 		}
 		return ris;
 	}
@@ -350,8 +137,7 @@ public class ORM {
 		{
 			Nodo appoggio = n.get(i);
             String nNode = appoggio.getNome();
-            addNode(nNode, "bad");
-            addNode(nNode, "good");
+            addNode(nNode);
 		}	
 		for(int i=0; i<t.size(); i++)
 		{
@@ -363,13 +149,10 @@ public class ORM {
             String from = appoggio.getFrom();
             String to = appoggio.getTo();
             Node nFrom = findNodeByName(from);
-            Node nFromGood = findNodeByNameGood(from);
             Node nTo = findNodeByName(to);
-            Node nToGood = findNodeByNameGood(to);
-            addRelation(nFrom, nTo,nome,osservabile, evento, guasto, "bad");
-            addRelation(nFromGood, nToGood,nome,osservabile, evento, guasto, "good");
+            addRelation(nFrom, nTo,nome,osservabile, evento, guasto);
 		}	
-		CheckRequirements.prepare(allNodes,allRelations, graphDb);
+		//CheckRequirements.prepare();
 	}
 	
 	public enum RelTypes implements RelationshipType{
@@ -378,7 +161,7 @@ public class ORM {
 	
 	public static void scriviVettore (Vector<Relationship> oggetto)
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			for(int i=0; i<oggetto.size(); i++)
 			{
@@ -391,7 +174,7 @@ public class ORM {
 	
 	public static boolean inRel(Relationship ago, Vector<Relationship> pagliaio)
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			for(int i=0; i<pagliaio.size(); i++)
 			{
@@ -409,7 +192,7 @@ public class ORM {
 	
 	public static boolean inNodes(Node ago, Vector<Node> pagliaio)
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			for(int i=0; i<pagliaio.size(); i++)
 			{
@@ -425,44 +208,25 @@ public class ORM {
 		return false;
 	}
 	
-	public static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu, String who)
+	public static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
 	{
 		Relationship relationship = null;
-		if(who.equalsIgnoreCase("bad"))
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			try ( Transaction tx = graphDb.beginTx() )
-			{
-				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-				relationship.setProperty( "type", nome );
-				relationship.setProperty( "oss", oss );
-				relationship.setProperty("event", ev);
-				relationship.setProperty("guasto", gu);
-				String nomeN1 = n1.getProperties("name").values().toString();
-				String nomeN2 = n2.getProperties("name").values().toString();	
-				relationship.setProperty("from", nomeN1);
-				relationship.setProperty("to", nomeN2);
-				tx.success();
-				allRelations.addElement(relationship);
-				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
-			}	
-		}
-		else
-		{
-			try ( Transaction tx = graphDbGood.beginTx() )
-			{
-				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-				relationship.setProperty( "type", nome );
-				relationship.setProperty( "oss", oss );
-				relationship.setProperty("event", ev);
-				relationship.setProperty("guasto", gu);
-				String nomeN1 = n1.getProperties("name").values().toString();
-				String nomeN2 = n2.getProperties("name").values().toString();	
-				relationship.setProperty("from", nomeN1);
-				relationship.setProperty("to", nomeN2);
-				tx.success();
-				allRelationsGood.addElement(relationship);
-			}
-		}
+			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+			relationship.setProperty( "type", pulisci(nome) );
+			relationship.setProperty( "oss", pulisci(oss) );
+			ev = pulisci(ev);
+			relationship.setProperty("event", pulisci(ev));
+			relationship.setProperty("guasto", pulisci(gu));
+			String nomeN1 = n1.getProperties("name").values().toString();
+			String nomeN2 = n2.getProperties("name").values().toString();	
+			relationship.setProperty("from", pulisci(nomeN1));
+			relationship.setProperty("to", pulisci(nomeN2));
+			tx.success();
+			Globals.allRelations.addElement(relationship);
+			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+		}	
 		return relationship;
 	}
 	
@@ -471,7 +235,6 @@ public class ORM {
 		try {
 			FileUtils.deleteRecursively(new File(path));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -480,34 +243,10 @@ public class ORM {
 	{
 		ArrayList<Node> userNodes = new ArrayList<>();
 		Label label = DynamicLabel.label( "Nome" );
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 		    try ( ResourceIterator<Node> users =
-		            graphDb.findNodes( label, "name", nameToFind ) )
-		    {
-		        while ( users.hasNext() )
-		        {
-		            userNodes.add( users.next() );
-		        }
-
-		        /*for ( Node node : userNodes )
-		        {
-		            System.out.println( "trovato nodo: " + node.getProperty( "name" ) );
-		        }*/
-		    }
-		}
-		return userNodes.get(0);
-
-	}
-	
-	private static Node findNodeByNameGood(String nameToFind)
-	{
-		ArrayList<Node> userNodes = new ArrayList<>();
-		Label label = DynamicLabel.label( "Nome" );
-		try ( Transaction tx = graphDbGood.beginTx() )
-		{
-		    try ( ResourceIterator<Node> users =
-		            graphDbGood.findNodes( label, "name", nameToFind ) )
+		    		Globals.graphDb.findNodes( label, "name", nameToFind ) )
 		    {
 		        while ( users.hasNext() )
 		        {
@@ -516,54 +255,55 @@ public class ORM {
 		    }
 		}
 		return userNodes.get(0);
-	}
 
-	
+	}
+		
 	public static void setLabelSystem()
 	{
 		IndexDefinition indexDefinition;
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-		    Schema schema = graphDb.schema();
+		    Schema schema = Globals.graphDb.schema();
 		    indexDefinition = schema.indexFor( DynamicLabel.label( "Nome" ) )
 		            .on( "name" )
 		            .create();
 		    tx.success();
 		}
 		
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-		    Schema schema = graphDb.schema();
+		    Schema schema = Globals.graphDb.schema();
 		    schema.awaitIndexOnline( indexDefinition, 10, TimeUnit.SECONDS );
-		}		
+		}	
+		
+		IndexDefinition indexDefinition1;
+		try ( Transaction tx = Globals.graphDbGood.beginTx() )
+		{
+		    Schema schema = Globals.graphDbGood.schema();
+		    indexDefinition1 = schema.indexFor( DynamicLabel.label( "Nome" ) )
+		            .on( "name" )
+		            .create();
+		    tx.success();
+		}
+		
+		try ( Transaction tx = Globals.graphDbGood.beginTx() )
+		{
+		    Schema schema = Globals.graphDbGood.schema();
+		    schema.awaitIndexOnline( indexDefinition1, 10, TimeUnit.SECONDS );
+		}	
 	}
 	
-	public static Node addNode(String name, String who)
+	public static Node addNode(String name)
 	{
 		Node userNode = null;
-		if(who.equalsIgnoreCase("bad"))
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			try ( Transaction tx = graphDb.beginTx() )
-			{
-			    Label label = DynamicLabel.label( "Nome" );
-		        userNode = graphDb.createNode( label );
-		        userNode.setProperty( "name", name);
-		        allNodes.addElement(userNode);
-			    tx.success();
-			}    
-
-		}
-		else
-		{
-			try ( Transaction tx = graphDbGood.beginTx() )
-			{
-			    Label label = DynamicLabel.label( "Nome" );
-		        userNode = graphDbGood.createNode( label );
-		        userNode.setProperty( "name", name);
-		        allNodesGood.addElement(userNode);
-			    tx.success();
-	        }
-		}
+		    Label label = DynamicLabel.label( "Nome" );
+	        userNode = Globals.graphDb.createNode( label );
+	        userNode.setProperty( "name", name);
+	        Globals.allNodes.addElement(userNode);
+		    tx.success();
+		}    
 		return userNode;
 	}
 	

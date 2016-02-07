@@ -22,20 +22,22 @@ import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.io.fs.FileUtils;
 import org.neo4j.kernel.GraphDatabaseAPI;
 
+import global.Globals;
+
 
 public class CheckRequirements {
 	
-	private static Vector<Node> allNodes;
+	/*private static Vector<Node> allNodes;
 	private static Vector<Relationship> allRelations;
-	private static GraphDatabaseService graphDb;
+	private static GraphDatabaseService graphDb;*/
 	private static boolean isCyclic = false;
 	
-	public static void prepare(Vector<Node> _allNodes, Vector<Relationship> _allRels, GraphDatabaseService _graphDb)
+	/*public static void prepare()
 	{
 		allNodes = _allNodes;
 		allRelations = _allRels;
 		graphDb = _graphDb;
-	}
+	}*/
 	
 	public static void check()
 	{
@@ -72,11 +74,11 @@ public class CheckRequirements {
 	
 	private static void checkUnOsservable()
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int i=0; i<allRelations.size(); i++)
+			for(int i=0; i<Globals.allRelations.size(); i++)
 			{
-				Relationship attuale = allRelations.get(i);
+				Relationship attuale = Globals.allRelations.get(i);
 				String osservabile = attuale.getProperties("oss").values().toString();
 				if(osservabile.contains("n"))
 				{
@@ -96,11 +98,11 @@ public class CheckRequirements {
 	
 	private static void checkGuastoNonOsservabile()
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int i=0; i<allRelations.size(); i++)
+			for(int i=0; i<Globals.allRelations.size(); i++)
 			{
-				Relationship attuale = allRelations.get(i);
+				Relationship attuale = Globals.allRelations.get(i);
 				String guasto = attuale.getProperties("guasto").values().toString();
 				String osservabile = attuale.getProperties("oss").values().toString();
 				String nome = attuale.getProperties("type").values().toString();
@@ -117,15 +119,15 @@ public class CheckRequirements {
 	
 	private static void checkTwin()
 	{
-		int max = allRelations.size();
+		int max = Globals.allRelations.size();
 		for(int i=0; i<max; i++)
 		{
-			Relationship attuale = allRelations.get(i);
+			Relationship attuale = Globals.allRelations.get(i);
 			for(int a=0; a<max; a++)
 			{
 				if(a!=i)
 				{
-					twin(attuale, allRelations.get(a));
+					twin(attuale, Globals.allRelations.get(a));
 				}			
 			}
 		}
@@ -133,7 +135,7 @@ public class CheckRequirements {
 	
 	private static void twin(Relationship a, Relationship b)
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			String nomea = a.getProperty("type").toString();
 			String froma =  a.getProperty("from").toString();
@@ -163,18 +165,18 @@ public class CheckRequirements {
 	
 	private static void rootCanArrive()
 	{
-		for(int i=1; i<allNodes.size(); i++)
+		for(int i=1; i<Globals.allNodes.size(); i++)
 		{
-			checkPathFromRoot(allNodes.get(i));
+			checkPathFromRoot(Globals.allNodes.get(i));
 		}
 	}
 	
 	private static void checkPathFromRoot(Node n)
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			boolean safe = false;
-			Node root = allNodes.get(0);
+			Node root = Globals.allNodes.get(0);
 			Iterator<Path> iteratore = findPath(root,n);
 			while(iteratore.hasNext() && !safe)
 			{
@@ -199,7 +201,7 @@ public class CheckRequirements {
 	private static Iterator<Path> findPath(Node s, Node e)
 	{
 		Iterator<Path> iteratore = null;
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			PathFinder<Path> finder =
 					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
@@ -219,7 +221,7 @@ public class CheckRequirements {
 		Iterator<Path> iteratore = findPath(s,e);
 		Iterator<Relationship> result = null;
 		Vector<Relationship> ris = new Vector<Relationship>();
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			//LO SO ANCHE IO CHE È UN CAZZO DI WHILE DENTRO UN WHILE MA TENUTO
 			//CONTO DEL FATTO CHE PUÒ TROVARE TANTI PERCORSI ALTERNATIVI
@@ -252,7 +254,7 @@ public class CheckRequirements {
 	{
 		System.out.println("ecco un possibile path tra " + s.getProperties("name") + 
 				" ed " + e.getProperties("name"));
-		try( Transaction tx = graphDb.beginTx() )
+		try( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			for(int i=0; i<v.size(); i++)
 			{
@@ -265,7 +267,7 @@ public class CheckRequirements {
 	private static void writeVector(Vector<Relationship> v)
 	{
 		System.out.println("ecco un possibile path");
-		try( Transaction tx = graphDb.beginTx() )
+		try( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			for(int i=0; i<v.size(); i++)
 			{
@@ -278,9 +280,9 @@ public class CheckRequirements {
 	
 	private static void checkOutComing()
 	{
-		for(int i=0; i<allNodes.size(); i++)
+		for(int i=0; i<Globals.allNodes.size(); i++)
 		{
-			Node n = allNodes.get(i);
+			Node n = Globals.allNodes.get(i);
 			hasRelationsOut(n,false);
 		}
 	}
@@ -288,13 +290,13 @@ public class CheckRequirements {
 	//	questo nodo ha una relazione uscente?
     private static boolean hasRelationsOut(Node n, boolean verbose)
     {
-    	try ( Transaction tx = graphDb.beginTx() )
+    	try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 	    	int a=0;
 	    	String nomeNodo = n.getProperties("name").values().toString();
-	    	while(a<allRelations.size())
+	    	while(a<Globals.allRelations.size())
 	    	{
-	    	   Relationship r = allRelations.get(a);	
+	    	   Relationship r = Globals.allRelations.get(a);	
 	    	   String from = r.getProperties("from").values().toString();
 	    	   if(verbose)
 	    	   {
@@ -316,7 +318,7 @@ public class CheckRequirements {
 	
 	private static void checkAllCycleOsservable(Vector<Relationship> c, String extreme)
 	{
-		try ( Transaction tx = graphDb.beginTx() )
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			boolean safe = false;
 			int a=0;
@@ -349,9 +351,9 @@ public class CheckRequirements {
 	public static void controlCycleRequirements()
 	{
 		Vector<Cycle> rels = new Vector<Cycle>();
-		for(int i=0; i<allNodes.size(); i++)
+		for(int i=0; i<Globals.allNodes.size(); i++)
 		{
-		   Node n = allNodes.get(i);
+		   Node n = Globals.allNodes.get(i);
 		   //System.out.println("STO ESAMINANDO IL NODO: " +i);
 		   findPathRels(n,n, false);
 		}

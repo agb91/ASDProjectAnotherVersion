@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <grafo>
-    <nodo><!-- IPOTESI: IL PRIMO NODO È LA RADICE PER DEFINIZIONE -->
+    <nodo>
         <nome>inizio</nome>
     </nodo>
     <nodo>
@@ -89,7 +89,7 @@
     <transizione>
         <nome>T8</nome>
         <evento></evento>
-        <osservabile>N</osservabile>
+        <osservabile>n</osservabile>
         <guasto>Y</guasto>
         <from>E</from>
         <to>F</to>
