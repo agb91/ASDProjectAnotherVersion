@@ -11,6 +11,7 @@ import org.neo4j.graphdb.Transaction;
 import global.Globals;
 import talkToDb.ORM;
 import talkToDb.Tripletta;
+import talkToDb.ORM.RelTypes;
 import usefullAbstract.GenericGraphHandler;
 
 public class FirstBadTwin extends GenericGraphHandler {
@@ -67,7 +68,7 @@ public class FirstBadTwin extends GenericGraphHandler {
 									guastoAttuale = "y";
 								}
 								String id = "t"+k+i+a;
-								ORM.addRelation(nodoAttuale, triplettaAttuale.getsDestinazione(), 
+								addRelationBad(nodoAttuale, triplettaAttuale.getsDestinazione(), 
 										id, "y", triplettaAttuale.getEvento() 
 										, guastoAttuale);
 								tPrimo.add(id);
@@ -82,6 +83,29 @@ public class FirstBadTwin extends GenericGraphHandler {
 				tx.success();
 			}	
 		}
+		
+		/*private static Relationship addRelationBad(Node n1, Node n2, String nome, String oss, String ev, String gu)
+		{
+			Relationship relationship = null;
+			try ( Transaction tx = Globals.graphDb.beginTx() )
+			{
+				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+				relationship.setProperty( "type", pulisci(nome) );
+				relationship.setProperty( "oss", pulisci(oss) );
+				ev = pulisci(ev);
+				relationship.setProperty("event", pulisci(ev));
+				relationship.setProperty("guasto", pulisci(gu));
+				String nomeN1 = n1.getProperties("name").values().toString();
+				String nomeN2 = n2.getProperties("name").values().toString();	
+				relationship.setProperty("from", pulisci(nomeN1));
+				relationship.setProperty("to", pulisci(nomeN2));
+				tx.success();
+				Globals.allRelations.addElement(relationship);
+				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+			}	
+			return relationship;
+		}*/
+		
 		
 		private static Vector<String> riempiTPrimo()
 		{

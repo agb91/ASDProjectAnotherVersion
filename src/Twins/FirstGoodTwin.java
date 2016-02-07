@@ -55,50 +55,6 @@ public class FirstGoodTwin extends GenericGraphHandler{
 		}	
 		
 	}
-	
-	private static void addRelationGood(String n1, String n2, String nome, String oss, String ev, String gu) {
-		Relationship relationship = null;
-		try ( Transaction tx = Globals.graphDbGood.beginTx() )
-		{
-			Node n1Node = findNodeByName(pulisci(n1));
-			Node n2Node = findNodeByName(pulisci(n2));
-			relationship = n1Node.createRelationshipTo( n2Node, RelTypes.STD );
-			relationship.setProperty( "type", pulisci(nome) );
-			relationship.setProperty( "oss", pulisci(oss) );
-			ev = pulisci(ev);
-			relationship.setProperty("event", pulisci(ev));
-			relationship.setProperty("guasto", pulisci(gu));
-			relationship.setProperty("from", pulisci(n1));
-			relationship.setProperty("to", pulisci(n2));
-			tx.success();
-			Globals.allRelationsGood.addElement(relationship);
-			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
-		}	
-	}
-
-	private static Node findNodeByName(String n2) {
-		n2 = pulisci(n2);
-		Node returned = null;
-		try ( Transaction tx = Globals.graphDbGood.beginTx() )
-		{
-			for(int i=0; i<Globals.allNodesGood.size(); i++)
-			{
-				Node attuale = Globals.allNodesGood.get(i);
-				String nomeAttuale = attuale.getProperties("name").values().toString();
-				nomeAttuale = pulisci(nomeAttuale);
-				/*System.out.println("attuale: " + nomeAttuale);
-				System.out.println("n2 : " + n2);
-				System.out.println("------------------------------------------------------");
-				*/
-				if(n2.equalsIgnoreCase(nomeAttuale))
-				{
-					returned = attuale;
-				}
-			}
-			tx.success();
-		}
-		return returned;
-	}
 
 	private static void addNodeGood(String n) {
 		Node userNode = null;
@@ -120,10 +76,10 @@ public class FirstGoodTwin extends GenericGraphHandler{
 			{
 				Relationship attuale = Globals.allRelationsGood.get(i);
 				String guasto = attuale.getProperties("guasto").values().toString();
-				System.out.println("vedo guasto: " + guasto);
+				//System.out.println("vedo guasto: " + guasto);
 				if(guasto.toLowerCase().contains("y"))
 				{
-					System.out.println("e me ne libero: " + Globals.allRelationsGood.get(i).getId());
+					//System.out.println("e me ne libero: " + Globals.allRelationsGood.get(i).getId());
 					
 					Globals.allRelationsGood.get(i).delete();
 					Globals.allRelationsGood.remove(i);

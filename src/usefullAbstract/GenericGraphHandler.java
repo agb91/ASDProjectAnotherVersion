@@ -1,13 +1,22 @@
 package usefullAbstract;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.neo4j.graphalgo.GraphAlgoFactory;
 import org.neo4j.graphalgo.PathFinder;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.DynamicLabel;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.PathExpanders;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterator;
+import org.neo4j.graphdb.Transaction;
+
+import global.Globals;
+import talkToDb.ORM.RelTypes;
 
 public class GenericGraphHandler {
 	
@@ -34,6 +43,115 @@ public class GenericGraphHandler {
 		
 		iteratore = paths.iterator();
 		return iteratore;
+	}
+	
+	protected static Relationship addRelationBad(Node n1, Node n2, String nome, String oss, String ev, String gu)
+	{
+		Relationship relationship = null;
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+			relationship.setProperty( "type", pulisci(nome) );
+			relationship.setProperty( "oss", pulisci(oss) );
+			ev = pulisci(ev);
+			relationship.setProperty("event", pulisci(ev));
+			relationship.setProperty("guasto", pulisci(gu));
+			String nomeN1 = n1.getProperties("name").values().toString();
+			String nomeN2 = n2.getProperties("name").values().toString();	
+			relationship.setProperty("from", pulisci(nomeN1));
+			relationship.setProperty("to", pulisci(nomeN2));
+			tx.success();
+			Globals.allRelations.addElement(relationship);
+			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+		}	
+		return relationship;
+	}
+	
+	protected static Node findNodeByNameBadStd(String nameToFind)
+	{
+		ArrayList<Node> userNodes = new ArrayList<>();
+		Label label = DynamicLabel.label( "Nome" );
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+		    try ( ResourceIterator<Node> users =
+		    		Globals.graphDb.findNodes( label, "name", nameToFind ) )
+		    {
+		        while ( users.hasNext() )
+		        {
+		            userNodes.add( users.next() );
+		        }
+		    }
+		}
+		return userNodes.get(0);
+
+	}
+	
+	protected static Node findNodeByNameGood(String n2) {
+		n2 = pulisci(n2);
+		Node returned = null;
+		try ( Transaction tx = Globals.graphDbGood.beginTx() )
+		{
+			for(int i=0; i<Globals.allNodesGood.size(); i++)
+			{
+				Node attuale = Globals.allNodesGood.get(i);
+				String nomeAttuale = attuale.getProperties("name").values().toString();
+				nomeAttuale = pulisci(nomeAttuale);
+				/*System.out.println("attuale: " + nomeAttuale);
+				System.out.println("n2 : " + n2);
+				System.out.println("------------------------------------------------------");
+				*/
+				if(n2.equalsIgnoreCase(nomeAttuale))
+				{
+					returned = attuale;
+				}
+			}
+			tx.success();
+		}
+		return returned;
+	}
+
+	
+	protected static void addRelationGood(String n1, String n2, String nome, String oss, String ev, String gu) {
+		Relationship relationship = null;
+		try ( Transaction tx = Globals.graphDbGood.beginTx() )
+		{
+			Node n1Node = findNodeByNameGood(pulisci(n1));
+			Node n2Node = findNodeByNameGood(pulisci(n2));
+			relationship = n1Node.createRelationshipTo( n2Node, RelTypes.STD );
+			relationship.setProperty( "type", pulisci(nome) );
+			relationship.setProperty( "oss", pulisci(oss) );
+			ev = pulisci(ev);
+			relationship.setProperty("event", pulisci(ev));
+			relationship.setProperty("guasto", pulisci(gu));
+			relationship.setProperty("from", pulisci(n1));
+			relationship.setProperty("to", pulisci(n2));
+			tx.success();
+			Globals.allRelationsGood.addElement(relationship);
+			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+		
+		}	
+	}
+	
+	protected static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
+	{
+		Relationship relationship = null;
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+			relationship.setProperty( "type", pulisci(nome) );
+			relationship.setProperty( "oss", pulisci(oss) );
+			ev = pulisci(ev);
+			relationship.setProperty("event", pulisci(ev));
+			relationship.setProperty("guasto", pulisci(gu));
+			String nomeN1 = n1.getProperties("name").values().toString();
+			String nomeN2 = n2.getProperties("name").values().toString();	
+			relationship.setProperty("from", pulisci(nomeN1));
+			relationship.setProperty("to", pulisci(nomeN2));
+			tx.success();
+			Globals.allRelations.addElement(relationship);
+			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+		}	
+		return relationship;
 	}
 
 }

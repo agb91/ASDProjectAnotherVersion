@@ -148,8 +148,8 @@ public class ORM extends GenericGraphHandler {
             String guasto = appoggio.getGuasto();
             String from = appoggio.getFrom();
             String to = appoggio.getTo();
-            Node nFrom = findNodeByName(from);
-            Node nTo = findNodeByName(to);
+            Node nFrom = findNodeByNameBadStd(from);
+            Node nTo = findNodeByNameBadStd(to);
             addRelation(nFrom, nTo,nome,osservabile, evento, guasto);
 		}	
 		//CheckRequirements.prepare();
@@ -208,7 +208,7 @@ public class ORM extends GenericGraphHandler {
 		return false;
 	}
 	
-	public static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
+	/*private static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
 	{
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
@@ -228,7 +228,7 @@ public class ORM extends GenericGraphHandler {
 			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 		}	
 		return relationship;
-	}
+	}*/
 	
 	public static void clean(String path)
 	{
@@ -239,7 +239,7 @@ public class ORM extends GenericGraphHandler {
 		}
 	}
 		
-	private static Node findNodeByName(String nameToFind)
+	/*private static Node findNodeByName(String nameToFind)
 	{
 		ArrayList<Node> userNodes = new ArrayList<>();
 		Label label = DynamicLabel.label( "Nome" );
@@ -256,7 +256,7 @@ public class ORM extends GenericGraphHandler {
 		}
 		return userNodes.get(0);
 
-	}
+	}*/
 		
 	public static void setLabelSystem()
 	{
