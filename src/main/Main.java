@@ -1,4 +1,4 @@
-
+package main;
 
 import java.util.Vector;
 
@@ -14,6 +14,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import Twins.FirstBadTwin;
 import Twins.FirstGoodTwin;
+import Twins.Sincronizza;
 
 public class Main {
 	
@@ -26,6 +27,7 @@ public class Main {
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	FirstBadTwin.createBadTwinLevel1();  
     	FirstGoodTwin.createGoodTwinLevel1();
+    	Sincronizza.syncro();
     	System.out.println("ho finito");
 	}
 
