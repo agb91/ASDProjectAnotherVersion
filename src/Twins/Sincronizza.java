@@ -26,11 +26,55 @@ public class Sincronizza extends GenericGraphHandler{
 	public static void syncro()
 	{
 		createData();
+		boolean isDiagnosable = false;
 		if(nonDeterministic())
 		{
 			algoritmo();
+			isDiagnosable = diagnosticabile();
+		}
+		else
+		{
+			isDiagnosable = true;
+		}
+		if(isDiagnosable)
+		{
+			System.out.println("ok, è diagnosticabile a questo livello");
 		}
 	}
+	
+	private static boolean diagnosticabile()
+	{
+		if(Ta.size()==0)
+		{
+			return true;
+		}
+		for(int k=0; k<T.size(); k++)
+		{
+			// se sono collegati ad altre transizioni di guasto è ok, sono diagnosticabiliu
+			// se sono collegati a transabioni non di guasto no, non sono diagnosticabili
+			// se sono non sono collegati, ok, sono diagnosticabili
+			String guastoK = pulisci(T.get(k).getProperties("guasto").values().toString()); 
+			String osservabileK = pulisci(T.get(k).getProperties("oss").values().toString()); 
+			String eventoK = pulisci(T.get(k).getProperties("event").values().toString()); 
+			if(guastoK.toLowerCase().contains("y") && osservabileK.toLowerCase().contains("y"))
+			{
+				for( int s=0; s<T.size(); s++)
+				{
+					if(s!=k)
+					{
+						String guastoS = pulisci(T.get(s).getProperties("guasto").values().toString()); 
+						String eventoS = pulisci(T.get(s).getProperties("event").values().toString());
+						if(eventoS.equalsIgnoreCase(eventoK) && guastoS.toLowerCase().contains("n"))
+						{
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
 	/*
 	Se in un automa esistono due transizioni, una di
 	guasto e l’altra no, aventi lo stesso stato sorgente, lo
