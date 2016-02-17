@@ -30,6 +30,8 @@ public class Main {
     	FirstGoodTwin.createGoodTwinLevel1();
     	Sincronizza.syncro();
     	GeneralBadTwin.createBadTwinGeneral(2);
+    	FirstGoodTwin.createGoodTwinLevel1();
+    	Sincronizza.syncro();
     	System.out.println("ho finito");
 	}
 

@@ -40,6 +40,16 @@ public class Sincronizza extends GenericGraphHandler{
 		{
 			System.out.println("ok, è diagnosticabile a questo livello");
 		}
+		for(int i = 0 ; i<Sdue.size(); i++)
+		{
+			System.out.println("nodi sincros:  " + Sdue.get(i));
+		}
+		for(int i = 0 ; i<Tdue.size(); i++)
+		{
+			System.out.println("transazioni sincros:  " + 	Tdue.get(i).getEvento() 
+					+ ";   partente da: " + Tdue.get(i).getSorgente()
+					+ ";   destinazione to: " + Tdue.get(i).getDestinazione());
+		}
 	}
 	
 	private static boolean diagnosticabile()
@@ -293,10 +303,12 @@ public class Sincronizza extends GenericGraphHandler{
 	private static void createData()
 	{
 		//risolvo problema puntatore
+		S.clear();
 		for(int i=0; i<Globals.allNodes.size(); i++)
 		{
 			S.addElement(Globals.allNodes.get(i));
 		}
+		T.clear();
 		//risolvo problema puntatore
 		for(int i=0; i<Globals.allRelations.size(); i++)
 		{
@@ -304,18 +316,21 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 		
 		//SCELGO DI NON INCLUDERE IL NODO FITTIZIO INIZIALE
+		Sprimo.clear();
 		for(int i=1; i<Globals.allNodesGood.size(); i++)
 		{
 			Sprimo.addElement(Globals.allNodesGood.get(i));
 		}
 	
 		//SCELGO DI NON INCLUDERE LA TRANSIZIONE INIZIALE INIZIALE
+		Tprimo.clear();
 		for(int i=1; i<Globals.allRelationsGood.size(); i++)
 		{
 			Tprimo.addElement(Globals.allRelationsGood.get(i));
 		}
 		
 		// creo s2
+		Sdue.clear();
 		for(int i=0; i<Sprimo.size(); i++)
 		{
 			try ( Transaction tx = Globals.graphDbGood.beginTx() )
@@ -330,6 +345,7 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 		
 		//creo t2
+		Tdue.clear();
 		for(int i=0; i<Tprimo.size(); i++)
 		{
 			try ( Transaction tx = Globals.graphDbGood.beginTx() )

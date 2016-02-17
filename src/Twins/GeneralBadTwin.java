@@ -102,13 +102,13 @@ public class GeneralBadTwin extends GenericGraphHandler{
 				{
 					if(!elenco[k].equalsIgnoreCase(elenco[a]))
 					{
-						System.out.println("entra in identici: " + evento + "rispondo false;");
+						//System.out.println("entra in identici: " + evento + "rispondo false;");
 						return false;
 					}
 				}
 			}
 		}
-		System.out.println("entra in identici: " + evento + "rispondo true;");
+		//System.out.println("entra in identici: " + evento + "rispondo true;");
 		return true;		
 	}
 	

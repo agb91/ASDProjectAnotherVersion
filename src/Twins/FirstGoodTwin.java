@@ -35,19 +35,20 @@ public class FirstGoodTwin extends GenericGraphHandler{
 			for(int i=0; i<Globals.allNodes.size(); i++)
 			{
 				Node attuale = Globals.allNodes.get(i);
-				String nome = attuale.getProperty("name").toString();
+				String nome = pulisci(attuale.getProperty("name").toString());
+				//System.out.println("node: " + nome);
 				addNodeGood(nome);
 			}
 			
 			for(int i=0; i<Globals.allRelations.size(); i++)
 			{
 				Relationship attuale = Globals.allRelations.get(i);
-				String nome = attuale.getProperties("type").values().toString();
-				String n1 = attuale.getStartNode().getProperties("name").values().toString();
-				String n2 = attuale.getEndNode().getProperties("name").values().toString();
-				String oss = attuale.getProperties("oss").values().toString();
-				String ev = attuale.getProperties("event").values().toString();
-				String gu = attuale.getProperties("guasto").values().toString();
+				String nome = pulisci(attuale.getProperties("type").values().toString());
+				String n1 = pulisci(attuale.getStartNode().getProperties("name").values().toString());
+				String n2 = pulisci(attuale.getEndNode().getProperties("name").values().toString());
+				String oss = pulisci(attuale.getProperties("oss").values().toString());
+				String ev = pulisci(attuale.getProperties("event").values().toString());
+				String gu = pulisci(attuale.getProperties("guasto").values().toString());
 				addRelationGood(n1, n2, nome, oss, ev, gu);
 			}
 			
