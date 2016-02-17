@@ -40,7 +40,7 @@ public class Sincronizza extends GenericGraphHandler{
 		{
 			System.out.println("ok, è diagnosticabile a questo livello");
 		}
-		for(int i = 0 ; i<Sdue.size(); i++)
+		/*for(int i = 0 ; i<Sdue.size(); i++)
 		{
 			System.out.println("nodi sincros:  " + Sdue.get(i));
 		}
@@ -49,7 +49,7 @@ public class Sincronizza extends GenericGraphHandler{
 			System.out.println("transazioni sincros:  " + 	Tdue.get(i).getEvento() 
 					+ ";   partente da: " + Tdue.get(i).getSorgente()
 					+ ";   destinazione to: " + Tdue.get(i).getDestinazione());
-		}
+		}*/
 	}
 	
 	private static boolean diagnosticabile()

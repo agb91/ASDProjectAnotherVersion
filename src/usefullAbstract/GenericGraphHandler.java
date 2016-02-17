@@ -118,24 +118,43 @@ public class GenericGraphHandler {
 		return iteratore;
 	}
 	
+	protected static boolean notExist(String ago)
+	{
+		for(int i=0; i<Globals.allRelations.size(); i++)
+		{
+			Relationship attuale = Globals.allRelations.get(i);
+			String pagliaio = pulisci(attuale.getProperties("type").values().toString());
+			if(pagliaio.equalsIgnoreCase(ago))
+			{
+				return false;
+			}
+		}
+		return true;	
+	}
+	
 	protected static Relationship addRelationBad(Node n1, Node n2, String nome, String oss, String ev, String gu)
 	{
+		
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-			relationship.setProperty( "type", pulisci(nome) );
-			relationship.setProperty( "oss", pulisci(oss) );
-			ev = pulisci(ev);
-			relationship.setProperty("event", pulisci(ev));
-			relationship.setProperty("guasto", pulisci(gu));
-			String nomeN1 = n1.getProperties("name").values().toString();
-			String nomeN2 = n2.getProperties("name").values().toString();	
-			relationship.setProperty("from", pulisci(nomeN1));
-			relationship.setProperty("to", pulisci(nomeN2));
+			if(notExist(nome))
+			{
+				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+				relationship.setProperty( "type", pulisci(nome) );
+				relationship.setProperty( "oss", pulisci(oss) );
+				ev = pulisci(ev);
+				relationship.setProperty("event", pulisci(ev));
+				relationship.setProperty("guasto", pulisci(gu));
+				String nomeN1 = n1.getProperties("name").values().toString();
+				String nomeN2 = n2.getProperties("name").values().toString();	
+				relationship.setProperty("from", pulisci(nomeN1));
+				relationship.setProperty("to", pulisci(nomeN2));
+	
+				Globals.allRelations.addElement(relationship);
+				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+			}
 			tx.success();
-			Globals.allRelations.addElement(relationship);
-			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 		}	
 		return relationship;
 	}
