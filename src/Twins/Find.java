@@ -7,8 +7,9 @@ import org.neo4j.graphdb.Relationship;
 
 import global.Globals;
 import talkToDb.Tripletta;
+import usefullAbstract.GenericGraphHandler;
 
-public class Find {
+public class Find extends GenericGraphHandler{
 	
 	private static int getCardinalita(String e)
 	{
@@ -17,22 +18,25 @@ public class Find {
 		return ris;
 	}
 	
-	public static Vector<Tripletta> find (Node s, int n, boolean fault, String eventoNullo)
+	public static Vector<Tripletta> find (Node s, int n, boolean fault, String ot)
 	{
+		ot = pulisci(ot);
 		Vector<Tripletta> risultato = new Vector<Tripletta>();
 		for(int q=1; q<Globals.allRelations.size(); q++)
 		{
 			Relationship transazioneAttuale = Globals.allRelations.get(q);
-			String fromRichiesto = s.getProperties("name").values().toString();
-			String fromTransazioneAttuale = transazioneAttuale.getProperties("from").values().toString();
-			//System.out.println("fromRichiesto:  " + fromRichiesto);
-			//System.out.println("transazione attuale from : " + fromTransazioneAttuale);
-			if(fromTransazioneAttuale.contains(fromRichiesto))
+			String fromRichiesto = pulisci(s.getProperties("name").values().toString());
+			String fromTransazioneAttuale = pulisci(transazioneAttuale.getProperties("from").values().toString());
+			/*System.out.println("fromRichiesto:  " + fromRichiesto);
+			System.out.println("transazione attuale from : " + fromTransazioneAttuale);
+			System.out.println("--------------------------------------------------");
+			*/
+			if(fromTransazioneAttuale.equalsIgnoreCase(fromRichiesto))
 			{
 				boolean faultPrimo;
-				String guasto = transazioneAttuale.getProperties("guasto").values().toString();
-				String osservabile = transazioneAttuale.getProperties("oss").values().toString();
-				String evento = transazioneAttuale.getProperties("event").values().toString();
+				String guasto = pulisci(transazioneAttuale.getProperties("guasto").values().toString());
+				String osservabile = pulisci(transazioneAttuale.getProperties("oss").values().toString());
+				String evento = pulisci(transazioneAttuale.getProperties("event").values().toString());
 				Node sPrimo = transazioneAttuale.getEndNode();
 				int cardinalitaEvento = getCardinalita(evento);
 				//System.out.println("trovo cardinalità == : " + cardinalitaEvento);
@@ -46,13 +50,11 @@ public class Find {
 				{
 					faultPrimo = fault;
 				}
-				if(osservabile.toLowerCase().contains("y") && cardinalitaEvento <= n)
+				//System.out.println("oss: " + osservabile);
+				if(osservabile.equalsIgnoreCase("y") && cardinalitaEvento <= n)
 				{
-					String eventoTripletta = evento;
-					if(eventoNullo.length()!=0)
-					{
-						eventoTripletta = eventoTripletta + "//" + eventoNullo;
-					}
+					String eventoTripletta = evento + "//" + ot;
+					eventoTripletta = pulisciEvento(eventoTripletta);
 					if(n==cardinalitaEvento)
 					{
 						Tripletta aggiungi = new Tripletta(eventoTripletta, sPrimo, faultPrimo );
@@ -64,14 +66,26 @@ public class Find {
 						risultato.addAll(aggiunta);
 					}
 				}
-				if(osservabile.toLowerCase().contains("n"))
+				if(osservabile.equalsIgnoreCase("n"))
 				{
-					Vector<Tripletta> aggiunta = find(sPrimo, n, faultPrimo, eventoNullo);
+					Vector<Tripletta> aggiunta = find(sPrimo, n, faultPrimo, ot);
 					risultato.addAll(aggiunta);
 				}
 			}
 		}
 		return risultato;
+	}
+	
+	private static String pulisciEvento(String evento)
+	{
+		//System.out.println("evento prima: " + evento);
+		int limite = evento.length() -2;
+		if(evento.substring(limite).equalsIgnoreCase("//"))
+		{
+			evento = evento.substring(0, limite);
+		}
+		//System.out.println("evento dopo: " + evento);
+		return evento;
 	}
 	
 

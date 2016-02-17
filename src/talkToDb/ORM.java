@@ -52,19 +52,6 @@ public class ORM extends GenericGraphHandler {
 		setLabelSystem();	
 	}
 	
-	/*public static String pulisci(String s)
-	{
-		String ris = s;
-		for(int i=0; i<2; i++)
-		{
-			if(ris.startsWith("["))
-			{
-			   ris = ris.substring(1,ris.length()-1);
-			}
-		}
-		return ris;
-	}*/
-	
 	public static void updateDb(Vector<String> nuovo)
 	{
 		for(int i=1; i<Globals.allRelations.size(); i++)

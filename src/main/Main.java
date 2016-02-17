@@ -14,6 +14,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import Twins.FirstBadTwin;
 import Twins.FirstGoodTwin;
+import Twins.GeneralBadTwin;
 import Twins.Sincronizza;
 
 public class Main {
@@ -28,6 +29,7 @@ public class Main {
     	FirstBadTwin.createBadTwinLevel1();  
     	FirstGoodTwin.createGoodTwinLevel1();
     	Sincronizza.syncro();
+    	GeneralBadTwin.createBadTwinGeneral(2);
     	System.out.println("ho finito");
 	}
 

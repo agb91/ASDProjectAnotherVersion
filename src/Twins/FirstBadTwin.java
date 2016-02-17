@@ -67,7 +67,9 @@ public class FirstBadTwin extends GenericGraphHandler {
 								{
 									guastoAttuale = "y";
 								}
-								String id = "t"+k+i+a;
+								String sorgente = pulisci(nodoAttuale.getProperties("name").values().toString());
+								String destination = pulisci(triplettaAttuale.getsDestinazione().getProperties("name").values().toString());
+								String id = sorgente + "--" + triplettaAttuale.getEvento() +"--" + destination;
 								addRelationBad(nodoAttuale, triplettaAttuale.getsDestinazione(), 
 										id, "y", triplettaAttuale.getEvento() 
 										, guastoAttuale);
@@ -84,98 +86,6 @@ public class FirstBadTwin extends GenericGraphHandler {
 			}	
 		}
 		
-		/*private static Relationship addRelationBad(Node n1, Node n2, String nome, String oss, String ev, String gu)
-		{
-			Relationship relationship = null;
-			try ( Transaction tx = Globals.graphDb.beginTx() )
-			{
-				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-				relationship.setProperty( "type", pulisci(nome) );
-				relationship.setProperty( "oss", pulisci(oss) );
-				ev = pulisci(ev);
-				relationship.setProperty("event", pulisci(ev));
-				relationship.setProperty("guasto", pulisci(gu));
-				String nomeN1 = n1.getProperties("name").values().toString();
-				String nomeN2 = n2.getProperties("name").values().toString();	
-				relationship.setProperty("from", pulisci(nomeN1));
-				relationship.setProperty("to", pulisci(nomeN2));
-				tx.success();
-				Globals.allRelations.addElement(relationship);
-				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
-			}	
-			return relationship;
-		}*/
-		
-		
-		private static Vector<String> riempiTPrimo()
-		{
-			Vector<String> ris = new Vector<String>();
-			for(int i=0; i<Globals.allRelations.size(); i++)
-			{
-				Relationship attuale = Globals.allRelations.get(i);
-				String osservabilita = attuale.getProperties("oss").values().toString();
-				if(osservabilita.contains("y"))
-				{
-					String nome = attuale.getProperties("type").values().toString();
-					ris.add(nome);
-				}
-			}
-			return ris;
-		}
-		
-		public static void removeIsolatedStatesBad()
-		{
-			boolean raggiungibile = false;
-			for(int i=1; i<Globals.allNodes.size(); i++)
-			{
-				//System.out.println("check del nodo: " + Globals.allNodes.get(i));
-				raggiungibile = checkPathFromRootBad(Globals.allNodes.get(i));
-				if(!raggiungibile)
-				{
-					killNode(Globals.allNodes.get(i), i);
-					i--;
-				}
-			}
-		}
-		
-		//prima elimino tutte le relazioni che partono da n
-		//poi elimino n
-		public static void killNode(Node n, int index)
-		{
-			Globals.allNodes.remove(index);
-			String nomeNode = n.getProperties("name").values().toString();
-			for(int a=0; a<Globals.allRelations.size(); a++)
-			{
-				Relationship r = Globals.allRelations.get(a);
-				String fromr = r.getProperties("from").values().toString();
-				if(fromr.contains(nomeNode))
-				{
-					Globals.allRelations.get(a).delete();
-					Globals.allRelations.remove(a);
-					a--;		
-				}
-			}
-			n.delete();
-		}
-		
-		
-		public static boolean checkPathFromRootBad(Node n)
-		{
-			boolean raggiungibile = false;
-			//System.out.println("analizzo il nodo : " + n.getProperties("name").values().toString());
-			
-			Node root = Globals.allNodes.get(0);
-			Iterator<Path> tuttiIPath = findPath(root,n);
-			while(tuttiIPath.hasNext() && !raggiungibile)
-			{
-				Path path = tuttiIPath.next();
-				if(path.relationships().iterator().hasNext()) 
-				{
-					raggiungibile = true;
-				}
-			}
-			return raggiungibile;
-		}
 		
 			
 		
