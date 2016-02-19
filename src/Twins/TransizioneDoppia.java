@@ -5,6 +5,7 @@ public class TransizioneDoppia {
 	private String evento;
 	private String sorgente;
 	private String destinazione;
+	//private String guasto;
 	
 	
 	public String getEvento() {
@@ -25,5 +26,11 @@ public class TransizioneDoppia {
 	public void setDestinazione(String destinazione) {
 		this.destinazione = destinazione;
 	}
+	/*public String getGuasto() {
+		return guasto;
+	}
+	public void setGuasto(String guasto) {
+		this.guasto = guasto;
+	}*/
 
 }

@@ -1,6 +1,7 @@
 package Twins;
 
 
+import java.util.Arrays;
 import java.util.Vector;
 
 import org.neo4j.graphdb.Node;
@@ -27,15 +28,16 @@ public class Sincronizza extends GenericGraphHandler{
 	{
 		createData();
 		boolean isDiagnosable = false;
-		if(nonDeterministic())
+		//if(nonDeterministic())
 		{
 			algoritmo();
-			isDiagnosable = diagnosticabile();
+			//isDiagnosable = diagnosticabile();
 		}
-		else
+		/*else
 		{
 			isDiagnosable = true;
-		}
+			System.out.println("è diagnosticabile perchè È DETERMINISTICO");
+		}*/
 		if(isDiagnosable)
 		{
 			System.out.println("ok, è diagnosticabile a questo livello");
@@ -43,13 +45,13 @@ public class Sincronizza extends GenericGraphHandler{
 		/*for(int i = 0 ; i<Sdue.size(); i++)
 		{
 			System.out.println("nodi sincros:  " + Sdue.get(i));
-		}
-		for(int i = 0 ; i<Tdue.size(); i++)
-		{
-			System.out.println("transazioni sincros:  " + 	Tdue.get(i).getEvento() 
-					+ ";   partente da: " + Tdue.get(i).getSorgente()
-					+ ";   destinazione to: " + Tdue.get(i).getDestinazione());
 		}*/
+		for(int i = 0 ; i<Ta.size(); i++)
+		{
+			System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
+					";   dest : " + Ta.get(i).getDestinazione()
+					+ ";    evento: " + Ta.get(i).getEvento());
+		}
 	}
 	
 	private static boolean diagnosticabile()
@@ -66,7 +68,7 @@ public class Sincronizza extends GenericGraphHandler{
 			String guastoK = pulisci(T.get(k).getProperties("guasto").values().toString()); 
 			String osservabileK = pulisci(T.get(k).getProperties("oss").values().toString()); 
 			String eventoK = pulisci(T.get(k).getProperties("event").values().toString()); 
-			if(guastoK.toLowerCase().contains("y") && osservabileK.toLowerCase().contains("y"))
+			if(guastoK.equalsIgnoreCase("y") && osservabileK.equalsIgnoreCase("y"))
 			{
 				for( int s=0; s<T.size(); s++)
 				{
@@ -74,7 +76,7 @@ public class Sincronizza extends GenericGraphHandler{
 					{
 						String guastoS = pulisci(T.get(s).getProperties("guasto").values().toString()); 
 						String eventoS = pulisci(T.get(s).getProperties("event").values().toString());
-						if(eventoS.equalsIgnoreCase(eventoK) && guastoS.toLowerCase().contains("n"))
+						if(eventoS.equalsIgnoreCase(eventoK) && guastoS.equalsIgnoreCase("n"))
 						{
 							return false;
 						}
@@ -103,7 +105,8 @@ public class Sincronizza extends GenericGraphHandler{
 				String destinazione1 = pulisci(T.get(i).getProperties("to").values().toString()); 
 	
 				guastot = pulisci(guastot);
-				if(guastot.toLowerCase().contains("y"))
+				
+				if(guastot.equalsIgnoreCase("y"))
 				{
 					for(int a=0; a<T.size(); a++)
 					{
@@ -113,12 +116,17 @@ public class Sincronizza extends GenericGraphHandler{
 							String evento2 = pulisci(T.get(a).getProperties("event").values().toString()); 
 							String destinazione2 = pulisci(T.get(a).getProperties("to").values().toString()); 
 							String guasto2 = pulisci(T.get(a).getProperties("guasto").values().toString());
+							//System.out.println("sorgenti: " + sorgente1 + "--" + sorgente2);
+						
 							boolean nonD = sorgente2.equalsIgnoreCase(sorgente1) 
 									&& evento2.equalsIgnoreCase(evento1)
 									&& destinazione2.equalsIgnoreCase(destinazione1)
-									&& guasto2.toLowerCase().contains("n");
+									&& guasto2.equalsIgnoreCase("n");
 							if(nonD)
 							{
+								System.out.println("prima transizione: " + sorgente1 + "-" + destinazione1 + "-" + evento1 + " - " + guastot);
+								System.out.println("seconda transizione: " + sorgente2 + "-" + destinazione2 + "-" + evento2 + " - " + guasto2);
+								System.out.println("sto per dire che è NON deterministico");
 								return true;
 							}
 						}
@@ -127,29 +135,32 @@ public class Sincronizza extends GenericGraphHandler{
 			}
 			tx.success();
 		}	
+		System.out.println("sto per dire che è deterministico");
 		return false;
 	}
 	
 	private static void algoritmo()
 	{
 		//creo sprev
+		Sprev.clear();
 		for(int i=0; i<Sdue.size(); i++)
 		{
 			Sprev.addElement(Sdue.get(i));
 		}
 		bloccoSuperioreSincroAlgo();
 		bloccoWhileSincroAlgo();
-		/*for(int i=0; i<Sdue.size(); i++)
-		{
-			System.out.println("check s2 : " + Sdue.get(i));
-		}
-		*/
 	}
 	
 	private static void bloccoWhileSincroAlgo()
 	{
+		//System.out.println("entro in while;");
 		while(!checkEqual(Sdue, Sprev))
 		{
+			/*System.out.println("sono diversi:");
+			System.out.println("sdue: " + Sdue.toString());
+			System.out.println("sprev: " + Sprev.toString());
+			System.out.println("-----------------------------------");*/
+			Sdiff.clear();
 			for(int i=0; i<Sdue.size(); i++)
 			{
 				String ago = pulisci(Sdue.get(i));
@@ -167,6 +178,8 @@ public class Sincronizza extends GenericGraphHandler{
 					Sdiff.addElement(Sdue.get(i));
 				}
 			}	
+			//System.out.println("sdiff:   " + Sdiff);
+			//System.out.println("dim di sdiff : " +Sdiff.size());
 			
 			Sprev.clear();
 			for(int i=0; i<Sdue.size(); i++)
@@ -176,10 +189,23 @@ public class Sincronizza extends GenericGraphHandler{
 			
 			for(int i=0; i<Sdiff.size(); i++)
 			{
+				//System.out.println("entro in sdiff");
 				String coppia = Sdiff.get(i);
-				String sa = coppia.split("-",2)[0];
-				String sb = coppia.split("-",2)[1];				
+				String sa = coppia.split("-")[0];
+				String sb = coppia.split("-")[1];
+				//System.out.println("sa: " + sa + ";   sb: " + sb);
 				
+				/*for(int s=0; s<T.size(); s++)
+				{
+					try ( Transaction tx = Globals.graphDb.beginTx() )
+					{
+						System.out.println("ecco T: " + T.get(s).getProperties("type").values().toString());
+						tx.success();
+					}
+				}*/
+				
+				
+				//System.out.println("qui T vale : " + T.size());
 				for(int a=0; a<T.size(); a++)
 				{
 					for(int k=0; k<T.size(); k++)
@@ -188,31 +214,44 @@ public class Sincronizza extends GenericGraphHandler{
 						{
 							Relationship t1 = T.get(a);
 							Relationship t2 = T.get(k);
-							String guasto1 = t1.getProperties("guasto").values().toString();
-							String guasto2 = t2.getProperties("guasto").values().toString();
-							String evento1 = t1.getProperties("event").values().toString();
-							String evento2 = t2.getProperties("event").values().toString();
-							String sorgente1 = t1.getProperties("from").values().toString();
-							String sorgente2 = t2.getProperties("from").values().toString();
-							String destinazione1 = t1.getProperties("to").values().toString();
-							String destinazione2 = t2.getProperties("to").values().toString();
+							String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
+							String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
+							String evento1 = pulisci(t1.getProperties("event").values().toString());
+							String evento2 = pulisci(t2.getProperties("event").values().toString());
+							String sorgente1 = pulisci(t1.getProperties("from").values().toString());
+							String sorgente2 = pulisci(t2.getProperties("from").values().toString());
+							String destinazione1 = pulisci(t1.getProperties("to").values().toString());
+							String destinazione2 = pulisci(t2.getProperties("to").values().toString());
 								
-							boolean bool = (a!=k && !guasto2.contains("y") && 
-									sorgente2.contains(sa)&& !guasto2.contains("y")&&
-									sorgente1.contains(sb));
+							boolean bool = (a!=k && guasto2.equalsIgnoreCase("n") && 
+									uguali(evento1,evento2) &&
+									sorgente1.equalsIgnoreCase(sa)&& sorgente2.equalsIgnoreCase(sb));
 							
 							if(bool)
 							{
+								//
+								//System.out.println("evento1: " + evento1 + ";  evento2: " + evento2 
+								//		+ ";  sorgente1: " + sorgente1 + ";   sorgente2 :" + sorgente2
+								//		+ "; destinazione1: " + destinazione1 + ";  dest2 : " + destinazione2);
 								TransizioneDoppia tsecondo = new TransizioneDoppia();
 								tsecondo.setSorgente(sa+"-"+sb);
 								tsecondo.setDestinazione(destinazione1+"-"+destinazione2);
 								tsecondo.setEvento(evento1);
-								Sdue.addElement(destinazione1+"-"+destinazione2);
-								//System.out.println("sono nel while: stato: " + destinazione1+"-"+destinazione2);
-								Tdue.addElement(tsecondo);
-								if(guasto1.contains("y"))
+								//tsecondo.setGuasto("n");
+								String nuovo = destinazione1+"-"+destinazione2;
+								if(nuovoStato(nuovo))
 								{
-									Ta.addElement(tsecondo);
+									Sdue.addElement(nuovo);
+								}
+								if(nuovaTransizione(tsecondo))
+								{
+									if(guasto1.equalsIgnoreCase("y"))
+									{
+										Ta.addElement(tsecondo);
+										//tsecondo.setGuasto("y");
+									}
+									Tdue.addElement(tsecondo);
+	
 								}
 							}
 						}			
@@ -224,6 +263,7 @@ public class Sincronizza extends GenericGraphHandler{
 		
 	private static void bloccoSuperioreSincroAlgo()
 	{
+		//System.out.println("entro in primo blocco");
 		for(int i=0; i<Sprimo.size(); i++)
 		{
 			String stato = "";
@@ -231,9 +271,11 @@ public class Sincronizza extends GenericGraphHandler{
 			{
 				stato = Sprimo.get(i).getProperties("name").values().toString();
 				stato = pulisci(stato);
+				//System.out.println("lander: " + stato);
 				tx.success();
 			}
 			
+			//System.out.println("sopra T vale: " + T.size());
 			for(int a=0; a<T.size(); a++)
 			{
 				for(int k=0; k<T.size(); k++)
@@ -242,19 +284,27 @@ public class Sincronizza extends GenericGraphHandler{
 					{
 						Relationship t1 = T.get(a);
 						Relationship t2 = T.get(k);
-						String guasto1 = t1.getProperties("guasto").values().toString();
-						String guasto2 = t2.getProperties("guasto").values().toString();
-						String evento1 = t1.getProperties("event").values().toString();
-						String evento2 = t2.getProperties("event").values().toString();
-						String sorgente1 = t1.getProperties("from").values().toString();
-						String sorgente2 = t2.getProperties("from").values().toString();
-						String destinazione1 = t1.getProperties("to").values().toString();
-						String destinazione2 = t2.getProperties("to").values().toString();
+						String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
+						String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
+						String evento1 = pulisci(t1.getProperties("event").values().toString());
+						String evento2 = pulisci(t2.getProperties("event").values().toString());
+						String sorgente1 = pulisci(t1.getProperties("from").values().toString());
+						String sorgente2 = pulisci(t2.getProperties("from").values().toString());
+						String destinazione1 = pulisci(t1.getProperties("to").values().toString());
+						String destinazione2 = pulisci(t2.getProperties("to").values().toString());
+						String id1 = pulisci(t1.getProperties("type").values().toString());
+						String id2 = pulisci(t2.getProperties("type").values().toString());
 						
-						boolean bool = (a!=k && !guasto2.contains("y")
-								&& sorgente2.contains(stato) && 
-								sorgente1.contains(stato)
-								&& evento1.equalsIgnoreCase(evento2));
+						
+						boolean bool = a!=k && guasto2.equalsIgnoreCase("n")
+								&& sorgente2.equalsIgnoreCase(stato) 
+								&& sorgente1.equalsIgnoreCase(stato)
+								&& uguali(evento1,evento2);
+						
+						/*if(stato.equalsIgnoreCase("A") && sorgente1.equalsIgnoreCase("A") && sorgente2.equalsIgnoreCase("A"))
+						{
+								System.out.println(";  evento1: " + evento1 + " evento2 " +evento2 + ";  uguali?: " + uguali(evento1,evento2)) ;
+						}*/
 						
 						if(bool)
 						{
@@ -263,14 +313,23 @@ public class Sincronizza extends GenericGraphHandler{
 							tsecondo.setSorgente(stato+"-"+stato);
 							tsecondo.setDestinazione(destinazione1+"-"+destinazione2);
 							tsecondo.setEvento(evento1);
-							Sdue.addElement(destinazione1+"-"+destinazione2);
-							//System.out.println("stato: " + destinazione1+"-"+destinazione2);
-							
-							Tdue.addElement(tsecondo);
-							if(guasto1.contains("y"))
+							//tsecondo.setGuasto("n");
+							String nuovo = destinazione1+"-"+destinazione2;
+							if(nuovoStato(nuovo))
 							{
-								Ta.addElement(tsecondo);
+								Sdue.addElement(nuovo);
 							}
+							//System.out.println("stato: " + destinazione1+"-"+destinazione2);
+							if(nuovaTransizione(tsecondo))
+							{
+								if(guasto1.equalsIgnoreCase("y"))
+								{
+									Ta.addElement(tsecondo);
+									//tsecondo.setGuasto("y");
+								}
+								Tdue.addElement(tsecondo);
+							}
+
 						}
 					}			
 				}
@@ -278,30 +337,122 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 	}
 	
+	private static boolean nuovaTransizione(TransizioneDoppia nuovo)
+	{
+		String eventoNuovo = nuovo.getEvento();
+		//String guastoNuovo = nuovo.getGuasto();
+		//System.out.println("primoN: " + primoNuovo + ";   secondoN : " + secondoNuovo);
+		for(int i=0; i<Tdue.size(); i++)
+		{
+			TransizioneDoppia attuale = Tdue.get(i);
+			String evento = attuale.getEvento();
+			//String guasto = attuale.getGuasto();
+			if(stessoStato(attuale.getSorgente(),nuovo.getSorgente()) 
+				&& stessoStato(attuale.getDestinazione(),nuovo.getDestinazione())
+				&& uguali(eventoNuovo,evento))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static boolean stessoStato(String primo, String secondo)
+	{
+		String primoA = primo.split("-")[0];
+		String primoB = primo.split("-")[1];
+		String secondoA = secondo.split("-")[0];
+		String secondoB = secondo.split("-")[1];
+		if(primoA.equalsIgnoreCase(secondoA) && primoB.equalsIgnoreCase(secondoB))
+		{
+			return true;
+		}
+		if(primoA.equalsIgnoreCase(secondoB) && primoB.equalsIgnoreCase(secondoA))
+		{
+			return true;
+		}
+		return false;
+	}
+		
+	private static boolean nuovoStato(String nuovo)
+	{
+		String primoNuovo = nuovo.split("-")[0];
+		String secondoNuovo = nuovo.split("-")[1];
+		//System.out.println("primoN: " + primoNuovo + ";   secondoN : " + secondoNuovo);
+		for(int i=0; i<Sdue.size(); i++)
+		{
+			String attuale = Sdue.get(i);
+			String primo = attuale.split("-")[0];
+			String secondo = attuale.split("-")[1];
+			//System.out.println("primo: " + primo + ";   secondo : " + secondo);
+			if(primo.equalsIgnoreCase(primoNuovo) && secondo.equalsIgnoreCase(secondoNuovo))
+			{
+				return false;
+			}
+			if(primo.equalsIgnoreCase(secondoNuovo) && secondo.equalsIgnoreCase(primoNuovo))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static boolean uguali(String a , String b)
+	{
+		String[] va = a.split("//");
+		String[] vb = b.split("//");
+		if(va.length!=vb.length)
+		{
+			return false;
+		}
+		for(int i=0; i<va.length; i++)
+		{
+			va[i] = va[i].toLowerCase();
+			vb[i] = vb[i].toLowerCase();
+		}
+		Arrays.sort( va );
+		Arrays.sort(vb);
+		for(int i=0; i<va.length; i++)
+		{
+			if(!va[i].equalsIgnoreCase(vb[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	private static boolean checkEqual(Vector<String> primo, Vector<String> secondo)
 	{
+	/*	System.out.println("------------------------------------------");
+		System.out.println(primo.toString());
+		System.out.println(secondo.toString());*/
+
 		if(primo.size() != secondo.size())
 		{
-			System.out.println("prima dimensione: " + primo.size());
+			/*System.out.println("prima dimensione: " + primo.size());
 			System.out.println("seconda dimensione: " + secondo.size());
-			System.out.println("non è uguale la dimensione!!");
+			System.out.println("non è uguale la dimensione!!");*/
 			return false;
 		}
 		
 		for(int i=0; i<primo.size(); i++)
 		{
-			if(!primo.get(i).equalsIgnoreCase(secondo.get(i)))
+			if(!stessoStato(primo.get(i),secondo.get(i)))
 			{
-				System.out.println("diversi:  " + primo.get(i) + "---" + secondo.get(i));
+				//System.out.println("diversi:  " + primo.get(i) + "---" + secondo.get(i));
 				return false;
 			}
 		}
-		
+		//System.out.println("rispondo che sono uguali");
 		return true;	
 	}
 	
 	private static void createData()
 	{
+		Ta.clear();
+		Sprev.clear();
+		Sdiff.clear();
 		//risolvo problema puntatore
 		S.clear();
 		for(int i=0; i<Globals.allNodes.size(); i++)

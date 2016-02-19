@@ -13,7 +13,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import Twins.FirstBadTwin;
-import Twins.FirstGoodTwin;
+import Twins.GoodTwin;
 import Twins.GeneralBadTwin;
 import Twins.Sincronizza;
 
@@ -27,13 +27,14 @@ public class Main {
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	FirstBadTwin.createBadTwinLevel1();  
-    	FirstGoodTwin.createGoodTwinLevel1();
+    	GoodTwin.createGoodTwin();
     	Sincronizza.syncro();
     	GeneralBadTwin.createBadTwinGeneral(2);
-    	FirstGoodTwin.createGoodTwinLevel1();
+    	GoodTwin.createGoodTwin();
     	Sincronizza.syncro();
     	GeneralBadTwin.createBadTwinGeneral(3);
-    	FirstGoodTwin.createGoodTwinLevel1();
+    	GoodTwin.createGoodTwin();
+    	Sincronizza.syncro();
     	System.out.println("ho finito");
 	}
 

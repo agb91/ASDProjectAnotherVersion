@@ -14,9 +14,9 @@ import talkToDb.ORM;
 import talkToDb.ORM.RelTypes;
 import usefullAbstract.GenericGraphHandler;
 
-public class FirstGoodTwin extends GenericGraphHandler{
+public class GoodTwin extends GenericGraphHandler{
 	
-	public static void createGoodTwinLevel1()
+	public static void createGoodTwin()
 	{
 		goodBase();
 		removeGuasti();
