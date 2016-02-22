@@ -70,7 +70,7 @@ public class GeneralBadTwin extends GenericGraphHandler{
 							{
 								String sorgente = pulisci(nodoAttuale.getProperties("name").values().toString());
 								String destination = pulisci(triplettaAttuale.getsDestinazione().getProperties("name").values().toString());
-								String id = sorgente + "--" + triplettaAttuale.getEvento() + "--" + destination + "--" + guastoAttuale;
+								String id = sorgente + "--" + triplettaAttuale.getEventoOrdered() + "--" + destination + "--" + guastoAttuale;
 								//System.out.println("tripletta: " + id);
 								addRelationBad(nodoAttuale, triplettaAttuale.getsDestinazione(), 
 										id, "y", triplettaAttuale.getEvento() , guastoAttuale);

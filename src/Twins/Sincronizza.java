@@ -27,44 +27,57 @@ public class Sincronizza extends GenericGraphHandler{
 	public static void syncro()
 	{
 		createData();
-		boolean isDiagnosable = false;
-		//if(nonDeterministic())
-		{
-			algoritmo();
-			//isDiagnosable = diagnosticabile();
-		}
-		/*else
-		{
-			isDiagnosable = true;
-			System.out.println("è diagnosticabile perchè È DETERMINISTICO");
-		}*/
-		if(isDiagnosable)
-		{
-			System.out.println("ok, è diagnosticabile a questo livello");
-		}
+		algoritmo();
 		/*for(int i = 0 ; i<Sdue.size(); i++)
 		{
 			System.out.println("nodi sincros:  " + Sdue.get(i));
 		}*/
-		for(int i = 0 ; i<Ta.size(); i++)
+		/*for(int i = 0 ; i<Ta.size(); i++)
 		{
 			System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
 					";   dest : " + Ta.get(i).getDestinazione()
 					+ ";    evento: " + Ta.get(i).getEvento());
-		}
+		}*/
 	}
 	
-	private static boolean diagnosticabile()
+	private static boolean diagnosticable()
 	{
+		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
 		if(Ta.size()==0)
 		{
+			System.out.println("vale C1: "
+					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
 			return true;
 		}
+		
+		//secondo caso se è deterministico allora è diagnosticabile
+		if(deterministic())
+		{
+			System.out.println("vale C2: il bad twin è deterministico");
+			return true;
+		}
+		
+		//cerco le transizioni di guasto: prendo il loro evento.
+		// se per tutti quegli eventi non esistono transizioni di guasto
+		// che abbiano come evento quegli eventi allora è diagnosticabile
+		if(thirdCondition())
+		{
+			System.out.println("vale la C3");
+			return true;
+		}
+		System.out.println("non ho nessuna delle condizioni di diagnosticabilità"
+				+ "\n, quindi NON DIAGNOSTICABILE");
+		return false;
+	}
+	
+	//cerco le transizioni di guasto: prendo il loro evento.
+	// se per tutti quegli eventi non esistono transizioni di guasto
+	// che abbiano come evento quegli eventi allora è diagnosticabile
+	private static boolean thirdCondition()
+	{
+		boolean risp = true;
 		for(int k=0; k<T.size(); k++)
 		{
-			// se sono collegati ad altre transizioni di guasto è ok, sono diagnosticabiliu
-			// se sono collegati a transabioni non di guasto no, non sono diagnosticabili
-			// se sono non sono collegati, ok, sono diagnosticabili
 			String guastoK = pulisci(T.get(k).getProperties("guasto").values().toString()); 
 			String osservabileK = pulisci(T.get(k).getProperties("oss").values().toString()); 
 			String eventoK = pulisci(T.get(k).getProperties("event").values().toString()); 
@@ -84,7 +97,7 @@ public class Sincronizza extends GenericGraphHandler{
 				}
 			}
 		}
-		return true;
+		return risp;
 	}
 	
 	/*
@@ -92,8 +105,9 @@ public class Sincronizza extends GenericGraphHandler{
 	guasto e l’altra no, aventi lo stesso stato sorgente, lo
 	stesso stato destinazione e lo stesso evento
 	osservabile, tale automa è non-deterministico*/
-	private static boolean nonDeterministic()
+	private static boolean deterministic()
 	{
+		boolean deterministico = true;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
 			for(int i=0; i<T.size(); i++)
@@ -106,7 +120,7 @@ public class Sincronizza extends GenericGraphHandler{
 	
 				guastot = pulisci(guastot);
 				
-				if(guastot.equalsIgnoreCase("y"))
+				if(guastot.equalsIgnoreCase("y") && deterministico==true)
 				{
 					for(int a=0; a<T.size(); a++)
 					{
@@ -119,15 +133,16 @@ public class Sincronizza extends GenericGraphHandler{
 							//System.out.println("sorgenti: " + sorgente1 + "--" + sorgente2);
 						
 							boolean nonD = sorgente2.equalsIgnoreCase(sorgente1) 
-									&& evento2.equalsIgnoreCase(evento1)
+									&& uguali(evento2, evento1)
 									&& destinazione2.equalsIgnoreCase(destinazione1)
 									&& guasto2.equalsIgnoreCase("n");
 							if(nonD)
 							{
+								System.out.println("non determinsitico perchè: ");
 								System.out.println("prima transizione: " + sorgente1 + "-" + destinazione1 + "-" + evento1 + " - " + guastot);
 								System.out.println("seconda transizione: " + sorgente2 + "-" + destinazione2 + "-" + evento2 + " - " + guasto2);
 								System.out.println("sto per dire che è NON deterministico");
-								return true;
+								deterministico = false;
 							}
 						}
 					}
@@ -135,8 +150,8 @@ public class Sincronizza extends GenericGraphHandler{
 			}
 			tx.success();
 		}	
-		System.out.println("sto per dire che è deterministico");
-		return false;
+		//System.out.println("sto per dire che è deterministico");
+		return deterministico;
 	}
 	
 	private static void algoritmo()
@@ -149,6 +164,7 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 		bloccoSuperioreSincroAlgo();
 		bloccoWhileSincroAlgo();
+		diagnosticable();
 	}
 	
 	private static void bloccoWhileSincroAlgo()

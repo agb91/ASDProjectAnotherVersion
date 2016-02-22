@@ -126,6 +126,7 @@ public class GenericGraphHandler {
 			String pagliaio = pulisci(attuale.getProperties("type").values().toString());
 			if(pagliaio.equalsIgnoreCase(ago))
 			{
+				//System.out.println("ho scartato; " + ago);
 				return false;
 			}
 		}
