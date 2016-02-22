@@ -16,12 +16,12 @@ import usefullAbstract.GenericGraphHandler;
 
 public class GoodTwin extends GenericGraphHandler{
 	
-	public static void createGoodTwin()
+	public static void createGoodTwin(int l)
 	{
 		goodBase();
 		removeGuasti();
 		removeIsolatedStatesGood();
-		System.out.println("created good twin level 1");
+		System.out.println("created good twin level: "+l);
 	}
 	
 	//crea il grafo good iniziale

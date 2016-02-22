@@ -26,15 +26,9 @@ public class Main {
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
-    	FirstBadTwin.createBadTwinLevel1();  
-    	GoodTwin.createGoodTwin();
-    	Sincronizza.syncro();
-    	GeneralBadTwin.createBadTwinGeneral(2);
-    	GoodTwin.createGoodTwin();
-    	Sincronizza.syncro();
-    	GeneralBadTwin.createBadTwinGeneral(3);
-    	GoodTwin.createGoodTwin();
-    	Sincronizza.syncro();
+    	
+    	Risolutori.first();
+    	
     	System.out.println("ho finito");
 	}
 

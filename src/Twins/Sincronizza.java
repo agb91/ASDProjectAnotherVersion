@@ -24,7 +24,7 @@ public class Sincronizza extends GenericGraphHandler{
 	private static Vector<String> Sprev = new Vector<String>();
 	private static Vector<String> Sdiff = new Vector<String>();
 	
-	public static void syncro()
+	public static boolean syncro()
 	{
 		createData();
 		algoritmo();
@@ -38,6 +38,7 @@ public class Sincronizza extends GenericGraphHandler{
 					";   dest : " + Ta.get(i).getDestinazione()
 					+ ";    evento: " + Ta.get(i).getEvento());
 		}*/
+		return diagnosticable();
 	}
 	
 	private static boolean diagnosticable()
@@ -76,26 +77,31 @@ public class Sincronizza extends GenericGraphHandler{
 	private static boolean thirdCondition()
 	{
 		boolean risp = true;
-		for(int k=0; k<T.size(); k++)
+		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			String guastoK = pulisci(T.get(k).getProperties("guasto").values().toString()); 
-			String osservabileK = pulisci(T.get(k).getProperties("oss").values().toString()); 
-			String eventoK = pulisci(T.get(k).getProperties("event").values().toString()); 
-			if(guastoK.equalsIgnoreCase("y") && osservabileK.equalsIgnoreCase("y"))
+			for(int k=0; k<T.size(); k++)
 			{
-				for( int s=0; s<T.size(); s++)
+				String guastoK = pulisci(T.get(k).getProperties("guasto").values().toString()); 
+				String osservabileK = pulisci(T.get(k).getProperties("oss").values().toString()); 
+				String eventoK = pulisci(T.get(k).getProperties("event").values().toString()); 
+				if(guastoK.equalsIgnoreCase("y") && osservabileK.equalsIgnoreCase("y"))
 				{
-					if(s!=k)
+					for( int s=0; s<T.size(); s++)
 					{
-						String guastoS = pulisci(T.get(s).getProperties("guasto").values().toString()); 
-						String eventoS = pulisci(T.get(s).getProperties("event").values().toString());
-						if(eventoS.equalsIgnoreCase(eventoK) && guastoS.equalsIgnoreCase("n"))
+						if(s!=k)
 						{
-							return false;
+							String guastoS = pulisci(T.get(s).getProperties("guasto").values().toString()); 
+							String eventoS = pulisci(T.get(s).getProperties("event").values().toString());
+							if(eventoS.equalsIgnoreCase(eventoK) && guastoS.equalsIgnoreCase("n"))
+							{
+								return false;
+							}
 						}
 					}
 				}
+				
 			}
+			tx.success();
 		}
 		return risp;
 	}
@@ -113,37 +119,25 @@ public class Sincronizza extends GenericGraphHandler{
 			for(int i=0; i<T.size(); i++)
 			{
 				Relationship t1 = T.get(i);
-				String guastot = t1.getProperties("guasto").values().toString(); 
 				String sorgente1 = pulisci(T.get(i).getProperties("from").values().toString()); 
 				String evento1 = pulisci(T.get(i).getProperties("event").values().toString()); 
-				String destinazione1 = pulisci(T.get(i).getProperties("to").values().toString()); 
-	
-				guastot = pulisci(guastot);
 				
-				if(guastot.equalsIgnoreCase("y") && deterministico==true)
+				for(int a=0; a<T.size(); a++)
 				{
-					for(int a=0; a<T.size(); a++)
+					if(a!=i)
 					{
-						if(a!=i)
+						String sorgente2 = pulisci(T.get(a).getProperties("from").values().toString()); 
+						String evento2 = pulisci(T.get(a).getProperties("event").values().toString()); 
+					
+						boolean nonD = sorgente2.equalsIgnoreCase(sorgente1) 
+								&& uguali(evento2, evento1);
+						if(nonD)
 						{
-							String sorgente2 = pulisci(T.get(a).getProperties("from").values().toString()); 
-							String evento2 = pulisci(T.get(a).getProperties("event").values().toString()); 
-							String destinazione2 = pulisci(T.get(a).getProperties("to").values().toString()); 
-							String guasto2 = pulisci(T.get(a).getProperties("guasto").values().toString());
-							//System.out.println("sorgenti: " + sorgente1 + "--" + sorgente2);
-						
-							boolean nonD = sorgente2.equalsIgnoreCase(sorgente1) 
-									&& uguali(evento2, evento1)
-									&& destinazione2.equalsIgnoreCase(destinazione1)
-									&& guasto2.equalsIgnoreCase("n");
-							if(nonD)
-							{
-								System.out.println("non determinsitico perchè: ");
-								System.out.println("prima transizione: " + sorgente1 + "-" + destinazione1 + "-" + evento1 + " - " + guastot);
-								System.out.println("seconda transizione: " + sorgente2 + "-" + destinazione2 + "-" + evento2 + " - " + guasto2);
-								System.out.println("sto per dire che è NON deterministico");
-								deterministico = false;
-							}
+						//	System.out.println("non determinsitico perchè: ");
+						//	System.out.println("prima transizione: " + sorgente1 + " evento : " + evento1);
+						//	System.out.println("seconda transizione: " + sorgente2 + " evento : " + evento2);
+						//	System.out.println("sto per dire che è NON deterministico");
+							deterministico = false;
 						}
 					}
 				}
@@ -164,7 +158,6 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 		bloccoSuperioreSincroAlgo();
 		bloccoWhileSincroAlgo();
-		diagnosticable();
 	}
 	
 	private static void bloccoWhileSincroAlgo()
