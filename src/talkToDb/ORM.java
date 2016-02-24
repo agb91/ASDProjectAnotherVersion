@@ -49,6 +49,7 @@ public class ORM extends GenericGraphHandler {
 	    clean(DB_PATH+"/dbGood");
 		Globals.graphDb = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 		Globals.graphDbGood = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH+"/dbGood");
+		Globals.graphDbSyncro = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH+"/dbSyncro");
 		setLabelSystem();	
 	}
 	

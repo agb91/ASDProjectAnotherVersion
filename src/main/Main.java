@@ -26,10 +26,9 @@ public class Main {
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
-    	
-    	Risolutori.first();
-    	
-    	System.out.println("ho finito");
-	}
+    	Menu.ask();
+    	    	
+
+    }
 
 }

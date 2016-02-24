@@ -57,18 +57,7 @@ public class GoodTwin extends GenericGraphHandler{
 		
 	}
 
-	private static void addNodeGood(String n) {
-		Node userNode = null;
-		try ( Transaction tx = Globals.graphDbGood.beginTx() )
-		{
-		    Label label = DynamicLabel.label( "Nome" );
-	        userNode = Globals.graphDbGood.createNode( label );
-	        userNode.setProperty( "name", n);
-	        Globals.allNodesGood.addElement(userNode);
-		    tx.success();
-		}    		
-	}
-
+	
 	private static void removeGuasti()
 	{
 		try ( Transaction tx = Globals.graphDbGood.beginTx() )

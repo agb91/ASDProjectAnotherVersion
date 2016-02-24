@@ -31,17 +31,58 @@ public class Sincronizza extends GenericGraphHandler{
 		/*for(int i = 0 ; i<Sdue.size(); i++)
 		{
 			System.out.println("nodi sincros:  " + Sdue.get(i));
-		}*/
+		}
 		/*for(int i = 0 ; i<Ta.size(); i++)
 		{
 			System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
 					";   dest : " + Ta.get(i).getDestinazione()
 					+ ";    evento: " + Ta.get(i).getEvento());
 		}*/
-		return diagnosticable();
+		writeInDb();
+		return diagnosable();
 	}
 	
-	private static boolean diagnosticable()
+	private static void writeInDb()
+	{
+		for(int i=0; i<Sdue.size(); i++)
+		{
+			String nome = Sdue.get(i);
+			addNodeSyncro(nome);
+		}
+		for(int i=0; i<Tdue.size(); i++)
+		{
+			TransizioneDoppia attuale = Tdue.get(i);
+			String n1 = attuale.getSorgente();
+			String n2 = attuale.getDestinazione();
+			String oss = "y";
+			String ev = attuale.getEvento();
+			String nome = n1+ "-" + n2 + "- " + oss + "- " + ev;
+			//Node n1, Node n2, String nome, String oss, String ev, String gu
+			addRelationSyncro(n1, n2, nome, oss, ev);
+		}
+	}
+	
+	public static boolean syncroC1()
+	{
+		createData();
+		algoritmo();
+		return diagnosableC1();
+	}
+		
+	private static boolean diagnosableC1()
+	{
+		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
+		if(Ta.size()==0)
+		{
+			System.out.println("vale C1: "
+					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
+			return true;
+		}
+		return false;
+	}
+	
+	
+	private static boolean diagnosable()
 	{
 		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
 		if(Ta.size()==0)
@@ -52,7 +93,7 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 		
 		//secondo caso se è deterministico allora è diagnosticabile
-		if(deterministic())
+		if(deterministic(T))
 		{
 			System.out.println("vale C2: il bad twin è deterministico");
 			return true;
@@ -61,93 +102,17 @@ public class Sincronizza extends GenericGraphHandler{
 		//cerco le transizioni di guasto: prendo il loro evento.
 		// se per tutti quegli eventi non esistono transizioni di guasto
 		// che abbiano come evento quegli eventi allora è diagnosticabile
-		if(thirdCondition())
+		if(thirdCondition(T))
 		{
 			System.out.println("vale la C3");
 			return true;
 		}
 		System.out.println("non ho nessuna delle condizioni di diagnosticabilità"
-				+ "\n, quindi NON DIAGNOSTICABILE");
+				+ " quindi NON DIAGNOSTICABILE");
 		return false;
 	}
 	
-	//cerco le transizioni di guasto: prendo il loro evento.
-	// se per tutti quegli eventi non esistono transizioni di guasto
-	// che abbiano come evento quegli eventi allora è diagnosticabile
-	private static boolean thirdCondition()
-	{
-		boolean risp = true;
-		try ( Transaction tx = Globals.graphDb.beginTx() )
-		{
-			for(int k=0; k<T.size(); k++)
-			{
-				String guastoK = pulisci(T.get(k).getProperties("guasto").values().toString()); 
-				String osservabileK = pulisci(T.get(k).getProperties("oss").values().toString()); 
-				String eventoK = pulisci(T.get(k).getProperties("event").values().toString()); 
-				if(guastoK.equalsIgnoreCase("y") && osservabileK.equalsIgnoreCase("y"))
-				{
-					for( int s=0; s<T.size(); s++)
-					{
-						if(s!=k)
-						{
-							String guastoS = pulisci(T.get(s).getProperties("guasto").values().toString()); 
-							String eventoS = pulisci(T.get(s).getProperties("event").values().toString());
-							if(eventoS.equalsIgnoreCase(eventoK) && guastoS.equalsIgnoreCase("n"))
-							{
-								return false;
-							}
-						}
-					}
-				}
-				
-			}
-			tx.success();
-		}
-		return risp;
-	}
-	
-	/*
-	Se in un automa esistono due transizioni, una di
-	guasto e l’altra no, aventi lo stesso stato sorgente, lo
-	stesso stato destinazione e lo stesso evento
-	osservabile, tale automa è non-deterministico*/
-	private static boolean deterministic()
-	{
-		boolean deterministico = true;
-		try ( Transaction tx = Globals.graphDb.beginTx() )
-		{
-			for(int i=0; i<T.size(); i++)
-			{
-				Relationship t1 = T.get(i);
-				String sorgente1 = pulisci(T.get(i).getProperties("from").values().toString()); 
-				String evento1 = pulisci(T.get(i).getProperties("event").values().toString()); 
-				
-				for(int a=0; a<T.size(); a++)
-				{
-					if(a!=i)
-					{
-						String sorgente2 = pulisci(T.get(a).getProperties("from").values().toString()); 
-						String evento2 = pulisci(T.get(a).getProperties("event").values().toString()); 
-					
-						boolean nonD = sorgente2.equalsIgnoreCase(sorgente1) 
-								&& uguali(evento2, evento1);
-						if(nonD)
-						{
-						//	System.out.println("non determinsitico perchè: ");
-						//	System.out.println("prima transizione: " + sorgente1 + " evento : " + evento1);
-						//	System.out.println("seconda transizione: " + sorgente2 + " evento : " + evento2);
-						//	System.out.println("sto per dire che è NON deterministico");
-							deterministico = false;
-						}
-					}
-				}
-			}
-			tx.success();
-		}	
-		//System.out.println("sto per dire che è deterministico");
-		return deterministico;
-	}
-	
+		
 	private static void algoritmo()
 	{
 		//creo sprev
@@ -365,23 +330,6 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 		return true;
 	}
-	
-	private static boolean stessoStato(String primo, String secondo)
-	{
-		String primoA = primo.split("-")[0];
-		String primoB = primo.split("-")[1];
-		String secondoA = secondo.split("-")[0];
-		String secondoB = secondo.split("-")[1];
-		if(primoA.equalsIgnoreCase(secondoA) && primoB.equalsIgnoreCase(secondoB))
-		{
-			return true;
-		}
-		if(primoA.equalsIgnoreCase(secondoB) && primoB.equalsIgnoreCase(secondoA))
-		{
-			return true;
-		}
-		return false;
-	}
 		
 	private static boolean nuovoStato(String nuovo)
 	{
@@ -406,57 +354,7 @@ public class Sincronizza extends GenericGraphHandler{
 		return true;
 	}
 	
-	private static boolean uguali(String a , String b)
-	{
-		String[] va = a.split("//");
-		String[] vb = b.split("//");
-		if(va.length!=vb.length)
-		{
-			return false;
-		}
-		for(int i=0; i<va.length; i++)
-		{
-			va[i] = va[i].toLowerCase();
-			vb[i] = vb[i].toLowerCase();
-		}
-		Arrays.sort( va );
-		Arrays.sort(vb);
-		for(int i=0; i<va.length; i++)
-		{
-			if(!va[i].equalsIgnoreCase(vb[i]))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	private static boolean checkEqual(Vector<String> primo, Vector<String> secondo)
-	{
-	/*	System.out.println("------------------------------------------");
-		System.out.println(primo.toString());
-		System.out.println(secondo.toString());*/
-
-		if(primo.size() != secondo.size())
-		{
-			/*System.out.println("prima dimensione: " + primo.size());
-			System.out.println("seconda dimensione: " + secondo.size());
-			System.out.println("non è uguale la dimensione!!");*/
-			return false;
-		}
 		
-		for(int i=0; i<primo.size(); i++)
-		{
-			if(!stessoStato(primo.get(i),secondo.get(i)))
-			{
-				//System.out.println("diversi:  " + primo.get(i) + "---" + secondo.get(i));
-				return false;
-			}
-		}
-		//System.out.println("rispondo che sono uguali");
-		return true;	
-	}
-	
 	private static void createData()
 	{
 		Ta.clear();

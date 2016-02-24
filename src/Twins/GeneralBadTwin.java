@@ -92,6 +92,26 @@ public class GeneralBadTwin extends GenericGraphHandler{
 		}
 	}
 	
+	public static boolean checkC2C3()
+	{
+		//secondo caso se è deterministico allora è diagnosticabile
+		if(deterministic(Globals.allRelations))
+		{
+			System.out.println("vale C2: il bad twin è deterministico");
+			return true;
+		}
+		
+		//cerco le transizioni di guasto: prendo il loro evento.
+		// se per tutti quegli eventi non esistono transizioni di guasto
+		// che abbiano come evento quegli eventi allora è diagnosticabile
+		if(thirdCondition(Globals.allRelations))
+		{
+			System.out.println("vale la C3");
+			return true;
+		}
+		return false;
+	}
+	
 	private static boolean identici( String evento)
 	{
 		String elenco[] = evento.split("//");
