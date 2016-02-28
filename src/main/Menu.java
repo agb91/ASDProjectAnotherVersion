@@ -19,9 +19,6 @@ public class Menu {
                  break;
         default: errorInput();
 		}
-		
-		System.exit(2);
-
 	}
 	
 	private static void errorInput()

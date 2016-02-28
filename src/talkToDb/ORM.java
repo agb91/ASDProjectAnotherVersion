@@ -32,6 +32,7 @@ import global.Globals;
 import letturaXML.Graficatore;
 import letturaXML.Nodo;
 import letturaXML.Transizione;
+import talkToDb.ORM.RelTypes;
 import usefullAbstract.GenericGraphHandler;
 
 import org.neo4j.graphdb.RelationshipType;
@@ -53,67 +54,23 @@ public class ORM extends GenericGraphHandler {
 		setLabelSystem();	
 	}
 	
-	public static void updateDb(Vector<String> nuovo)
+	public static void updateDb(int level)
 	{
-		for(int i=1; i<Globals.allRelations.size(); i++)
+		for (int l=0; l<=level; l++)
 		{
-			Relationship attuale = Globals.allRelations.get(i);
-			String osservabilita = attuale.getProperties("oss").values().toString();
-			if(osservabilita.toLowerCase().contains("n"))
+			for(int i=1; i<Globals.allRelationsGeneral.get(l).size(); i++)
 			{
-				//System.out.println("cancello la relazione: " + Globals.allRelations.get(i).getStartNode() + "--->" + Globals.allRelations.get(i).getEndNode());
-				Globals.allRelations.get(i).delete();
-				Globals.allRelations.remove(i);
-				i--;
+				Relationship attuale = Globals.allRelationsGeneral.get(l).get(i);
+				String osservabilita = attuale.getProperties("oss").values().toString();
+				if(osservabilita.toLowerCase().contains("n"))
+				{
+					//System.out.println("cancello la relazione: " + Globals.allRelations.get(i).getStartNode() + "--->" + Globals.allRelations.get(i).getEndNode());
+					Globals.allRelationsGeneral.get(l).get(i).delete();
+					Globals.allRelationsGeneral.get(l).remove(i);
+					i--;
+				}
 			}
 		}
-	}
-	
-	
-	
-	
-	
-	//prima creo un grafo identico al bad twin dello stesso livello (questa parte viene fatta a runtime)
-	//rimuovo tutte le transizioni guaste
-	//rimuovo tutti gli stati non raggiungibili dallo stato iniziale
-	
-	
-	
-	
-	
-	
-	/*public static Iterator<Path> findPath(Node s, Node e)
-	{
-		Iterator<Path> iteratore = null;
-		PathFinder<Path> finder =
-				GraphAlgoFactory.allPaths(PathExpanders.forDirection(
-						Direction.OUTGOING ), 15 );
-		Iterable<Path> paths = finder.findAllPaths( s, e );
-		
-		iteratore = paths.iterator();
-		return iteratore;
-	}*/
-	
-	
-	
-	public Vector<Node> getNodes()
-	{
-		Vector<Node> ris = new Vector<Node>();
-		for(int i=0; i<Globals.allNodes.size(); i++)
-		{
-			ris.addElement(Globals.allNodes.get(i));
-		}
-		return ris;
-	}
-	
-	public Vector<Relationship> getRelationships()
-	{
-		Vector<Relationship> ris = new Vector<Relationship>();
-		for(int i=0; i<Globals.allRelations.size(); i++)
-		{
-			ris.addElement(Globals.allRelations.get(i));
-		}
-		return ris;
 	}
 	
 	public void readXml()
@@ -141,6 +98,28 @@ public class ORM extends GenericGraphHandler {
             addRelation(nFrom, nTo,nome,osservabile, evento, guasto);
 		}	
 		//CheckRequirements.prepare();
+	}
+	
+	protected static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
+	{
+		Relationship relationship = null;
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+			relationship.setProperty( "type", pulisci(nome) );
+			relationship.setProperty( "oss", pulisci(oss) );
+			ev = pulisci(ev);
+			relationship.setProperty("event", pulisci(ev));
+			relationship.setProperty("guasto", pulisci(gu));
+			String nomeN1 = n1.getProperties("name").values().toString();
+			String nomeN2 = n2.getProperties("name").values().toString();	
+			relationship.setProperty("from", pulisci(nomeN1));
+			relationship.setProperty("to", pulisci(nomeN2));
+			tx.success();
+			Globals.allRelationsGeneral.get(0).addElement(relationship);
+			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+		}	
+		return relationship;
 	}
 	
 	public enum RelTypes implements RelationshipType{
@@ -195,28 +174,6 @@ public class ORM extends GenericGraphHandler {
 		}	
 		return false;
 	}
-	
-	/*private static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
-	{
-		Relationship relationship = null;
-		try ( Transaction tx = Globals.graphDb.beginTx() )
-		{
-			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-			relationship.setProperty( "type", pulisci(nome) );
-			relationship.setProperty( "oss", pulisci(oss) );
-			ev = pulisci(ev);
-			relationship.setProperty("event", pulisci(ev));
-			relationship.setProperty("guasto", pulisci(gu));
-			String nomeN1 = n1.getProperties("name").values().toString();
-			String nomeN2 = n2.getProperties("name").values().toString();	
-			relationship.setProperty("from", pulisci(nomeN1));
-			relationship.setProperty("to", pulisci(nomeN2));
-			tx.success();
-			Globals.allRelations.addElement(relationship);
-			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
-		}	
-		return relationship;
-	}*/
 	
 	public static void clean(String path)
 	{

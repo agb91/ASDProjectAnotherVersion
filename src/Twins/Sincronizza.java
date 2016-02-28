@@ -24,15 +24,15 @@ public class Sincronizza extends GenericGraphHandler{
 	private static Vector<String> Sprev = new Vector<String>();
 	private static Vector<String> Sdiff = new Vector<String>();
 	
-	public static boolean syncro()
+	public static boolean syncro(int level)
 	{
-		createData();
+		createData(level);
 		algoritmo();
 		/*for(int i = 0 ; i<Sdue.size(); i++)
 		{
 			System.out.println("nodi sincros:  " + Sdue.get(i));
 		}
-		/*for(int i = 0 ; i<Ta.size(); i++)
+		for(int i = 0 ; i<Ta.size(); i++)
 		{
 			System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
 					";   dest : " + Ta.get(i).getDestinazione()
@@ -62,9 +62,9 @@ public class Sincronizza extends GenericGraphHandler{
 		}
 	}
 	
-	public static boolean syncroC1()
+	public static boolean syncroC1(int level)
 	{
-		createData();
+		createData(level);
 		algoritmo();
 		return diagnosableC1();
 	}
@@ -91,12 +91,20 @@ public class Sincronizza extends GenericGraphHandler{
 					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
 			return true;
 		}
+		else
+		{
+			System.out.println("non vale C1");
+		}
 		
 		//secondo caso se è deterministico allora è diagnosticabile
 		if(deterministic(T))
 		{
 			System.out.println("vale C2: il bad twin è deterministico");
 			return true;
+		}
+		else
+		{
+			System.out.println("non vale c2: il bad twin non è deterministico");
 		}
 		
 		//cerco le transizioni di guasto: prendo il loro evento.
@@ -106,6 +114,10 @@ public class Sincronizza extends GenericGraphHandler{
 		{
 			System.out.println("vale la C3");
 			return true;
+		}
+		else
+		{
+			System.out.println("non vale C3");
 		}
 		System.out.println("non ho nessuna delle condizioni di diagnosticabilità"
 				+ " quindi NON DIAGNOSTICABILE");
@@ -237,7 +249,6 @@ public class Sincronizza extends GenericGraphHandler{
 		
 	private static void bloccoSuperioreSincroAlgo()
 	{
-		//System.out.println("entro in primo blocco");
 		for(int i=0; i<Sprimo.size(); i++)
 		{
 			String stato = "";
@@ -249,7 +260,6 @@ public class Sincronizza extends GenericGraphHandler{
 				tx.success();
 			}
 			
-			//System.out.println("sopra T vale: " + T.size());
 			for(int a=0; a<T.size(); a++)
 			{
 				for(int k=0; k<T.size(); k++)
@@ -275,6 +285,7 @@ public class Sincronizza extends GenericGraphHandler{
 								&& sorgente1.equalsIgnoreCase(stato)
 								&& uguali(evento1,evento2);
 						
+						//System.out.println("booo:  " + bool);
 						/*if(stato.equalsIgnoreCase("A") && sorgente1.equalsIgnoreCase("A") && sorgente2.equalsIgnoreCase("A"))
 						{
 								System.out.println(";  evento1: " + evento1 + " evento2 " +evento2 + ";  uguali?: " + uguali(evento1,evento2)) ;
@@ -282,7 +293,6 @@ public class Sincronizza extends GenericGraphHandler{
 						
 						if(bool)
 						{
-							//System.out.println("entrato");
 							TransizioneDoppia tsecondo = new TransizioneDoppia();
 							tsecondo.setSorgente(stato+"-"+stato);
 							tsecondo.setDestinazione(destinazione1+"-"+destinazione2);
@@ -355,7 +365,7 @@ public class Sincronizza extends GenericGraphHandler{
 	}
 	
 		
-	private static void createData()
+	private static void createData(int level)
 	{
 		Ta.clear();
 		Sprev.clear();
@@ -366,12 +376,15 @@ public class Sincronizza extends GenericGraphHandler{
 		{
 			S.addElement(Globals.allNodes.get(i));
 		}
+		
 		T.clear();
 		//risolvo problema puntatore
-		for(int i=0; i<Globals.allRelations.size(); i++)
+		Vector<Relationship> appoggio = getAllRelationsUntil(level, Globals.allRelationsGeneral);
+		for(int i=0; i<appoggio.size(); i++)
 		{
-			T.addElement(Globals.allRelations.get(i));
+			T.addElement(appoggio.get(i));
 		}
+		//System.out.println("T,size:   " + T.size());
 		
 		//SCELGO DI NON INCLUDERE IL NODO FITTIZIO INIZIALE
 		Sprimo.clear();
@@ -382,9 +395,11 @@ public class Sincronizza extends GenericGraphHandler{
 	
 		//SCELGO DI NON INCLUDERE LA TRANSIZIONE INIZIALE INIZIALE
 		Tprimo.clear();
-		for(int i=1; i<Globals.allRelationsGood.size(); i++)
+		Vector<Relationship> appoggioGood = getAllRelationsUntil(level, Globals.allRelationsGoodGeneral);
+		
+		for(int i=1; i<appoggioGood.size(); i++)
 		{
-			Tprimo.addElement(Globals.allRelationsGood.get(i));
+			Tprimo.addElement(appoggioGood.get(i));
 		}
 		
 		// creo s2

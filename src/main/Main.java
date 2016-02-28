@@ -16,6 +16,7 @@ import Twins.FirstBadTwin;
 import Twins.GoodTwin;
 import Twins.GeneralBadTwin;
 import Twins.Sincronizza;
+import global.Globals;
 
 public class Main {
 	
@@ -23,9 +24,13 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
+		System.out.println("comincio a creare il db ed a leggere l'xml...");
+		Globals.initialize();
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
+    	System.out.println("comincio il programma principale");
+		
     	Menu.ask();
     	    	
 

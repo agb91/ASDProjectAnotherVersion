@@ -17,14 +17,15 @@ public class Find extends GenericGraphHandler{
 		ris = e.split("//").length;
 		return ris;
 	}
-	
-	public static Vector<Tripletta> find (Node s, int n, boolean fault, String ot)
+
+	public static Vector<Tripletta> find (Node s, int n, boolean fault, String ot, int level)
 	{
 		ot = pulisci(ot);
 		Vector<Tripletta> risultato = new Vector<Tripletta>();
-		for(int q=1; q<Globals.allRelations.size(); q++)
+		Vector<Relationship> allRelationsUntilNow = getAllRelationsUntil(level, Globals.allRelationsGeneral); //perchè è compreso questo...
+		for(int q=1; q<allRelationsUntilNow.size(); q++)
 		{
-			Relationship transazioneAttuale = Globals.allRelations.get(q);
+			Relationship transazioneAttuale = allRelationsUntilNow.get(q);
 			String fromRichiesto = pulisci(s.getProperties("name").values().toString());
 			String fromTransazioneAttuale = pulisci(transazioneAttuale.getProperties("from").values().toString());
 			/*System.out.println("fromRichiesto:  " + fromRichiesto);
@@ -62,13 +63,13 @@ public class Find extends GenericGraphHandler{
 					}
 					else
 					{
-						Vector<Tripletta> aggiunta = find(sPrimo, (n-cardinalitaEvento), faultPrimo, eventoTripletta);
+						Vector<Tripletta> aggiunta = find(sPrimo, (n-cardinalitaEvento), faultPrimo, eventoTripletta, level );
 						risultato.addAll(aggiunta);
 					}
 				}
 				if(osservabile.equalsIgnoreCase("n"))
 				{
-					Vector<Tripletta> aggiunta = find(sPrimo, n, faultPrimo, ot);
+					Vector<Tripletta> aggiunta = find(sPrimo, n, faultPrimo, ot, level);
 					risultato.addAll(aggiunta);
 				}
 			}

@@ -76,9 +76,9 @@ public class CheckRequirements {
 	{
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int i=0; i<Globals.allRelations.size(); i++)
+			for(int i=0; i<Globals.allRelationsGeneral.get(0).size(); i++)
 			{
-				Relationship attuale = Globals.allRelations.get(i);
+				Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
 				String osservabile = attuale.getProperties("oss").values().toString();
 				if(osservabile.contains("n"))
 				{
@@ -100,9 +100,9 @@ public class CheckRequirements {
 	{
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int i=0; i<Globals.allRelations.size(); i++)
+			for(int i=0; i<Globals.allRelationsGeneral.get(0).size(); i++)
 			{
-				Relationship attuale = Globals.allRelations.get(i);
+				Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
 				String guasto = attuale.getProperties("guasto").values().toString();
 				String osservabile = attuale.getProperties("oss").values().toString();
 				String nome = attuale.getProperties("type").values().toString();
@@ -119,15 +119,15 @@ public class CheckRequirements {
 	
 	private static void checkTwin()
 	{
-		int max = Globals.allRelations.size();
+		int max = Globals.allRelationsGeneral.get(0).size();
 		for(int i=0; i<max; i++)
 		{
-			Relationship attuale = Globals.allRelations.get(i);
+			Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
 			for(int a=0; a<max; a++)
 			{
 				if(a!=i)
 				{
-					twin(attuale, Globals.allRelations.get(a));
+					twin(attuale, Globals.allRelationsGeneral.get(0).get(a));
 				}			
 			}
 		}
@@ -294,9 +294,9 @@ public class CheckRequirements {
 		{
 	    	int a=0;
 	    	String nomeNodo = n.getProperties("name").values().toString();
-	    	while(a<Globals.allRelations.size())
+	    	while(a<Globals.allRelationsGeneral.get(0).size())
 	    	{
-	    	   Relationship r = Globals.allRelations.get(a);	
+	    	   Relationship r = Globals.allRelationsGeneral.get(0).get(a);	
 	    	   String from = r.getProperties("from").values().toString();
 	    	   if(verbose)
 	    	   {

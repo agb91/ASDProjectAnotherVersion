@@ -13,12 +13,12 @@ public class Risolutori {
 		boolean diagnosable = true;
 		FirstBadTwin.createBadTwinLevel1(); 
 		GoodTwin.createGoodTwin(1);
-		diagnosable = Sincronizza.syncro();
+		diagnosable = Sincronizza.syncro(1);
 		while(diagnosable)
 		{
 			GeneralBadTwin.createBadTwinGeneral(level);
 			GoodTwin.createGoodTwin(level);
-			diagnosable = Sincronizza.syncro();
+			diagnosable = Sincronizza.syncro(level);
 			if(diagnosable == false)
 			{
 				System.out.println("********************************************************");
@@ -38,14 +38,14 @@ public class Risolutori {
 		while(diagnosable)
 		{
 			GeneralBadTwin.createBadTwinGeneral(i);
-			if(GeneralBadTwin.checkC2C3())
+			if(GeneralBadTwin.checkC2C3(i))
 			{
 				i++;
 			}
 			else
 			{
 				GoodTwin.createGoodTwin(i);
-				diagnosable = Sincronizza.syncroC1();
+				diagnosable = Sincronizza.syncroC1(i);
 				if(diagnosable)
 				{
 					i++;
