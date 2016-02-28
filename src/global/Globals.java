@@ -20,8 +20,10 @@ public class Globals {
 	public static Vector <Vector<Relationship>> allRelationsGoodGeneral = new Vector<Vector<Relationship>>();
 	public static Vector<Integer> goodTwinDid = new Vector<Integer>();
 	
-	public static Vector <Node> allNodesSyncro = new Vector<Node>();
-	public static Vector <Relationship> allRelationsSyncro = new Vector<Relationship>();
+	public static Vector<Vector<Node>> allNodesSyncroGeneral = new Vector<Vector<Node>>();
+	public static Vector<Vector<Relationship>> allRelationsSyncroGeneral = 
+			new Vector<Vector<Relationship>>();
+	public static Vector<Integer> syncroDid = new Vector<Integer>();
 
 	public static void initialize()
 	{
@@ -29,8 +31,11 @@ public class Globals {
 		{
 			allRelationsGeneral.addElement(new Vector<Relationship>());
 			allRelationsGoodGeneral.addElement(new Vector<Relationship>());
+			allNodesSyncroGeneral.addElement(new Vector<Node>());
+			allRelationsSyncroGeneral.addElement(new Vector<Relationship>());
 		}
 		badTwinDid.addElement(Integer.valueOf(0));
 		goodTwinDid.addElement(Integer.valueOf(0));
+		syncroDid.addElement(Integer.valueOf(0));
 	}
 }

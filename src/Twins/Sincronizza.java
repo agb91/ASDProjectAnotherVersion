@@ -38,16 +38,16 @@ public class Sincronizza extends GenericGraphHandler{
 					";   dest : " + Ta.get(i).getDestinazione()
 					+ ";    evento: " + Ta.get(i).getEvento());
 		}*/
-		writeInDb();
+		writeInDb(level);
 		return diagnosable();
 	}
 	
-	private static void writeInDb()
+	private static void writeInDb(int level)
 	{
 		for(int i=0; i<Sdue.size(); i++)
 		{
 			String nome = Sdue.get(i);
-			addNodeSyncro(nome);
+			addNodeSyncro(nome, level);
 		}
 		for(int i=0; i<Tdue.size(); i++)
 		{
@@ -58,7 +58,7 @@ public class Sincronizza extends GenericGraphHandler{
 			String ev = attuale.getEvento();
 			String nome = n1+ "-" + n2 + "- " + oss + "- " + ev;
 			//Node n1, Node n2, String nome, String oss, String ev, String gu
-			addRelationSyncro(n1, n2, nome, oss, ev);
+			addRelationSyncro(n1, n2, nome, oss, ev, level);
 		}
 	}
 	

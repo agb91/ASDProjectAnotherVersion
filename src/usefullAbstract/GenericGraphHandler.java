@@ -64,7 +64,7 @@ public class GenericGraphHandler {
 		return deterministico;
 	}
 	
-	protected static void addNodeSyncro( String n)
+	protected static void addNodeSyncro( String n, int level)
 	{
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
@@ -74,7 +74,7 @@ public class GenericGraphHandler {
 			    Label label = DynamicLabel.label( "Nome" );
 		        userNode = Globals.graphDbSyncro.createNode( label );
 		        userNode.setProperty( "name", n);
-		        Globals.allNodesSyncro.addElement(userNode);
+		        Globals.allNodesSyncroGeneral.get(level).addElement(userNode);
 			    tx.success();
 			}   
 		}    		
@@ -348,24 +348,30 @@ public class GenericGraphHandler {
 	
 	protected static boolean notExistSyncro(String ago)
 	{
-		for(int i=0; i<Globals.allRelationsSyncro.size(); i++)
+		for(int l=0; l<Globals.allRelationsSyncroGeneral.size(); l++)
 		{
-			Relationship attuale = Globals.allRelationsSyncro.get(i);
-			String pagliaio = pulisci(attuale.getProperties("type").values().toString());
-			if(pagliaio.equalsIgnoreCase(ago))
+			for(int i=0; i<Globals.allRelationsSyncroGeneral.get(l).size(); i++)
 			{
-				//System.out.println("ho scartato; " + ago);
-				return false;
+				Relationship attuale = Globals.allRelationsSyncroGeneral.get(l).get(i);
+				String pagliaio = pulisci(attuale.getProperties("type").values().toString());
+				if(pagliaio.equalsIgnoreCase(ago))
+				{
+					//System.out.println("ho scartato; " + ago);
+					return false;
+				}
 			}
 		}
-		for(int i=0; i<Globals.allNodesSyncro.size(); i++)
+		for(int l=0; l<Globals.allNodesSyncroGeneral.size(); l++)
 		{
-			Node attuale = Globals.allNodesSyncro.get(i);
-			String pagliaio = pulisci(attuale.getProperties("name").values().toString());
-			if(pagliaio.equalsIgnoreCase(ago))
+			for(int i=0; i<Globals.allNodesSyncroGeneral.get(l).size(); i++)
 			{
-				//System.out.println("ho scartato; " + ago);
-				return false;
+				Node attuale = Globals.allNodesSyncroGeneral.get(l).get(i);
+				String pagliaio = pulisci(attuale.getProperties("name").values().toString());
+				if(pagliaio.equalsIgnoreCase(ago))
+				{
+					//System.out.println("ho scartato; " + ago);
+					return false;
+				}
 			}
 		}
 		return true;	
@@ -397,7 +403,7 @@ public class GenericGraphHandler {
 		return relationship;
 	}
 	
-	protected static Relationship addRelationSyncro(String n1s, String n2s, String nome, String oss, String ev)
+	protected static Relationship addRelationSyncro(String n1s, String n2s, String nome, String oss, String ev, int level)
 	{
 		
 		Relationship relationship = null;
@@ -417,7 +423,7 @@ public class GenericGraphHandler {
 				relationship.setProperty("from", pulisci(nomeN1));
 				relationship.setProperty("to", pulisci(nomeN2));
 	
-				Globals.allRelationsSyncro.addElement(relationship);
+				Globals.allRelationsSyncroGeneral.get(level).addElement(relationship);
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}
 			tx.success();
