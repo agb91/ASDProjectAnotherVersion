@@ -3,22 +3,23 @@ package main;
 import Twins.FirstBadTwin;
 import Twins.GeneralBadTwin;
 import Twins.GoodTwin;
-import Twins.Sincronizza;
+import Twins.SincronizzaFirst;
 
 public class Risolutori {
 	
 	public static void first()
 	{
+		long startTime = System.currentTimeMillis();
 		int level = 2;
 		boolean diagnosable = true;
 		FirstBadTwin.createBadTwinLevel1(); 
 		GoodTwin.createGoodTwin(1);
-		diagnosable = Sincronizza.syncro(1);
+		diagnosable = SincronizzaFirst.syncro(1);
 		while(diagnosable)
 		{
 			GeneralBadTwin.createBadTwinGeneral(level);
 			GoodTwin.createGoodTwin(level);
-			diagnosable = Sincronizza.syncro(level);
+			diagnosable = SincronizzaFirst.syncro(level);
 			if(diagnosable == false)
 			{
 				System.out.println("********************************************************");
@@ -27,14 +28,19 @@ public class Risolutori {
 			}
 			level++;
 		}
-
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		System.out.println("Questo metodo ha rischiesto " + seconds + " milliseconds ;  \n\n\n\n");
 	}
 	
 	public static void second()
 	{
+		/*
+		long startTime = System.currentTimeMillis();
 		int i=2;
 		boolean diagnosable = true;
 		FirstBadTwin.createBadTwinLevel1(); 
+		GoodTwin.createGoodTwin(1);
 		while(diagnosable)
 		{
 			GeneralBadTwin.createBadTwinGeneral(i);
@@ -45,7 +51,7 @@ public class Risolutori {
 			else
 			{
 				GoodTwin.createGoodTwin(i);
-				diagnosable = Sincronizza.syncroC1(i);
+				diagnosable = SincronizzaFirst.syncroC1(i);
 				if(diagnosable)
 				{
 					i++;
@@ -59,6 +65,9 @@ public class Risolutori {
 				}
 			}
 		}
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		System.out.println("Questo metodo ha rischiesto " + seconds + ";  \n\n\n\n");*/
 	}
 	
 	public static void third()

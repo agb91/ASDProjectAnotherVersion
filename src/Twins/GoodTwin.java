@@ -18,10 +18,14 @@ public class GoodTwin extends GenericGraphHandler{
 	
 	public static void createGoodTwin(int l)
 	{
-		goodBase(l);
-		removeGuasti(l);
-		removeIsolatedStatesGood();
-		System.out.println("created good twin level: "+l);
+		if(Globals.goodTwinDid.lastElement()<l)
+		{
+			goodBase(l);
+			removeGuasti(l);
+			removeIsolatedStatesGood();
+			System.out.println("created good twin level: "+l);
+			Globals.goodTwinDid.addElement(Integer.valueOf(l));
+		}		
 	}
 	
 	//crea il grafo good iniziale

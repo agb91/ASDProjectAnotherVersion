@@ -15,7 +15,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import Twins.FirstBadTwin;
 import Twins.GoodTwin;
 import Twins.GeneralBadTwin;
-import Twins.Sincronizza;
+import Twins.SincronizzaFirst;
 import global.Globals;
 
 public class Main {
@@ -31,8 +31,21 @@ public class Main {
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	System.out.println("comincio il programma principale");
 		
+    	/*FirstBadTwin.createBadTwinLevel1();
+    	GoodTwin.createGoodTwin(1);
+    	Sincronizza.syncro(1);
+    	GeneralBadTwin.createBadTwinGeneral(2);
+    	GoodTwin.createGoodTwin(2);
+    	Sincronizza.syncro(2);
+    	GeneralBadTwin.createBadTwinGeneral(3);
+    	GoodTwin.createGoodTwin(3);
+    	Sincronizza.syncro(3);
+    	Sincronizza.syncroSecond(3);
+    	System.out.println("ho finito");*/
     	Menu.ask();
-    	    	
+    	Menu.ask();
+    	Menu.ask();
+    	Menu.ask();
 
     }
 

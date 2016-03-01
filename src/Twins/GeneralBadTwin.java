@@ -109,14 +109,24 @@ public class GeneralBadTwin extends GenericGraphHandler{
 			System.out.println("vale C2: il bad twin è deterministico");
 			return true;
 		}
+		else
+		{
+			System.out.println("non vale C2, il bad twin è non deterministico");
+		}
 		
 		//cerco le transizioni di guasto: prendo il loro evento.
 		// se per tutti quegli eventi non esistono transizioni di guasto
 		// che abbiano come evento quegli eventi allora è diagnosticabile
-		if(thirdCondition(Globals.allRelationsGeneral.get(level)))
+		Vector<Relationship> allBadTwinLocal = 
+				getAllRelationsUntil(level, Globals.allRelationsGeneral);
+		if(thirdCondition(allBadTwinLocal))
 		{
 			System.out.println("vale la C3");
 			return true;
+		}
+		else
+		{
+			System.out.println("non vale la C3");
 		}
 		return false;
 	}

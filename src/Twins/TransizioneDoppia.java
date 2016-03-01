@@ -5,6 +5,7 @@ public class TransizioneDoppia {
 	private String evento;
 	private String sorgente;
 	private String destinazione;
+	private String nome;
 	//private String guasto;
 	
 	
@@ -32,5 +33,11 @@ public class TransizioneDoppia {
 	public void setGuasto(String guasto) {
 		this.guasto = guasto;
 	}*/
+	public String getNome() {
+		return nome;
+	}
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
 
 }

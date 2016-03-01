@@ -17,7 +17,9 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 
+import Twins.TransizioneDoppia;
 import global.Globals;
+import talkToDb.Cycle;
 import talkToDb.ORM.RelTypes;
 
 public class GenericGraphHandler {
@@ -63,6 +65,81 @@ public class GenericGraphHandler {
 		//System.out.println("sto per dire che è deterministico");
 		return deterministico;
 	}
+		
+	protected static boolean inVettore(String ago, Vector<String> pagliaio)
+	{
+		for(int i=0; i<pagliaio.size(); i++)
+		{
+			if(pagliaio.get(i).equalsIgnoreCase(ago))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	protected static boolean inVettoreSyncro(Relationship ago,
+			Vector<TransizioneDoppia> pagliaio)
+	{
+		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		{
+			String fromAgo = ago.getProperties("from").values().toString();
+			fromAgo = pulisci(fromAgo);
+			String toAgo = ago.getProperties("to").values().toString();
+			toAgo = pulisci(toAgo);
+			String evAgo = ago.getProperties("event").values().toString();
+			evAgo = pulisci(evAgo);
+			for(int i=0; i<pagliaio.size(); i++)
+			{
+				String fromPa = pagliaio.get(i).getSorgente();
+				String toPa = pagliaio.get(i).getDestinazione();
+				String evPa = pagliaio.get(i).getEvento();
+	
+				if(fromAgo.equalsIgnoreCase(fromPa)
+						&& toAgo.equalsIgnoreCase(toPa)
+						&& evAgo.equalsIgnoreCase(evPa))
+				{
+					return true;
+				}
+			}
+			tx.success();
+		}
+		return false;
+	}
+	
+	protected static boolean inVettore(Relationship ago, Vector<Relationship> pagliaio)
+	{
+		for(int i=0; i<pagliaio.size(); i++)
+		{
+			String attuale = pagliaio.get(i).getProperties("type").values().toString();
+			attuale = pulisci(attuale);
+			String nomeAgo = ago.getProperties("type").values().toString();
+			if(attuale.equalsIgnoreCase(nomeAgo))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
+	protected static Iterator<Path> findPath(Node s, Node e)
+	{
+		Iterator<Path> iteratore = null;
+		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		{
+			PathFinder<Path> finder =
+					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
+							Direction.OUTGOING ), 15 );
+			Iterable<Path> paths = finder.findAllPaths( s, e );
+			
+			iteratore = paths.iterator();
+			tx.success();
+		}	
+		return iteratore;
+	}	
+	
+	
 	
 	protected static void addNodeSyncro( String n, int level)
 	{
@@ -76,6 +153,7 @@ public class GenericGraphHandler {
 		        userNode.setProperty( "name", n);
 		        Globals.allNodesSyncroGeneral.get(level).addElement(userNode);
 			    tx.success();
+			    Globals.lastSyncroNodes.add(userNode);
 			}   
 		}    		
 	}
@@ -298,18 +376,6 @@ public class GenericGraphHandler {
 		return ris;
 	}
 	
-	protected static Iterator<Path> findPath(Node s, Node e)
-	{
-		Iterator<Path> iteratore = null;
-		PathFinder<Path> finder =
-				GraphAlgoFactory.allPaths(PathExpanders.forDirection(
-						Direction.OUTGOING ), 15 );
-		Iterable<Path> paths = finder.findAllPaths( s, e );
-		
-		iteratore = paths.iterator();
-		return iteratore;
-	}
-	
 	protected static boolean notExistGood(String ago, int level)
 	{
 		for(int l=0; l<=level; l++)
@@ -431,7 +497,7 @@ public class GenericGraphHandler {
 		return relationship;
 	}
 	
-	private static Node findNodeByNameSyncro(String n1s)
+	protected static Node findNodeByNameSyncro(String n1s)
 	{
 		ArrayList<Node> userNodes = new ArrayList<>();
 		Label label = DynamicLabel.label( "Nome" );

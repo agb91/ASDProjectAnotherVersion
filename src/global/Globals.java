@@ -6,6 +6,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
+import Twins.TransizioneDoppia;
+
 public class Globals {
 	
 	public static GraphDatabaseService graphDb;
@@ -21,10 +23,15 @@ public class Globals {
 	public static Vector<Integer> goodTwinDid = new Vector<Integer>();
 	
 	public static Vector<Vector<Node>> allNodesSyncroGeneral = new Vector<Vector<Node>>();
+	public static Vector<Node> lastSyncroNodes = new Vector<Node>();
+	public static Vector<TransizioneDoppia> lastTa = new Vector<TransizioneDoppia>();
 	public static Vector<Vector<Relationship>> allRelationsSyncroGeneral = 
 			new Vector<Vector<Relationship>>();
 	public static Vector<Integer> syncroDid = new Vector<Integer>();
 
+	public static Vector<String> inCycleNodes = new Vector<String>();
+	public static Vector<Relationship> primeTransizioniAmbigue = new Vector<Relationship>();
+	
 	public static void initialize()
 	{
 		for(int i=0; i<10; i++)

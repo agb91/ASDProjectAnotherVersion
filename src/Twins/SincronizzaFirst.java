@@ -12,20 +12,22 @@ import org.neo4j.graphdb.Transaction;
 import global.Globals;
 import usefullAbstract.GenericGraphHandler;
 
-public class Sincronizza extends GenericGraphHandler{
+public class SincronizzaFirst extends SincronizzaCommon{
+	//first method
+	protected static Vector<Node> S = new Vector<Node>();
+	protected static Vector<Node> Sprimo = new Vector<Node>();
+	protected static Vector<Relationship> T = new Vector<Relationship>();
+	protected static Vector<Relationship> Tprimo = new Vector<Relationship>();
+	protected static Vector<String> Sdue = new Vector<String>();
+	protected static Vector<TransizioneDoppia> Tdue = new Vector<TransizioneDoppia>();
+	protected static Vector<TransizioneDoppia> Ta = new Vector<TransizioneDoppia>();
+	protected static Vector<String> Sprev = new Vector<String>();
+	protected static Vector<String> Sdiff = new Vector<String>();
 	
-	private static Vector<Node> S = new Vector<Node>();
-	private static Vector<Node> Sprimo = new Vector<Node>();
-	private static Vector<Relationship> T = new Vector<Relationship>();
-	private static Vector<Relationship> Tprimo = new Vector<Relationship>();
-	private static Vector<String> Sdue = new Vector<String>();
-	private static Vector<TransizioneDoppia> Tdue = new Vector<TransizioneDoppia>();
-	private static Vector<TransizioneDoppia> Ta = new Vector<TransizioneDoppia>();
-	private static Vector<String> Sprev = new Vector<String>();
-	private static Vector<String> Sdiff = new Vector<String>();
 	
 	public static boolean syncro(int level)
 	{
+		System.out.println("inizio la sincronizzazione di livello: " + level);
 		createData(level);
 		algoritmo();
 		/*for(int i = 0 ; i<Sdue.size(); i++)
@@ -39,8 +41,39 @@ public class Sincronizza extends GenericGraphHandler{
 					+ ";    evento: " + Ta.get(i).getEvento());
 		}*/
 		writeInDb(level);
-		return diagnosable();
+		checkQuarta(Sdue, level, Ta, Tdue);
+		return diagnosable(level);
 	}
+	
+	protected static boolean diagnosable(int level)
+	{
+		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
+		if (checkPrima(Ta, level))
+		{
+			return true;
+		};
+		
+		//secondo caso se è deterministico allora è diagnosticabile
+		if (checkSeconda(T, level))
+		{
+			return true;
+		}
+		
+		//cerco le transizioni di guasto: prendo il loro evento.
+		// se per tutti quegli eventi non esistono transizioni di guasto
+		// che abbiano come evento quegli eventi allora è diagnosticabile
+		if(checkTerza(T, level))
+		{
+			return true;
+		}
+		
+		System.out.println("non ho nessuna delle condizioni di diagnosticabilità"
+				+ " quindi NON DIAGNOSTICABILE");
+		System.out.println("finisco la sincronizzazione di livello: " + level);
+		return false;
+	}
+	
+
 	
 	private static void writeInDb(int level)
 	{
@@ -61,69 +94,7 @@ public class Sincronizza extends GenericGraphHandler{
 			addRelationSyncro(n1, n2, nome, oss, ev, level);
 		}
 	}
-	
-	public static boolean syncroC1(int level)
-	{
-		createData(level);
-		algoritmo();
-		return diagnosableC1();
-	}
 		
-	private static boolean diagnosableC1()
-	{
-		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
-		if(Ta.size()==0)
-		{
-			System.out.println("vale C1: "
-					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
-			return true;
-		}
-		return false;
-	}
-	
-	
-	private static boolean diagnosable()
-	{
-		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
-		if(Ta.size()==0)
-		{
-			System.out.println("vale C1: "
-					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
-			return true;
-		}
-		else
-		{
-			System.out.println("non vale C1");
-		}
-		
-		//secondo caso se è deterministico allora è diagnosticabile
-		if(deterministic(T))
-		{
-			System.out.println("vale C2: il bad twin è deterministico");
-			return true;
-		}
-		else
-		{
-			System.out.println("non vale c2: il bad twin non è deterministico");
-		}
-		
-		//cerco le transizioni di guasto: prendo il loro evento.
-		// se per tutti quegli eventi non esistono transizioni di guasto
-		// che abbiano come evento quegli eventi allora è diagnosticabile
-		if(thirdCondition(T))
-		{
-			System.out.println("vale la C3");
-			return true;
-		}
-		else
-		{
-			System.out.println("non vale C3");
-		}
-		System.out.println("non ho nessuna delle condizioni di diagnosticabilità"
-				+ " quindi NON DIAGNOSTICABILE");
-		return false;
-	}
-	
 		
 	private static void algoritmo()
 	{
@@ -136,6 +107,7 @@ public class Sincronizza extends GenericGraphHandler{
 		bloccoSuperioreSincroAlgo();
 		bloccoWhileSincroAlgo();
 	}
+	
 	
 	private static void bloccoWhileSincroAlgo()
 	{
@@ -225,15 +197,16 @@ public class Sincronizza extends GenericGraphHandler{
 								tsecondo.setEvento(evento1);
 								//tsecondo.setGuasto("n");
 								String nuovo = destinazione1+"-"+destinazione2;
-								if(nuovoStato(nuovo))
+								if(nuovoStato(nuovo, Sdue))
 								{
 									Sdue.addElement(nuovo);
 								}
-								if(nuovaTransizione(tsecondo))
+								if(nuovaTransizione(tsecondo , Tdue))
 								{
 									if(guasto1.equalsIgnoreCase("y"))
 									{
 										Ta.addElement(tsecondo);
+										Globals.lastTa.addElement(tsecondo);
 										//tsecondo.setGuasto("y");
 									}
 									Tdue.addElement(tsecondo);
@@ -246,6 +219,7 @@ public class Sincronizza extends GenericGraphHandler{
 			}
 		}
 	}
+	
 		
 	private static void bloccoSuperioreSincroAlgo()
 	{
@@ -299,16 +273,17 @@ public class Sincronizza extends GenericGraphHandler{
 							tsecondo.setEvento(evento1);
 							//tsecondo.setGuasto("n");
 							String nuovo = destinazione1+"-"+destinazione2;
-							if(nuovoStato(nuovo))
+							if(nuovoStato(nuovo,  Sdue))
 							{
 								Sdue.addElement(nuovo);
 							}
 							//System.out.println("stato: " + destinazione1+"-"+destinazione2);
-							if(nuovaTransizione(tsecondo))
+							if(nuovaTransizione(tsecondo, Tdue))
 							{
 								if(guasto1.equalsIgnoreCase("y"))
 								{
 									Ta.addElement(tsecondo);
+									Globals.lastTa.addElement(tsecondo);
 									//tsecondo.setGuasto("y");
 								}
 								Tdue.addElement(tsecondo);
@@ -320,50 +295,6 @@ public class Sincronizza extends GenericGraphHandler{
 			}
 		}
 	}
-	
-	private static boolean nuovaTransizione(TransizioneDoppia nuovo)
-	{
-		String eventoNuovo = nuovo.getEvento();
-		//String guastoNuovo = nuovo.getGuasto();
-		//System.out.println("primoN: " + primoNuovo + ";   secondoN : " + secondoNuovo);
-		for(int i=0; i<Tdue.size(); i++)
-		{
-			TransizioneDoppia attuale = Tdue.get(i);
-			String evento = attuale.getEvento();
-			//String guasto = attuale.getGuasto();
-			if(stessoStato(attuale.getSorgente(),nuovo.getSorgente()) 
-				&& stessoStato(attuale.getDestinazione(),nuovo.getDestinazione())
-				&& uguali(eventoNuovo,evento))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-		
-	private static boolean nuovoStato(String nuovo)
-	{
-		String primoNuovo = nuovo.split("-")[0];
-		String secondoNuovo = nuovo.split("-")[1];
-		//System.out.println("primoN: " + primoNuovo + ";   secondoN : " + secondoNuovo);
-		for(int i=0; i<Sdue.size(); i++)
-		{
-			String attuale = Sdue.get(i);
-			String primo = attuale.split("-")[0];
-			String secondo = attuale.split("-")[1];
-			//System.out.println("primo: " + primo + ";   secondo : " + secondo);
-			if(primo.equalsIgnoreCase(primoNuovo) && secondo.equalsIgnoreCase(secondoNuovo))
-			{
-				return false;
-			}
-			if(primo.equalsIgnoreCase(secondoNuovo) && secondo.equalsIgnoreCase(primoNuovo))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	
 		
 	private static void createData(int level)
 	{
