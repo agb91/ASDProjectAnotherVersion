@@ -93,6 +93,10 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			//Node n1, Node n2, String nome, String oss, String ev, String gu
 			addRelationSyncro(n1, n2, nome, oss, ev, level);
 		}
+		for(int i=0; i<Ta.size(); i++)
+		{
+			Globals.allTa.get(level).add(Ta.get(i));	
+		}
 	}
 		
 		
@@ -206,7 +210,6 @@ public class SincronizzaFirst extends SincronizzaCommon{
 									if(guasto1.equalsIgnoreCase("y"))
 									{
 										Ta.addElement(tsecondo);
-										Globals.lastTa.addElement(tsecondo);
 										//tsecondo.setGuasto("y");
 									}
 									Tdue.addElement(tsecondo);
@@ -283,7 +286,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 								if(guasto1.equalsIgnoreCase("y"))
 								{
 									Ta.addElement(tsecondo);
-									Globals.lastTa.addElement(tsecondo);
+									//Globals.lastTa.addElement(tsecondo);
 									//tsecondo.setGuasto("y");
 								}
 								Tdue.addElement(tsecondo);

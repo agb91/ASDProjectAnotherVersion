@@ -111,9 +111,64 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			Vector<TransizioneDoppia> ta, Vector<TransizioneDoppia> Tdue)
 	{
 		searchCycle(in);
+		//System.out.println("fan parte di cicli: " + Globals.inCycleNodes.size());
 		searchFirstAmbiguous(ta, Tdue, in);
-		System.out.println("le transizioni da chekkare sono : "
-				+Globals.primeTransizioniAmbigue.size());
+		return checkIfFromAmbiguousGoToCycle();
+	}
+	
+	protected static boolean checkIfFromAmbiguousGoToCycle()
+	{
+		//prima trovo tutte le destinazioni delle transizioni ambigue
+		Vector<String> destinazioniAmbigue = new Vector<String>();
+		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		{
+			for(int i=0; i<Globals.primeTransizioniAmbigue.size(); i++)
+			{
+				Relationship attuale = Globals.primeTransizioniAmbigue.get(i);
+				String dest = attuale.getProperties("to").values().toString();
+				dest = pulisci(dest);
+				destinazioniAmbigue.addElement(dest);
+			}
+			
+			
+			
+			//poi verifico se esse sono in un ciclo
+			for(int a=0; a<destinazioniAmbigue.size(); a++)
+			{
+				for(int i=0; i<Globals.inCycleNodes.size(); i++)
+				{
+					String nome = Globals.inCycleNodes.get(i);
+					if(stessoStato(nome, destinazioniAmbigue.get(a)))
+					{
+						//System.out.println("FATTO");
+						return true;
+					}
+				}
+			}
+	
+
+			// ultimo caso: non è in un ciclo ma può raggiungere un nodo
+			// che è in un ciclo
+			for(int a=0; a<destinazioniAmbigue.size(); a++)
+			{
+				Node primo = findNodeByNameSyncro(destinazioniAmbigue.get(a));
+				for(int i=0; i<Globals.inCycleNodes.size(); i++)
+				{
+					Node secondo = findNodeByNameSyncro(Globals.inCycleNodes.get(i));
+					Vector<Relationship> path = findPathRels(primo, secondo);
+					if(path.size()>0)
+					{
+						//System.out.println("FATTO2");
+						return true;
+					}
+				}
+			}
+
+
+			
+			tx.success();
+		}
+		
 		return false;
 	}
 	

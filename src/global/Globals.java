@@ -13,6 +13,7 @@ public class Globals {
 	public static GraphDatabaseService graphDb;
 	public static GraphDatabaseService graphDbGood;
 	public static GraphDatabaseService graphDbSyncro;
+	public static GraphDatabaseService graphDbSyncroSecond;
 	
 	public static Vector <Node> allNodes = new Vector<Node>();
 	public static Vector <Vector<Relationship>> allRelationsGeneral = new Vector<Vector<Relationship>>();
@@ -23,9 +24,11 @@ public class Globals {
 	public static Vector<Integer> goodTwinDid = new Vector<Integer>();
 	
 	public static Vector<Vector<Node>> allNodesSyncroGeneral = new Vector<Vector<Node>>();
-	public static Vector<Node> lastSyncroNodes = new Vector<Node>();
-	public static Vector<TransizioneDoppia> lastTa = new Vector<TransizioneDoppia>();
+	public static Vector<Vector<Node>> allNodesSyncroGeneralSecond = new Vector<Vector<Node>>();
+	public static Vector<Vector<TransizioneDoppia>> allTa = new Vector<Vector<TransizioneDoppia>>();
 	public static Vector<Vector<Relationship>> allRelationsSyncroGeneral = 
+			new Vector<Vector<Relationship>>();
+	public static Vector<Vector<Relationship>> allRelationsSyncroGeneralSecond = 
 			new Vector<Vector<Relationship>>();
 	public static Vector<Integer> syncroDid = new Vector<Integer>();
 
@@ -39,7 +42,10 @@ public class Globals {
 			allRelationsGeneral.addElement(new Vector<Relationship>());
 			allRelationsGoodGeneral.addElement(new Vector<Relationship>());
 			allNodesSyncroGeneral.addElement(new Vector<Node>());
+			allNodesSyncroGeneralSecond.addElement(new Vector<Node>());
 			allRelationsSyncroGeneral.addElement(new Vector<Relationship>());
+			allRelationsSyncroGeneralSecond.addElement(new Vector<Relationship>());
+			allTa.addElement(new Vector<TransizioneDoppia>());
 		}
 		badTwinDid.addElement(Integer.valueOf(0));
 		goodTwinDid.addElement(Integer.valueOf(0));

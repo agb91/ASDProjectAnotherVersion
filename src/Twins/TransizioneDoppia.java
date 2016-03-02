@@ -1,5 +1,7 @@
 package Twins;
 
+import java.util.Arrays;
+
 public class TransizioneDoppia {
 	
 	private String evento;
@@ -10,7 +12,21 @@ public class TransizioneDoppia {
 	
 	
 	public String getEvento() {
-		return evento;
+		//System.out.println("prima= "+evento);
+		String appoggio = evento;
+		String[] vettore = appoggio.split("//");
+		Arrays.sort(vettore);
+		appoggio = "";
+		appoggio = vettore[0];
+		for(int i=1; i<vettore.length; i++)
+		{
+			appoggio+="//" + vettore[i];
+		}
+		//System.out.println("dopo = " + appoggio);
+		
+		//System.out.println("-----------------------------");
+
+		return appoggio;
 	}
 	public void setEvento(String evento) {
 		this.evento = evento;
