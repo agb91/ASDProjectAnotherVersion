@@ -18,7 +18,7 @@ public class GoodTwin extends GenericGraphHandler{
 	
 	public static void createGoodTwin(int l)
 	{
-		if(Globals.goodTwinDid.lastElement()<l)
+		if(!inInteger(l,Globals.goodTwinDid))
 		{
 			goodBase(l);
 			removeGuasti(l);

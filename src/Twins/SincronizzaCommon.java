@@ -67,7 +67,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		{
 			System.out.println("vale C1: "
 					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
-			System.out.println("finisco la sincronizzazione di livello: " + level);
+			//System.out.println("finisco la sincronizzazione di livello: " + level);
 			return true;
 		}
 		else
@@ -82,7 +82,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		if(deterministic(T))
 		{
 			System.out.println("vale C2: il bad twin è deterministico");
-			System.out.println("finisco la sincronizzazione di livello: " + level);
+			//System.out.println("finisco la sincronizzazione di livello: " + level);
 			return true;
 		}
 		else
@@ -97,7 +97,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		if(thirdCondition(T))
 		{
 			System.out.println("vale la C3");
-			System.out.println("finisco la sincronizzazione di livello: " + level);
+			//System.out.println("finisco la sincronizzazione di livello: " + level);
 			return true;
 		}
 		else
@@ -108,45 +108,53 @@ public class SincronizzaCommon extends GenericGraphHandler{
 	}
 		
 	protected static boolean checkQuarta(Vector<String> in, int level, 
-			Vector<TransizioneDoppia> ta, Vector<TransizioneDoppia> Tdue)
+			Vector<TransizioneDoppia> ta, Vector<TransizioneDoppia> Tdue, String who)
 	{
-		searchCycle(in);
-		//System.out.println("fan parte di cicli: " + Globals.inCycleNodes.size());
-		searchFirstAmbiguous(ta, Tdue, in);
-		return checkIfFromAmbiguousGoToCycle();
+		boolean ris = false;
+		
+		if(ta.size()==0)
+		{
+			return true;
+		}
+		searchCycle(in, who);
+		searchFirstAmbiguous(ta, Tdue, in, who);
+		ris = !checkIfFromAmbiguousGoToCycle(who);
+		
+		return ris;
 	}
 	
-	protected static boolean checkIfFromAmbiguousGoToCycle()
+		
+	protected static boolean checkIfFromAmbiguousGoToCycle(String who)
 	{
 		//prima trovo tutte le destinazioni delle transizioni ambigue
 		Vector<String> destinazioniAmbigue = new Vector<String>();
-		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		for(int i=0; i<Globals.primeTransizioniAmbigue.size(); i++)
 		{
-			for(int i=0; i<Globals.primeTransizioniAmbigue.size(); i++)
+			TransizioneDoppia attuale = Globals.primeTransizioniAmbigue.get(i);
+			String dest = attuale.getDestinazione();
+		//	System.err.println("destinazione ambigua: " + dest);
+			destinazioniAmbigue.addElement(dest);
+		}
+		
+		//poi verifico se esse sono in un ciclo
+		for(int a=0; a<destinazioniAmbigue.size(); a++)
+		{
+			for(int i=0; i<Globals.inCycleNodes.size(); i++)
 			{
-				Relationship attuale = Globals.primeTransizioniAmbigue.get(i);
-				String dest = attuale.getProperties("to").values().toString();
-				dest = pulisci(dest);
-				destinazioniAmbigue.addElement(dest);
-			}
-			
-			
-			
-			//poi verifico se esse sono in un ciclo
-			for(int a=0; a<destinazioniAmbigue.size(); a++)
-			{
-				for(int i=0; i<Globals.inCycleNodes.size(); i++)
+				String nome = Globals.inCycleNodes.get(i);
+				//System.err.println("confronto: " +nome + "; con " + destinazioniAmbigue.get(a));
+				if(stessoStato(nome, destinazioniAmbigue.get(a)))
 				{
-					String nome = Globals.inCycleNodes.get(i);
-					if(stessoStato(nome, destinazioniAmbigue.get(a)))
-					{
-						//System.out.println("FATTO");
-						return true;
-					}
+					return true;
 				}
 			}
-	
+		}
 
+		/*if(who.equalsIgnoreCase("f"))
+			{
+				try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+				{
+		
 			// ultimo caso: non è in un ciclo ma può raggiungere un nodo
 			// che è in un ciclo
 			for(int a=0; a<destinazioniAmbigue.size(); a++)
@@ -163,49 +171,64 @@ public class SincronizzaCommon extends GenericGraphHandler{
 					}
 				}
 			}
-
-
-			
+			}
 			tx.success();
-		}
-		
+		}*/
 		return false;
 	}
 	
 	protected static void searchFirstAmbiguous(Vector<TransizioneDoppia> ta, 
-			Vector<TransizioneDoppia> Tdue, Vector<String> nodi)
+			Vector<TransizioneDoppia> Tdue, Vector<String> nodi, String who)
 	{
-		Vector<String> sorgentiAmbigue = new Vector<String>();
 		for(int i=0; i<ta.size(); i++)
 		{
-			sorgentiAmbigue.add(ta.get(i).getSorgente());
-		}
-		for(int i=0; i<sorgentiAmbigue.size(); i++)
-		{
-			Node from = findNodeByNameSyncro(nodi.get(0));
-			Node to = findNodeByNameSyncro(sorgentiAmbigue.get(i));
-			Vector<Relationship> path = findPathRels(from,to);
+			String sorgenteAmbigua = ta.get(i).getSorgente();
+			boolean prima = true;
+			Vector<Relationship> path = null;
+			if(who.equalsIgnoreCase("f"))
+			{
+				Node from = findNodeByNameSyncro(nodi.get(0));
+				Node to = findNodeByNameSyncro(sorgenteAmbigua);
+				path = findPathRels(from,to);
+			}
+			else
+			{
+				Node from = findNodeByNameSyncroSecond(nodi.get(0));
+				Node to = findNodeByNameSyncroSecond(sorgenteAmbigua);
+				path = findPathRelsSecond(from,to);
+			}
 			for(int a=0; a<path.size(); a++)
 			{
-				Relationship nome = path.get(a);
-				if(!inVettoreSyncro(nome,ta));
+				if(inVettoreSyncro(path.get(a), ta, who))
 				{
-					Globals.primeTransizioniAmbigue.add(nome);
+					prima = false;
 				}
 			}
-			
-		}		
+			if(prima)
+			{
+				Globals.primeTransizioniAmbigue.addElement(ta.get(i));
+			}
+		}
 	}
 	
-	protected static void searchCycle(Vector<String> sdue)
+	protected static void searchCycle(Vector<String> sdue, String who)
 	{
 		Globals.inCycleNodes.clear();
 		for(int i=0; i<sdue.size(); i++)
 		{
 		   if(!inVettore(sdue.get(i), Globals.inCycleNodes))
 		   {
-			   Node n = findNodeByNameSyncro(sdue.get(i));
-			   findPathNodes(n,n);
+			   if(who.equalsIgnoreCase("f"))
+			   {
+				   Node n = findNodeByNameSyncro(sdue.get(i));
+				   findPathNodes(n,n);
+			   }
+			   else
+			   {
+				   Node n = findNodeByNameSyncroSecond(sdue.get(i));
+				   findPathNodesSecond(n,n);
+			   }
+
 		   }
 		}
 	}
@@ -221,7 +244,6 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			{
 				Path path = iteratore.next();
 				result = path.relationships().iterator();
-				int a=0;
 				if(result.hasNext()) //se è vuoto non mi interessa..
 				{
 					ris.clear();
@@ -239,6 +261,36 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		}
 		return ris;
 	}
+	
+	public static Vector<Relationship> findPathRelsSecond(Node s, Node e)
+	{
+		Iterator<Path> iteratore = findPathSecond(s,e);
+		Iterator<Relationship> result = null;
+		Vector<Relationship> ris = new Vector<Relationship>();
+		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
+		{
+			do
+			{
+				Path path = iteratore.next();
+				result = path.relationships().iterator();
+				if(result.hasNext()) //se è vuoto non mi interessa..
+				{
+					ris.clear();
+	                do
+	                {
+						ris.addElement(result.next());
+	                }while(result.hasNext());
+	                if(ris.size()!=0)
+	                {
+	                	return ris;
+	                }
+				}    
+			}while(iteratore.hasNext());
+			tx.success();
+		}
+		return ris;
+	}
+
 	
 	public static void findPathNodes(Node s, Node e)
 	{
@@ -266,6 +318,34 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			tx.success();
 		}
 	}
+	
+	public static void findPathNodesSecond(Node s, Node e)
+	{
+		Vector<Relationship> path = findPathRelsSecond(s,e);
+		//System.out.println("ecco un percorso lungo: " + path.size());
+		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
+		{
+			for(int i=0; i<path.size(); i++)
+			{
+				Relationship attuale = path.get(i);
+				String sorgente = attuale.getProperties("from").values().toString();
+				sorgente = pulisci(sorgente);
+				String destinazione = attuale.getProperties("to").values().toString();
+				destinazione = pulisci(destinazione);
+				if(!inVettore(sorgente,Globals.inCycleNodes))
+				{
+					Globals.inCycleNodes.addElement(sorgente);
+				}
+				if(!inVettore(destinazione,Globals.inCycleNodes))
+				{
+					Globals.inCycleNodes.addElement(destinazione);
+				}
+					
+			}
+			tx.success();
+		}
+	}
+	
 	
 		
 }

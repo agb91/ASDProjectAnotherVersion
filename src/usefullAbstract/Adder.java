@@ -42,30 +42,59 @@ public class Adder {
 	}
 	
 	protected static boolean inVettoreSyncro(Relationship ago,
-			Vector<TransizioneDoppia> pagliaio)
+			Vector<TransizioneDoppia> pagliaio, String who)
 	{
-		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		if(who.equalsIgnoreCase("f"))
 		{
-			String fromAgo = ago.getProperties("from").values().toString();
-			fromAgo = pulisci(fromAgo);
-			String toAgo = ago.getProperties("to").values().toString();
-			toAgo = pulisci(toAgo);
-			String evAgo = ago.getProperties("event").values().toString();
-			evAgo = pulisci(evAgo);
-			for(int i=0; i<pagliaio.size(); i++)
+			try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 			{
-				String fromPa = pagliaio.get(i).getSorgente();
-				String toPa = pagliaio.get(i).getDestinazione();
-				String evPa = pagliaio.get(i).getEvento();
-	
-				if(fromAgo.equalsIgnoreCase(fromPa)
-						&& toAgo.equalsIgnoreCase(toPa)
-						&& evAgo.equalsIgnoreCase(evPa))
+				String fromAgo = ago.getProperties("from").values().toString();
+				fromAgo = pulisci(fromAgo);
+				String toAgo = ago.getProperties("to").values().toString();
+				toAgo = pulisci(toAgo);
+				String evAgo = ago.getProperties("event").values().toString();
+				evAgo = pulisci(evAgo);
+				for(int i=0; i<pagliaio.size(); i++)
 				{
-					return true;
+					String fromPa = pagliaio.get(i).getSorgente();
+					String toPa = pagliaio.get(i).getDestinazione();
+					String evPa = pagliaio.get(i).getEvento();
+		
+					if(fromAgo.equalsIgnoreCase(fromPa)
+							&& toAgo.equalsIgnoreCase(toPa)
+							&& evAgo.equalsIgnoreCase(evPa))
+					{
+						return true;
+					}
 				}
-			}
-			tx.success();
+				tx.success();
+			}	
+		}
+		else
+		{
+			try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
+			{
+				String fromAgo = ago.getProperties("from").values().toString();
+				fromAgo = pulisci(fromAgo);
+				String toAgo = ago.getProperties("to").values().toString();
+				toAgo = pulisci(toAgo);
+				String evAgo = ago.getProperties("event").values().toString();
+				evAgo = pulisci(evAgo);
+				for(int i=0; i<pagliaio.size(); i++)
+				{
+					String fromPa = pagliaio.get(i).getSorgente();
+					String toPa = pagliaio.get(i).getDestinazione();
+					String evPa = pagliaio.get(i).getEvento();
+		
+					if(fromAgo.equalsIgnoreCase(fromPa)
+							&& toAgo.equalsIgnoreCase(toPa)
+							&& evAgo.equalsIgnoreCase(evPa))
+					{
+						return true;
+					}
+				}
+				tx.success();
+			}	
 		}
 		return false;
 	}
@@ -139,12 +168,15 @@ public class Adder {
 		String primoB = primo.split("-")[1];
 		String secondoA = secondo.split("-")[0];
 		String secondoB = secondo.split("-")[1];
+		
 		if(primoA.equalsIgnoreCase(secondoA) && primoB.equalsIgnoreCase(secondoB))
 		{
+			//System.err.println("sto per restiturire true");
 			return true;
 		}
 		if(primoA.equalsIgnoreCase(secondoB) && primoB.equalsIgnoreCase(secondoA))
 		{
+			//System.err.println("sto per restiturire true");
 			return true;
 		}
 		return false;

@@ -30,10 +30,11 @@ public class Globals {
 			new Vector<Vector<Relationship>>();
 	public static Vector<Vector<Relationship>> allRelationsSyncroGeneralSecond = 
 			new Vector<Vector<Relationship>>();
-	public static Vector<Integer> syncroDid = new Vector<Integer>();
+	public static Vector<Integer> syncroFirstDid = new Vector<Integer>();
+	public static Vector<Integer> syncroSecondDid = new Vector<Integer>();
 
 	public static Vector<String> inCycleNodes = new Vector<String>();
-	public static Vector<Relationship> primeTransizioniAmbigue = new Vector<Relationship>();
+	public static Vector<TransizioneDoppia> primeTransizioniAmbigue = new Vector<TransizioneDoppia>();
 	
 	public static void initialize()
 	{
@@ -49,6 +50,7 @@ public class Globals {
 		}
 		badTwinDid.addElement(Integer.valueOf(0));
 		goodTwinDid.addElement(Integer.valueOf(0));
-		syncroDid.addElement(Integer.valueOf(0));
+		syncroFirstDid.addElement(Integer.valueOf(0));
+		syncroSecondDid.addElement(Integer.valueOf(0));
 	}
 }

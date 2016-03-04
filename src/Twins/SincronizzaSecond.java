@@ -21,16 +21,73 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	protected static Vector<String> secondSdiff = new Vector<String>();
 	
 
-	public static boolean syncroSecond(int level)
+	public static void syncroSecond(int level)
 	{
-		createDataSecond(level );
-		algoritmoSecond( level);
-		/*System.out.println("ta ha il numero di elementi: " + secondTa.size());
-		System.out.println("che va da: " + secondTa.get(0).getSorgente());
-		System.out.println("che va to: " + secondTa.get(0).getDestinazione());*/
-		writeInDb(level);
+		if(!inInteger(level, Globals.syncroSecondDid) && level!=1)
+		{
+			SincronizzaFirst.syncroToSecond(level-1);
+			System.out.println("inizio la sincronizzazione di tipo 2 di livello: " + level);
+			createDataSecond(level );
+			algoritmoSecond( level);
+			//System.out.println("ta ha il numero di elementi: " + secondTa.size());
+			//System.out.println("che va da: " + secondTa.get(0).getSorgente());
+			//System.out.println("che va to: " + secondTa.get(0).getDestinazione());
+			writeInDb(level);
+			Globals.syncroSecondDid.addElement(level);
+		}
+	}
+	
+	public static boolean diagnosableC4(int level)
+	{
+		boolean risp = checkQuarta(secondSdue, level, secondTa, secondTdue,  "s");
+		//System.err.println("sono la c4 di: del secondo metodo; restituisco: " + risp);
+		return risp; 
+	}
+	
+	public static boolean diagnosableC2C3(int level)
+	{
+		 //secondo caso se è deterministico allora è diagnosticabile
+		if (checkSeconda(getAllRelationsUntil(level, Globals.allRelationsGeneral), level))
+		{
+			System.out.println("al livello: " + level + ", la condizione C2 è vera");
+			return true;
+		}
+		else
+		{
+			System.out.println("al livello: " + level + ", la condizione C2 È FALSA");
+		}
+		
+		//cerco le transizioni di guasto: prendo il loro evento.
+		// se per tutti quegli eventi non esistono transizioni di guasto
+		// che abbiano come evento quegli eventi allora è diagnosticabile
+		if(checkTerza(getAllRelationsUntil(level, Globals.allRelationsGeneral), level))
+		{
+			System.out.println("al livello: " + level + ", la condizione C3 è vera");
+			return true;
+		}
+		else
+		{
+			System.out.println("al livello: " + level + ", la condizione C3 È FALSA");
+		}
 		return false;
 	}
+	
+	public static boolean diagnosableC1(int level)
+	{
+		syncroSecond(level);
+		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
+		if (checkPrima(secondTa, level))
+		{
+			System.out.println("al livello: " + level + ", la condizione C1 è vera");
+			return true;
+		}
+		else
+		{
+			System.out.println("al livello: " + level + ", la condizione C1 è FALSA");
+		}
+		return false;
+	}
+
 	
 
 	private static void writeInDb(int level)
@@ -299,14 +356,6 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		//System.out.println("secondtemp size: "+secondSdue.size());
 		//System.out.println("ho ereditato il seguente numero di ta: " + secondTaPrimo.size());
 	}
-	
-	
-	/*public static boolean syncroC1(int level)
-	{
-		createData(level);
-		algoritmo();
-		return diagnosableC1();
-	}*/
 	
 
 	

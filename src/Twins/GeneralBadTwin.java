@@ -17,7 +17,7 @@ public class GeneralBadTwin extends GenericGraphHandler{
 	
 	public static void createBadTwinGeneral(int livello)
 	{
-		if(Globals.badTwinDid.lastElement()<livello)
+		if(!inInteger(livello,Globals.badTwinDid))
 		{
 			try ( Transaction tx = Globals.graphDb.beginTx() )
 			{

@@ -19,7 +19,7 @@ public class FirstBadTwin extends GenericGraphHandler {
 	// setta tutte le transizione ad "osservabile", nient'altro
 		public static void createBadTwinLevel1()
 		{
-			if(Globals.badTwinDid.lastElement()<1)
+			if(!inInteger(1,Globals.badTwinDid))
 			{
 				try ( Transaction tx = Globals.graphDb.beginTx() )
 				{
@@ -88,6 +88,7 @@ public class FirstBadTwin extends GenericGraphHandler {
 					System.out.println("---------------------------------------------");
 					System.out.println("created bad twin level 1");
 					tx.success();
+					Globals.badTwinDid.addElement(1);
 				}
 			}	
 		}

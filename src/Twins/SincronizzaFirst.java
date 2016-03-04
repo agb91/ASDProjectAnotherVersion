@@ -27,53 +27,54 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	
 	public static boolean syncro(int level)
 	{
-		System.out.println("inizio la sincronizzazione di livello: " + level);
-		createData(level);
-		algoritmo();
-		/*for(int i = 0 ; i<Sdue.size(); i++)
+		if(!inInteger(level,Globals.syncroFirstDid))
 		{
-			System.out.println("nodi sincros:  " + Sdue.get(i));
+			System.out.println("inizio la sincronizzazione di tipo 1 di livello: " + level);
+			createData(level);
+			algoritmo();
+			/*for(int i = 0 ; i<Sdue.size(); i++)
+			{
+				System.out.println("nodi sincros:  " + Sdue.get(i));
+			}
+			for(int i = 0 ; i<Ta.size(); i++)
+			{
+				System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
+						";   dest : " + Ta.get(i).getDestinazione()
+						+ ";    evento: " + Ta.get(i).getEvento());
+			}*/
+			writeInDb(level);
+			Globals.syncroFirstDid.addElement(level);
 		}
-		for(int i = 0 ; i<Ta.size(); i++)
-		{
-			System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
-					";   dest : " + Ta.get(i).getDestinazione()
-					+ ";    evento: " + Ta.get(i).getEvento());
-		}*/
-		writeInDb(level);
-		checkQuarta(Sdue, level, Ta, Tdue);
-		return diagnosable(level);
+		return checkQuarta(Sdue, level, Ta, Tdue, "f");
 	}
 	
-	protected static boolean diagnosable(int level)
+	public static boolean diagnosableC4(int level)
 	{
-		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
-		if (checkPrima(Ta, level))
-		{
-			return true;
-		};
-		
-		//secondo caso se è deterministico allora è diagnosticabile
-		if (checkSeconda(T, level))
-		{
-			return true;
-		}
-		
-		//cerco le transizioni di guasto: prendo il loro evento.
-		// se per tutti quegli eventi non esistono transizioni di guasto
-		// che abbiano come evento quegli eventi allora è diagnosticabile
-		if(checkTerza(T, level))
-		{
-			return true;
-		}
-		
-		System.out.println("non ho nessuna delle condizioni di diagnosticabilità"
-				+ " quindi NON DIAGNOSTICABILE");
-		System.out.println("finisco la sincronizzazione di livello: " + level);
-		return false;
+		return checkQuarta(Sdue, level, Ta, Tdue, "f");
 	}
 	
-
+	public static void syncroToSecond(int level)
+	{
+		if(!inInteger(level,Globals.syncroFirstDid))
+		{
+			System.out.println("inizio la sincronizzazione di tipo 1 di livello: " + level);
+			createData(level);
+			algoritmo();
+			/*for(int i = 0 ; i<Sdue.size(); i++)
+			{
+				System.out.println("nodi sincros:  " + Sdue.get(i));
+			}
+			for(int i = 0 ; i<Ta.size(); i++)
+			{
+				System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
+						";   dest : " + Ta.get(i).getDestinazione()
+						+ ";    evento: " + Ta.get(i).getEvento());
+			}*/
+			writeInDb(level);
+		}
+	}
+	
+	
 	
 	private static void writeInDb(int level)
 	{
@@ -298,6 +299,22 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			}
 		}
 	}
+	
+	public static boolean diagnosableC1(int level)
+	{
+		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
+		if (checkPrima(Ta, level))
+		{
+			System.out.println("al livello: " + level + ", la condizione C1 è vera");
+			return true;
+		}
+		else
+		{
+			System.out.println("al livello: " + level + ", la condizione C1 è FALSA");
+		}
+		return false;
+	}
+
 		
 	private static void createData(int level)
 	{
@@ -379,6 +396,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				tx.success();
 			}
 		}
+		
 
 	}
 

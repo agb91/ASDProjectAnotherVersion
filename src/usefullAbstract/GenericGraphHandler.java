@@ -66,12 +66,58 @@ public class GenericGraphHandler extends Adder{
 		return deterministico;
 	}
 		
+	protected static boolean inInteger(Integer ago, Vector<Integer> pagliaio)
+	{
+		for(int i=0; i<pagliaio.size(); i++)
+		{
+			if(ago==pagliaio.get(i))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/*protected static boolean hasOnePath(Node s, Node e)
+	{
+		Path path = null;
+		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		{
+			PathFinder<Path> finder =
+					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
+							Direction.OUTGOING ), 15 );
+			path = finder.findSinglePath( s, e );
+			tx.success();
+		}	
+		if(path.length()>1)
+		{
+			return true;
+		}
+		return false;
+	}*/
 	
 	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
 	protected static Iterator<Path> findPath(Node s, Node e)
 	{
 		Iterator<Path> iteratore = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		{
+			PathFinder<Path> finder =
+					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
+							Direction.OUTGOING ), 15 );
+			Iterable<Path> paths = finder.findAllPaths( s, e );
+			
+			iteratore = paths.iterator();
+			tx.success();
+		}	
+		return iteratore;
+	}	
+	
+	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
+	protected static Iterator<Path> findPathSecond(Node s, Node e)
+	{
+		Iterator<Path> iteratore = null;
+		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
 			PathFinder<Path> finder =
 					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
