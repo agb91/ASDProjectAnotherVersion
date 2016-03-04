@@ -25,7 +25,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	protected static Vector<String> Sdiff = new Vector<String>();
 	
 	
-	public static boolean syncro(int level)
+	public static void syncro(int level)
 	{
 		if(!inInteger(level,Globals.syncroFirstDid))
 		{
@@ -45,10 +45,10 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			writeInDb(level);
 			Globals.syncroFirstDid.addElement(level);
 		}
-		return checkQuarta(Sdue, level, Ta, Tdue, "f");
+		//checkQuarta(Sdue, level, Ta, Tdue, "f");
 	}
 	
-	public static boolean diagnosableC4(int level)
+	public static boolean checkC4(int level)
 	{
 		return checkQuarta(Sdue, level, Ta, Tdue, "f");
 	}
@@ -300,7 +300,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 		}
 	}
 	
-	public static boolean diagnosableC1(int level)
+	public static boolean checkC1(int level)
 	{
 		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
 		if (checkPrima(Ta, level))

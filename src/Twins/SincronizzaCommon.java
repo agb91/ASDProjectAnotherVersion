@@ -114,11 +114,11 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		
 		if(ta.size()==0)
 		{
-			return true;
+			return false;
 		}
 		searchCycle(in, who);
 		searchFirstAmbiguous(ta, Tdue, in, who);
-		ris = !checkIfFromAmbiguousGoToCycle(who);
+		ris = checkIfFromAmbiguousGoToCycle(who);
 		
 		return ris;
 	}

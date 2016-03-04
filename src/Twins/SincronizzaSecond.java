@@ -37,14 +37,14 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		}
 	}
 	
-	public static boolean diagnosableC4(int level)
+	public static boolean checkC4(int level)
 	{
 		boolean risp = checkQuarta(secondSdue, level, secondTa, secondTdue,  "s");
-		//System.err.println("sono la c4 di: del secondo metodo; restituisco: " + risp);
+		//System.out.println("sono la c4 di: del secondo metodo; restituisco: " + risp + " sono chiamato dal livello : "+ level);
 		return risp; 
 	}
 	
-	public static boolean diagnosableC2C3(int level)
+	public static boolean checkC2C3(int level)
 	{
 		 //secondo caso se è deterministico allora è diagnosticabile
 		if (checkSeconda(getAllRelationsUntil(level, Globals.allRelationsGeneral), level))
@@ -72,9 +72,8 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		return false;
 	}
 	
-	public static boolean diagnosableC1(int level)
+	public static boolean checkC1(int level)
 	{
-		syncroSecond(level);
 		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
 		if (checkPrima(secondTa, level))
 		{

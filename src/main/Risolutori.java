@@ -11,21 +11,26 @@ public class Risolutori {
 	public static void first()
 	{
 		long startTime = System.currentTimeMillis();
-		int level = 2;
-		boolean diagnosable = true;
-		FirstBadTwin.createBadTwinLevel1(); 
-		GoodTwin.createGoodTwin(1);
-		diagnosable = SincronizzaFirst.syncro(1);
-		while(diagnosable)
+		int level = 1;
+		boolean ancora = true;
+		while(ancora)
 		{
-			GeneralBadTwin.createBadTwinGeneral(level);
+			if(level==1)
+			{
+				FirstBadTwin.createBadTwinLevel1();
+			}
+			else
+			{
+				GeneralBadTwin.createBadTwinGeneral(level);
+			}
 			GoodTwin.createGoodTwin(level);
-			diagnosable = SincronizzaFirst.syncro(level);
-			if(diagnosable == false)
+			SincronizzaFirst.syncro(level);
+			if(SincronizzaFirst.checkC4(level))
 			{
 				System.out.println("********************************************************");
 				System.out.println("||    il livello generale di diagnosticabilità è "+(level-1) + "    ||" );
 				System.out.println("********************************************************");
+				ancora = false;
 			}
 			level++;
 		}
@@ -37,31 +42,43 @@ public class Risolutori {
 	public static void second()
 	{
 		long startTime = System.currentTimeMillis();
-		int i=2;
-		boolean diagnosable = true;
-		FirstBadTwin.createBadTwinLevel1(); 
-		GoodTwin.createGoodTwin(1);
-		while(diagnosable)
+		int i=1;
+		boolean ancora = true;
+		while(ancora)
 		{
-			GeneralBadTwin.createBadTwinGeneral(i);
-			if(SincronizzaSecond.diagnosableC2C3(i))
+			if(i==1)
 			{
+				FirstBadTwin.createBadTwinLevel1();
+			}
+			else
+			{
+				GeneralBadTwin.createBadTwinGeneral(i);
+			}
+			if(SincronizzaSecond.checkC2C3(i))
+			{
+				GoodTwin.createGoodTwin(i);
 				i++;
 			}
 			else
 			{
 				GoodTwin.createGoodTwin(i);
-				diagnosable = SincronizzaSecond.diagnosableC1(i);
-				if(diagnosable)
+				SincronizzaSecond.syncroSecond(i);
+				
+				if(SincronizzaSecond.checkC1(i))
 				{
 					i++;
 				}
 				else
 				{
-					System.out.println("non posso diagnosticare il livello " + i);
-					System.out.println("********************************************************");
-					System.out.println("||    il livello generale di diagnosticabilità è "+(i-1) + "    ||" );
-					System.out.println("********************************************************");
+					if(SincronizzaSecond.checkC4(i))
+					{
+						System.out.println("non posso diagnosticare il livello " + i);
+						System.out.println("********************************************************");
+						System.out.println("||    il livello generale di diagnosticabilità è "+(i-1) + "    ||" );
+						System.out.println("********************************************************");
+						ancora = false;
+					}
+					i++;					
 				}
 			}
 		}
@@ -74,9 +91,10 @@ public class Risolutori {
 	{
 		long startTime = System.currentTimeMillis();
 		int i=1;
-		boolean diagnosable = true;
-		while(diagnosable)
-		{			
+		boolean ancora = true;
+		while(ancora)
+		{		
+			//System.err.println("VENGO CHIAMATO");
 			if(i>1)
 			{
 				GeneralBadTwin.createBadTwinGeneral(i);
@@ -84,12 +102,10 @@ public class Risolutori {
 			else
 			{
 				FirstBadTwin.createBadTwinLevel1();
+				GoodTwin.createGoodTwin(1);
 			}
-			if(SincronizzaSecond.diagnosableC2C3(i))
+			if(SincronizzaSecond.checkC2C3(i))
 			{
-				GoodTwin.createGoodTwin(i);
-				SincronizzaFirst.syncro(i);
-				SincronizzaSecond.syncroSecond(i);
 				i++;
 			}
 			else
@@ -100,45 +116,54 @@ public class Risolutori {
 				{
 					GoodTwin.createGoodTwin(i);
 					SincronizzaSecond.syncroSecond(i);
-					if(SincronizzaSecond.diagnosableC1(i))
-					{
-						c1=true;
-					}
-					if(!SincronizzaSecond.diagnosableC4(i))
-					{
-						c4=true;
-					}
 				}
 				else
 				{
 					GoodTwin.createGoodTwin(1);
 					SincronizzaFirst.syncro(1);
-					if(SincronizzaFirst.diagnosableC1(1))
+				}
+				if(i>1)
+				{
+					if(SincronizzaSecond.checkC1(i))
 					{
 						c1=true;
 					}
-					if(!SincronizzaFirst.diagnosableC4(1))
+				}
+				else
+				{
+					if(SincronizzaFirst.checkC1(1))
 					{
-						c4=true;
+						c1=true;
 					}
 				}
 				if(c1)
 				{
-					GoodTwin.createGoodTwin(i);
-					SincronizzaFirst.syncro(i);
-					SincronizzaSecond.syncroSecond(i);
 					i++;
 				}
 				else
 				{
+					if(i>1)
+					{
+						if(SincronizzaSecond.checkC4(i))
+						{
+							c4=true;
+						}
+					}
+					else{
+						if(SincronizzaFirst.checkC4(1))
+						{
+							c4=true;
+						}
+					}
 					if(c4)
 					{
 						System.out.println("non posso diagnosticare il livello " + i);
 						System.out.println("********************************************************");
 						System.out.println("||    il livello generale di diagnosticabilità è "+(i-1) + "    ||" );
 						System.out.println("********************************************************");
-						diagnosable = false;
+						ancora = false;
 					}
+					i++;
 				}
 			}
 
