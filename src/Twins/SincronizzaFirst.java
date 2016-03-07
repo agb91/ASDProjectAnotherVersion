@@ -11,6 +11,7 @@ import org.neo4j.graphdb.Transaction;
 
 import global.Globals;
 import usefullAbstract.GenericGraphHandler;
+import usefullAbstract.InVector;
 
 public class SincronizzaFirst extends SincronizzaCommon{
 	//first method
@@ -187,7 +188,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							String destinazione2 = pulisci(t2.getProperties("to").values().toString());
 								
 							boolean bool = (a!=k && guasto2.equalsIgnoreCase("n") && 
-									uguali(evento1,evento2) &&
+									InVector.stessoEvento(evento1,evento2) &&
 									sorgente1.equalsIgnoreCase(sa)&& sorgente2.equalsIgnoreCase(sb));
 							
 							if(bool)
@@ -261,7 +262,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 						boolean bool = a!=k && guasto2.equalsIgnoreCase("n")
 								&& sorgente2.equalsIgnoreCase(stato) 
 								&& sorgente1.equalsIgnoreCase(stato)
-								&& uguali(evento1,evento2);
+								&& InVector.stessoEvento(evento1,evento2);
 						
 						//System.out.println("booo:  " + bool);
 						/*if(stato.equalsIgnoreCase("A") && sorgente1.equalsIgnoreCase("A") && sorgente2.equalsIgnoreCase("A"))

@@ -23,9 +23,10 @@ import org.neo4j.io.fs.FileUtils;
 import org.neo4j.kernel.GraphDatabaseAPI;
 
 import global.Globals;
+import usefullAbstract.GenericGraphHandler;
 
 
-public class CheckRequirements {
+public class CheckRequirements extends GenericGraphHandler{
 	
 	/*private static Vector<Node> allNodes;
 	private static Vector<Relationship> allRelations;
@@ -80,10 +81,12 @@ public class CheckRequirements {
 			{
 				Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
 				String osservabile = attuale.getProperties("oss").values().toString();
-				if(osservabile.contains("n"))
+				osservabile = pulisci(osservabile);
+				if(osservabile.equalsIgnoreCase("n"))
 				{
 					String evento = attuale.getProperties("event").values().toString();
-					if(evento.length()!=2)
+					evento = pulisci(evento);
+					if(!evento.equalsIgnoreCase(""))
 					{
 						String nome = attuale.getProperties("type").values().toString();
 						System.out.println("evento: " + evento);
@@ -104,10 +107,13 @@ public class CheckRequirements {
 			{
 				Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
 				String guasto = attuale.getProperties("guasto").values().toString();
+				guasto = pulisci(guasto);
 				String osservabile = attuale.getProperties("oss").values().toString();
+				osservabile = pulisci(osservabile);
 				String nome = attuale.getProperties("type").values().toString();
+				nome = pulisci(nome);
 				//System.out.println("guasto: "+guasto + ";   oss: " + osservabile + ";  nome: "+nome);
-				if(guasto.contains("y") && osservabile.contains("y"))
+				if(guasto.equalsIgnoreCase("y") && osservabile.equalsIgnoreCase("y"))
 				{
 					System.out.println(" ogni transizione di guasto DEVE essere non osservabile, la transazione: " + nome + " viola questa regola");
 					System.exit(2);
@@ -177,7 +183,7 @@ public class CheckRequirements {
 		{
 			boolean safe = false;
 			Node root = Globals.allNodes.get(0);
-			Iterator<Path> iteratore = findPath(root,n);
+			Iterator<Path> iteratore = findPathL(root,n);
 			while(iteratore.hasNext() && !safe)
 			{
 				Path path = iteratore.next();
@@ -198,7 +204,7 @@ public class CheckRequirements {
 	}
 	
 	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
-	private static Iterator<Path> findPath(Node s, Node e)
+	private static Iterator<Path> findPathL(Node s, Node e)
 	{
 		Iterator<Path> iteratore = null;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
@@ -218,7 +224,7 @@ public class CheckRequirements {
 	//RESTITUISCI ogni possiblie percorso BASTA CHE SIA DIVERSO DA PERCORSO VUOTO
 	public static void findPathRels(Node s, Node e, Boolean haveToWrite)
 	{
-		Iterator<Path> iteratore = findPath(s,e);
+		Iterator<Path> iteratore = findPathL(s,e);
 		Iterator<Relationship> result = null;
 		Vector<Relationship> ris = new Vector<Relationship>();
 		try ( Transaction tx = Globals.graphDb.beginTx() )

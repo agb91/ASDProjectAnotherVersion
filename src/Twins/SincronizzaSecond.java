@@ -7,6 +7,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 
 import global.Globals;
+import usefullAbstract.InVector;
 
 public class SincronizzaSecond extends SincronizzaCommon {
 	
@@ -165,7 +166,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							String destinazione2 = pulisci(t2.getProperties("to").values().toString());
 					
 							boolean bool = (a!=k) && guasto2.equalsIgnoreCase("n")
-									&& uguali(evento1,evento2) 
+									&& InVector.stessoEvento(evento1,evento2) 
 									&& sorgente1.equalsIgnoreCase(sa) 
 									&& sorgente2.equalsIgnoreCase(sb);
 							//System.out.println("bool: " + bool);
@@ -235,7 +236,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 						
 						
 						boolean bool= (a!=k) && guasto2.equalsIgnoreCase("n")
-								&& uguali(evento1,evento2) && 
+								&& InVector.stessoEvento(evento1,evento2) && 
 								sorgente1.equalsIgnoreCase(sa) &&
 								sorgente2.equalsIgnoreCase(sb);
 						if(bool)

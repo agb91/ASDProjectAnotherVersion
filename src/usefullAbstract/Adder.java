@@ -120,7 +120,7 @@ public class Adder {
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
-			if(notExistSyncro(n))
+			if(InVector.notExistSyncro(n))
 			{
 			    Label label = DynamicLabel.label( "Nome" );
 		        userNode = Globals.graphDbSyncro.createNode( label );
@@ -131,39 +131,21 @@ public class Adder {
 		}    		
 	}
 	
-	protected static boolean notExistSyncro(String ago)
-	{
-		for(int l=0; l<Globals.allRelationsSyncroGeneral.size(); l++)
-		{
-			for(int i=0; i<Globals.allRelationsSyncroGeneral.get(l).size(); i++)
-			{
-				Relationship attuale = Globals.allRelationsSyncroGeneral.get(l).get(i);
-				String pagliaio = pulisci(attuale.getProperties("type").values().toString());
-				if(pagliaio.equalsIgnoreCase(ago))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}
-		}
-		for(int l=0; l<Globals.allNodesSyncroGeneral.size(); l++)
-		{
-			for(int i=0; i<Globals.allNodesSyncroGeneral.get(l).size(); i++)
-			{
-				Node attuale = Globals.allNodesSyncroGeneral.get(l).get(i);
-				String pagliaio = pulisci(attuale.getProperties("name").values().toString());
-				if(pagliaio.equalsIgnoreCase(ago))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}
-		}
-		return true;	
-	}
 	
 	protected static boolean stessoStato(String primo, String secondo)
 	{
+		//nel caso base, una sola lettera
+		if(primo.split("-").length == 1)
+		{
+			if(primo.equalsIgnoreCase(secondo))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 		String primoA = primo.split("-")[0];
 		String primoB = primo.split("-")[1];
 		String secondoA = secondo.split("-")[0];
@@ -182,61 +164,13 @@ public class Adder {
 		return false;
 	}
 	
-	protected static boolean notExistSyncroSecondRels(String s, String d, String e)
-	{
-		s = pulisci(s);
-		d = pulisci(d);
-		e = pulisci(e);
-		for(int l=0; l<Globals.allRelationsSyncroGeneralSecond.size(); l++)
-		{
-			for(int i=0; i<Globals.allRelationsSyncroGeneralSecond.get(l).size(); i++)
-			{
-				Relationship attuale = Globals.allRelationsSyncroGeneralSecond.get(l).get(i);
-				String pagliaios = pulisci(attuale.getProperties("from").values().toString());
-				String pagliaiod = pulisci(attuale.getProperties("to").values().toString());
-				String pagliaioe = pulisci(attuale.getProperties("event").values().toString());
-				if(stessoStato(pagliaios,s) && stessoStato(pagliaiod,d) && pagliaioe.equalsIgnoreCase(e))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	
-	protected static boolean notExistSyncroSecondNode(String ago)
-	{
-		for(int l=0; l<Globals.allNodesSyncroGeneralSecond.size(); l++)
-		{
-			/*if(ago.equalsIgnoreCase("B-E"))
-			{
-				System.out.println("chiamato: " + Globals.allRelationsSyncroGeneralSecond.get(l).size());
-			}*/
-			for(int i=0; i<Globals.allNodesSyncroGeneralSecond.get(l).size(); i++)
-			{
-				/*if(ago.equalsIgnoreCase("B-E"))
-				{
-					System.out.println("chiamato: " + Globals.allRelationsSyncroGeneralSecond.get(l).size());
-				}*/
-				Node attuale = Globals.allNodesSyncroGeneralSecond.get(l).get(i);
-				String pagliaio = pulisci(attuale.getProperties("name").values().toString());
-				if(stessoStato(pagliaio,ago))
-				{
-					//System.out.println("per la cosa dei nodinscarrto " + ago);
-					return false;
-				}
-			}
-		}
-		return true;	
-	}
 		
 	protected static void addNodeSyncroSecond( String n, int level)
 	{
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
-			if(notExistSyncroSecondNode(n))
+			if(InVector.notExistSyncroSecondNode(n))
 			{
 			    Label label = DynamicLabel.label( "Nome" );
 		        userNode = Globals.graphDbSyncroSecond.createNode( label );
@@ -313,7 +247,7 @@ public class Adder {
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
-			if(notExistSyncro(nome))
+			if(InVector.notExistSyncro(nome))
 			{
 				Node n1 = findNodeByNameSyncro(n1s);
 				Node n2 = findNodeByNameSyncro(n2s);
@@ -341,7 +275,7 @@ public class Adder {
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
-			if(notExistSyncroSecondRels(n1s, n2s, ev))
+			if(InVector.notExistSyncroSecondRels(n1s, n2s, ev))
 			{
 				//System.out.println("nodo: " + n1s);
 				Node n1 = findNodeByNameSyncroSecond(n1s);
@@ -367,6 +301,10 @@ public class Adder {
 	
 	protected static Node findNodeByNameSyncro(String n1s)
 	{
+		
+		String a = n1s.split("-")[0];
+		String b = n1s.split("-")[1];
+		String n2s = b+"-"+a;
 		ArrayList<Node> userNodes = new ArrayList<>();
 		Label label = DynamicLabel.label( "Nome" );
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
@@ -380,6 +318,23 @@ public class Adder {
 		        }
 		    }
 		    tx.success();
+		}
+		
+		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		{
+		    try ( ResourceIterator<Node> users =
+		    		Globals.graphDbSyncro.findNodes( label, "name", n2s ) )
+		    {
+		        while ( users.hasNext() )
+		        {
+		            userNodes.add( users.next() );
+		        }
+		    }
+		    tx.success();
+		}
+		if(userNodes.size()==0)
+		{
+			System.out.println("non trovo il nodo: " + n1s+ "--fine nome");
 		}
 		return userNodes.get(0);
 

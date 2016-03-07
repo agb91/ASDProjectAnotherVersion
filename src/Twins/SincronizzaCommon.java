@@ -15,6 +15,7 @@ import org.neo4j.graphdb.Transaction;
 
 import global.Globals;
 import usefullAbstract.GenericGraphHandler;
+import usefullAbstract.InVector;
 
 public class SincronizzaCommon extends GenericGraphHandler{
 	
@@ -30,7 +31,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			//String guasto = attuale.getGuasto();
 			if(stessoStato(attuale.getSorgente(),nuovo.getSorgente()) 
 				&& stessoStato(attuale.getDestinazione(),nuovo.getDestinazione())
-				&& uguali(eventoNuovo,evento))
+				&& InVector.stessoEvento(eventoNuovo,evento))
 			{
 				return false;
 			}
@@ -199,7 +200,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			}
 			for(int a=0; a<path.size(); a++)
 			{
-				if(inVettoreSyncro(path.get(a), ta, who))
+				if(InVector.inVettoreSyncro(path.get(a), ta, who))
 				{
 					prima = false;
 				}
@@ -216,7 +217,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		Globals.inCycleNodes.clear();
 		for(int i=0; i<sdue.size(); i++)
 		{
-		   if(!inVettore(sdue.get(i), Globals.inCycleNodes))
+		   if(!InVector.inVettore(sdue.get(i), Globals.inCycleNodes))
 		   {
 			   if(who.equalsIgnoreCase("f"))
 			   {
@@ -305,11 +306,11 @@ public class SincronizzaCommon extends GenericGraphHandler{
 				sorgente = pulisci(sorgente);
 				String destinazione = attuale.getProperties("to").values().toString();
 				destinazione = pulisci(destinazione);
-				if(!inVettore(sorgente,Globals.inCycleNodes))
+				if(!InVector.inVettore(sorgente,Globals.inCycleNodes))
 				{
 					Globals.inCycleNodes.addElement(sorgente);
 				}
-				if(!inVettore(destinazione,Globals.inCycleNodes))
+				if(!InVector.inVettore(destinazione,Globals.inCycleNodes))
 				{
 					Globals.inCycleNodes.addElement(destinazione);
 				}
@@ -332,11 +333,11 @@ public class SincronizzaCommon extends GenericGraphHandler{
 				sorgente = pulisci(sorgente);
 				String destinazione = attuale.getProperties("to").values().toString();
 				destinazione = pulisci(destinazione);
-				if(!inVettore(sorgente,Globals.inCycleNodes))
+				if(!InVector.inVettore(sorgente,Globals.inCycleNodes))
 				{
 					Globals.inCycleNodes.addElement(sorgente);
 				}
-				if(!inVettore(destinazione,Globals.inCycleNodes))
+				if(!InVector.inVettore(destinazione,Globals.inCycleNodes))
 				{
 					Globals.inCycleNodes.addElement(destinazione);
 				}

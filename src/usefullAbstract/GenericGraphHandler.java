@@ -48,7 +48,7 @@ public class GenericGraphHandler extends Adder{
 						String evento2 = pulisci(T.get(a).getProperties("event").values().toString()); 
 					
 						boolean nonD = sorgente2.equalsIgnoreCase(sorgente1) 
-								&& uguali(evento2, evento1);
+								&& InVector.stessoEvento(evento2, evento1);
 						if(nonD)
 						{
 						//	System.out.println("non determinsitico perchè: ");
@@ -130,30 +130,6 @@ public class GenericGraphHandler extends Adder{
 		return iteratore;
 	}	
 	
-	protected static boolean uguali(String a , String b)
-	{
-		String[] va = a.split("//");
-		String[] vb = b.split("//");
-		if(va.length!=vb.length)
-		{
-			return false;
-		}
-		for(int i=0; i<va.length; i++)
-		{
-			va[i] = va[i].toLowerCase();
-			vb[i] = vb[i].toLowerCase();
-		}
-		Arrays.sort( va );
-		Arrays.sort(vb);
-		for(int i=0; i<va.length; i++)
-		{
-			if(!va[i].equalsIgnoreCase(vb[i]))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
 	
 	//cerco le transizioni di guasto: prendo il loro evento.
 	// se per tutti quegli eventi non esistono transizioni di guasto
@@ -241,15 +217,18 @@ public class GenericGraphHandler extends Adder{
 	{
 		Globals.allNodes.remove(index);
 		String nomeNode = n.getProperties("name").values().toString();
-		for(int a=0; a<Globals.allRelationsGeneral.get(level).size(); a++)
+		for(int l=0; l<Globals.allRelationsGoodGeneral.size(); l++)
 		{
-			Relationship r = Globals.allRelationsGeneral.get(level).get(a);
-			String fromr = r.getProperties("from").values().toString();
-			if(fromr.contains(nomeNode))
+			for(int a=0; a<Globals.allRelationsGeneral.get(l).size(); a++)
 			{
-				Globals.allRelationsGeneral.get(level).get(a).delete();
-				Globals.allRelationsGeneral.get(level).remove(a);
-				a--;		
+				Relationship r = Globals.allRelationsGeneral.get(l).get(a);
+				String fromr = r.getProperties("from").values().toString();
+				if(stessoStato(fromr,nomeNode))
+				{
+					Globals.allRelationsGeneral.get(l).get(a).delete();
+					Globals.allRelationsGeneral.get(l).remove(a);
+					a--;		
+				}
 			}
 		}
 		n.delete();

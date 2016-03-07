@@ -34,6 +34,7 @@ import letturaXML.Nodo;
 import letturaXML.Transizione;
 import talkToDb.ORM.RelTypes;
 import usefullAbstract.GenericGraphHandler;
+import usefullAbstract.InVector;
 
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
@@ -75,6 +76,125 @@ public class ORM extends GenericGraphHandler {
 		}
 	}
 	
+	private Vector<Nodo> testGetNodesList(int n)
+	{
+		Vector<Nodo> ris = new Vector<Nodo>();
+		Nodo inizio = new Nodo("inizio");
+		ris.addElement(inizio);
+		for(int a=0; a<n; a++)
+		{
+			Nodo node = new Nodo("test"+a);
+			ris.addElement(node);
+		}
+		return ris;
+	}
+	
+	private int randomize(int max)
+	{
+		return (int) (Math.round((Math.random()*max)));
+	}
+	
+	private String randomLetter()
+	{
+		String alphabet = "abcdefgh";
+		int i = randomize(alphabet.length()-1);
+		return alphabet.substring(i, i+1);
+	}
+	
+	private String randomYN( int limitY)
+	{
+		int i = randomize(100);
+		if(i<limitY)
+		{
+			return "y";
+		}
+		else
+		{
+			return "n";
+		}
+	}
+	private String getRandomNode(Vector<Nodo> n)
+	{
+		
+		int i = randomize(n.size()-1);
+		//System.out.println("esce:  " + i);
+		Nodo attuale = n.get(i);
+		return attuale.getNome();
+	}
+	
+	private Vector<Transizione> testGetRelationsList(Vector<Nodo> n, int num)
+	{
+		Vector<Transizione> ris = new Vector<Transizione>();
+		Transizione prima = new Transizione("prima", "a", "y", "n",
+				"inizio", "test0");
+		ris.addElement(prima);
+		for(int i=0; i<num; i++)
+		{
+			String evento = randomLetter();
+			String oss = randomYN(95);
+			if(oss.equalsIgnoreCase("n"))
+			{
+				evento = "";
+			}
+			String guasto = randomYN(1); //perchè voglio pochi guasti...
+			if(guasto.equalsIgnoreCase("y"))
+			{
+				oss = "n";
+			}
+			String from = "";
+			String to = "";
+			if(i<n.size())
+			{
+				from = n.get(i).getNome();
+			}
+			else
+			{
+				from = getRandomNode(n);
+			}
+			if(i<(n.size()-1))
+			{
+				to = n.get(i+1).getNome();
+			}
+			else
+			{
+				to = getRandomNode(n);
+			}
+			String nome = from + "--" + evento + "--" + to + "--" + guasto;
+			Transizione nuova = new Transizione(nome, evento, oss, guasto,
+					from, to);
+			if(!from.equalsIgnoreCase("inizio") && !to.equalsIgnoreCase("inizio"))
+			{
+				ris.addElement(nuova);
+			}
+		}
+		return ris;
+	}
+	
+	public void readTest()
+	{
+		Vector<Nodo> n = testGetNodesList(5);
+		Vector<Transizione> t = testGetRelationsList(n, 25);
+		for(int i=0; i<n.size(); i++)
+		{
+			Nodo appoggio = n.get(i);
+            String nNode = appoggio.getNome();
+            addNode(nNode);
+		}	
+		for(int i=0; i<t.size(); i++)
+		{
+			Transizione appoggio = t.get(i);
+            String nome = appoggio.getNome();
+            String osservabile = appoggio.getOss();
+            String evento = appoggio.getEvento();
+            String guasto = appoggio.getGuasto();
+            String from = appoggio.getFrom();
+            String to = appoggio.getTo();
+            Node nFrom = findNodeByNameBadStd(from);
+            Node nTo = findNodeByNameBadStd(to);
+            addRelation(from, to, nFrom, nTo,nome,osservabile, evento, guasto);
+		}
+	}
+	
 	public void readXml()
 	{
 		Graficatore ldx = new Graficatore(); //lettura iniziale da xml 
@@ -97,31 +217,37 @@ public class ORM extends GenericGraphHandler {
             String to = appoggio.getTo();
             Node nFrom = findNodeByNameBadStd(from);
             Node nTo = findNodeByNameBadStd(to);
-            addRelation(nFrom, nTo,nome,osservabile, evento, guasto);
+            addRelation(from, to, nFrom, nTo,nome,osservabile, evento, guasto);
 		}	
 		//CheckRequirements.prepare();
 	}
 	
-	protected static Relationship addRelation(Node n1, Node n2, String nome, String oss, String ev, String gu)
+		protected static void addRelation(String n1n, String n2n, Node n1, Node n2, String nome, String oss, String ev, String gu)
 	{
 		Relationship relationship = null;
-		try ( Transaction tx = Globals.graphDb.beginTx() )
+		if(!InVector.inRel(nome, Globals.allRelationsGeneral.get(0)))
 		{
-			relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-			relationship.setProperty( "type", pulisci(nome) );
-			relationship.setProperty( "oss", pulisci(oss) );
-			ev = pulisci(ev);
-			relationship.setProperty("event", pulisci(ev));
-			relationship.setProperty("guasto", pulisci(gu));
-			String nomeN1 = n1.getProperties("name").values().toString();
-			String nomeN2 = n2.getProperties("name").values().toString();	
-			relationship.setProperty("from", pulisci(nomeN1));
-			relationship.setProperty("to", pulisci(nomeN2));
-			tx.success();
-			Globals.allRelationsGeneral.get(0).addElement(relationship);
-			//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
-		}	
-		return relationship;
+			try ( Transaction tx = Globals.graphDb.beginTx() )
+			{
+				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+				relationship.setProperty( "type", pulisci(nome) );
+				relationship.setProperty( "oss", pulisci(oss) );
+				ev = pulisci(ev);
+				relationship.setProperty("event", pulisci(ev));
+				relationship.setProperty("guasto", pulisci(gu));
+				String nomeN1 = n1.getProperties("name").values().toString();
+				String nomeN2 = n2.getProperties("name").values().toString();	
+				relationship.setProperty("from", pulisci(nomeN1));
+				relationship.setProperty("to", pulisci(nomeN2));
+				
+				System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2 
+						+ "con evento:" + ev +"; guasto: " + gu);
+				Globals.allRelationsGeneral.get(0).addElement(relationship);
+				tx.success();
+			
+			}
+		}
+	
 	}
 	
 	public enum RelTypes implements RelationshipType{
@@ -141,42 +267,7 @@ public class ORM extends GenericGraphHandler {
 		}	
 	}
 	
-	public static boolean inRel(Relationship ago, Vector<Relationship> pagliaio)
-	{
-		try ( Transaction tx = Globals.graphDb.beginTx() )
-		{
-			for(int i=0; i<pagliaio.size(); i++)
-			{
-				String idAgo = ago.getProperties("type").values().toString();
-				String idPagliaioi = pagliaio.get(i).getProperties("type").values().toString();
-				if(idAgo.equalsIgnoreCase(idPagliaioi))
-				{
-					return true;
-				}
-			}
-			tx.success();
-		}	
-		return false;
-	}
-	
-	public static boolean inNodes(Node ago, Vector<Node> pagliaio)
-	{
-		try ( Transaction tx = Globals.graphDb.beginTx() )
-		{
-			for(int i=0; i<pagliaio.size(); i++)
-			{
-				String idAgo = ago.getProperties("name").values().toString();
-				String idPagliaioi = pagliaio.get(i).getProperties("name").values().toString();
-				if(idAgo.equalsIgnoreCase(idPagliaioi))
-				{
-					return true;
-				}
-			}
-			tx.success();
-		}	
-		return false;
-	}
-	
+		
 	public static void clean(String path)
 	{
 		try {
