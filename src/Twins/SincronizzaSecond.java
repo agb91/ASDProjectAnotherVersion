@@ -58,7 +58,18 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	
 	public static boolean checkC4(int level)
 	{
-		boolean risp = checkQuarta(secondSdue, level, Globals.secondTaPerLevel.get(level), secondTdue,  "s");
+		Vector<TransizioneDoppia> daCheckare = new Vector<TransizioneDoppia>();
+		for(int l=0; l<=level; l++)
+		{
+			for(int i=0; i<Globals.secondTaPerLevel.get(l).size(); i++)
+			{
+				if(!InVector.InDoppia(Globals.secondTaPerLevel.get(l).get(i), daCheckare))
+				{
+					daCheckare.addElement(Globals.secondTaPerLevel.get(l).get(i));
+				}
+			}
+		}
+		boolean risp = checkQuarta(secondSdue, level, daCheckare, secondTdue,  "s");
 		//System.out.println("sono la c4 di: del secondo metodo; restituisco: " + risp + " sono chiamato dal livello : "+ level);
 		return risp; 
 	}
@@ -339,8 +350,6 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	{
 		secondSprimo = getAllNodesUntil(level-1, Globals.allNodesSyncroGeneral);
 		secondTprimo = getAllRelationsUntil(level-1, Globals.allRelationsSyncroGeneral);
-		//secondTaPrimo = Globals.allTa.get(level-1);
-		//System.out.println("s eretidati: " + secondSprimo.size());
 		
 	
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
@@ -376,7 +385,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		}
 		
 		secondTa.clear();
-		for(int l=1; l<level; l++)
+		for(int l=1; l<=level; l++)
 		{
 			for(int i=0; i<Globals.firstTaPerLevel.get(l-1).size(); i++)
 			{

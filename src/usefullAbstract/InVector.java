@@ -49,6 +49,10 @@ public class InVector extends GenericGraphHandler{
 	
 	public static boolean InDoppia( TransizioneDoppia ago, Vector<TransizioneDoppia> pagliaio)
 	{
+		if(pagliaio.size()==0)
+		{
+			return false;
+		}
 		String fago = ago.getSorgente();
 		String dago = ago.getDestinazione();
 		String evago = ago.getEvento();

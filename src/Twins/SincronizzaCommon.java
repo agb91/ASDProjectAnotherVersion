@@ -115,7 +115,6 @@ public class SincronizzaCommon extends GenericGraphHandler{
 	{
 		boolean ris = false;
 		
-	//	TODO2 BUG NOTO DEL FATTO CHE TA POTREBBE ESSERE INCONSISTENTE IN ALCUNU CASI!
 		if(ta.size()==0)
 		{
 			return false;

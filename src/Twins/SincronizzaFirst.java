@@ -54,12 +54,23 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			writeInDb(level);
 			Globals.syncroFirstDid.addElement(level);
 		}
-		//checkQuarta(Sdue, level, Ta, Tdue, "f");
 	}
 	
 	public static boolean checkC4(int level)
 	{
-		boolean ris = checkQuarta(Sdue, level, Globals.firstTaPerLevel.get(level), Tdue, "f");
+		Vector<TransizioneDoppia> daCheckare = new Vector<TransizioneDoppia>();
+		for(int l=0; l<=level; l++)
+		{
+			for(int i=0; i<Globals.firstTaPerLevel.get(l).size(); i++)
+			{
+				if(!InVector.InDoppia(Globals.firstTaPerLevel.get(l).get(i), daCheckare))
+				{
+					daCheckare.addElement(Globals.firstTaPerLevel.get(l).get(i));
+				}
+			}
+		}
+		//System.err.println("da checkare size: " + daCheckare.size());
+		boolean ris = checkQuarta(Sdue, level, daCheckare, Tdue, "f");
 		if(ris)
 		{
 			System.out.println("a livello " + level + " c4 è vera");
