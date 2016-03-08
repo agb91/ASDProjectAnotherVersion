@@ -205,7 +205,9 @@ public class GenericGraphHandler extends Adder{
 			raggiungibile = checkPathFromRootBad(Globals.allNodes.get(i));
 			if(!raggiungibile)
 			{
+				//System.err.println("prima: "+ Globals.allNodes.size());
 				killNode(Globals.allNodes.get(i), i, level);
+				//System.err.println("dopo: "+ Globals.allNodes.size());
 				i--;
 			}
 		}
@@ -217,7 +219,7 @@ public class GenericGraphHandler extends Adder{
 	{
 		Globals.allNodes.remove(index);
 		String nomeNode = n.getProperties("name").values().toString();
-		for(int l=0; l<Globals.allRelationsGoodGeneral.size(); l++)
+		for(int l=0; l<Globals.allRelationsGeneral.size(); l++)
 		{
 			for(int a=0; a<Globals.allRelationsGeneral.get(l).size(); a++)
 			{
@@ -227,6 +229,20 @@ public class GenericGraphHandler extends Adder{
 				{
 					Globals.allRelationsGeneral.get(l).get(a).delete();
 					Globals.allRelationsGeneral.get(l).remove(a);
+					a--;		
+				}
+			}
+		}
+		for(int l=0; l<Globals.allRelationsGoodGeneral.size(); l++)
+		{
+			for(int a=0; a<Globals.allRelationsGoodGeneral.get(l).size(); a++)
+			{
+				Relationship r = Globals.allRelationsGoodGeneral.get(l).get(a);
+				String fromr = r.getProperties("from").values().toString();
+				if(stessoStato(fromr,nomeNode))
+				{
+					Globals.allRelationsGoodGeneral.get(l).get(a).delete();
+					Globals.allRelationsGoodGeneral.get(l).remove(a);
 					a--;		
 				}
 			}

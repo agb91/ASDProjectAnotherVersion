@@ -13,6 +13,7 @@ import global.Globals;
 import talkToDb.ORM;
 import talkToDb.ORM.RelTypes;
 import usefullAbstract.GenericGraphHandler;
+import usefullAbstract.InVector;
 
 public class GoodTwin extends GenericGraphHandler{
 	
@@ -31,38 +32,47 @@ public class GoodTwin extends GenericGraphHandler{
 	//crea il grafo good iniziale
 	private static void goodBase(int level)
 	{
-		try ( Transaction tx1 = Globals.graphDb.beginTx() )
+		//System.err.println("size: " + Globals.allNodes.size());
+
+		for(int i=0; i<Globals.allNodes.size(); i++) 
 		{
-			//Globals.allNodesGood.clear();
-			//Globals.allRelationsGood.clear();
-			
-			if(level==1)
+			String nome = "";
+			try ( Transaction tx = Globals.graphDb.beginTx() )
 			{
-				for(int i=0; i<Globals.allNodes.size(); i++)
-				{
-					Node attuale = Globals.allNodes.get(i);
-					String nome = pulisci(attuale.getProperty("name").toString());
-					//System.out.println("node: " + nome);
-					addNodeGood(nome);
-				}
+				Node attuale = Globals.allNodes.get(i);
+				nome = pulisci(attuale.getProperty("name").toString());
+				tx.success();
 			}
+			//System.out.println("node: " + nome);
+			//System.err.println("addo ora: " + nome);
+			addNodeGood(nome);	
+		}
+		
 			
-			for(int l=0; l<=level; l++)
+		for(int l=0; l<=level; l++)
+		{
+			for(int i=0; i<Globals.allRelationsGeneral.get(l).size(); i++)
 			{
-				for(int i=0; i<Globals.allRelationsGeneral.get(l).size(); i++)
+				String nome="";
+				String n1 ="";
+				String n2 ="";
+				String oss ="";
+				String ev ="";
+				String gu ="";
+				try ( Transaction tx = Globals.graphDb.beginTx() )
 				{
 					Relationship attuale = Globals.allRelationsGeneral.get(l).get(i);
-					String nome = pulisci(attuale.getProperties("type").values().toString());
-					String n1 = pulisci(attuale.getStartNode().getProperties("name").values().toString());
-					String n2 = pulisci(attuale.getEndNode().getProperties("name").values().toString());
-					String oss = pulisci(attuale.getProperties("oss").values().toString());
-					String ev = pulisci(attuale.getProperties("event").values().toString());
-					String gu = pulisci(attuale.getProperties("guasto").values().toString());
-					addRelationGood(n1, n2, nome, oss, ev, gu, level);
-				}
+					nome = pulisci(attuale.getProperties("type").values().toString());
+					n1 = pulisci(attuale.getStartNode().getProperties("name").values().toString());
+					n2 = pulisci(attuale.getEndNode().getProperties("name").values().toString());
+					oss = pulisci(attuale.getProperties("oss").values().toString());
+					ev = pulisci(attuale.getProperties("event").values().toString());
+					gu = pulisci(attuale.getProperties("guasto").values().toString());
+					tx.success();
+				}				
+				addRelationGood(n1, n2, nome, oss, ev, gu, level);
 			}
-			tx1.success();
-		}	
+		}
 		
 	}
 
@@ -102,7 +112,7 @@ public class GoodTwin extends GenericGraphHandler{
 				raggiungibile = checkPathFromRootGood(Globals.allNodesGood.get(i));
 				if(!raggiungibile)
 				{
-					killNode(Globals.allNodesGood.get(i), i);
+					killNodeGood(Globals.allNodesGood.get(i), i);
 					i--;
 				}
 			}
@@ -112,7 +122,7 @@ public class GoodTwin extends GenericGraphHandler{
 	
 	//prima elimino tutte le relazioni che partono da n
 	//poi elimino n
-	public static void killNode(Node n, int index)
+	public static void killNodeGood(Node n, int index)
 	{
 		Globals.allNodesGood.remove(index);
 		String nomeNode = n.getProperties("name").values().toString();

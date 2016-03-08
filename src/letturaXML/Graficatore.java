@@ -10,7 +10,7 @@ public class Graficatore {  //si occupa di dare un grafico pronto al main
 
 	public Graficatore()  //costruttore in caso generale
 	{
-		path="xmls/dilemma2Xml.xml";
+		path="xmls/originalXml.xml";
 		lg = new readXmlGraph(path);
 	}
 	

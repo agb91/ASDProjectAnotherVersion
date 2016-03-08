@@ -70,6 +70,28 @@ public class InVector extends GenericGraphHandler{
 		return false;
 	}
 	
+	public static boolean inNodes(String s, Vector<Node> pagliaio)
+	{
+		if(pagliaio.size()==0)
+		{
+			return false;
+		}
+		s = pulisci(s);
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+			for(int i=0; i<pagliaio.size(); i++)
+			{
+				String attuale = pagliaio.get(i).getProperties("name").values().toString();
+				attuale = pulisci(attuale);
+				if(attuale.equalsIgnoreCase(s))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	public static boolean notExistGoodRels(String id, int level)
 	{
 		for(int l=0; l<=level; l++)

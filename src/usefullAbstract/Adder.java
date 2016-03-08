@@ -186,10 +186,13 @@ public class Adder {
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDbGood.beginTx() )
 		{
-		    Label label = DynamicLabel.label( "Nome" );
-	        userNode = Globals.graphDbGood.createNode( label );
-	        userNode.setProperty( "name", n);
-	        Globals.allNodesGood.addElement(userNode);
+			if(!InVector.inNodes(n, Globals.allNodesGood))
+			{
+			    Label label = DynamicLabel.label( "Nome" );
+		        userNode = Globals.graphDbGood.createNode( label );
+		        userNode.setProperty( "name", n);
+		        Globals.allNodesGood.addElement(userNode);
+			}
 		    tx.success();
 		}    		
 	}

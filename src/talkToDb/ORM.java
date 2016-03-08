@@ -96,7 +96,7 @@ public class ORM extends GenericGraphHandler {
 	
 	private String randomLetter()
 	{
-		String alphabet = "abc";
+		String alphabet = "abcdeg";
 		int i = randomize(alphabet.length()-1);
 		return alphabet.substring(i, i+1);
 	}

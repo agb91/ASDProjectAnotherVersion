@@ -32,7 +32,7 @@ public class Main {
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	System.out.println("leggo da xml...");
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
-    	//db.readTest(5,14,10);
+    	//db.readTest(8,11,10);
     	System.out.println("controllo se rispetta i requisiti");
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	System.out.println("comincio il programma principale");
@@ -42,7 +42,7 @@ public class Main {
     	SincronizzaFirst.syncro(1);
     	GeneralBadTwin.createBadTwinGeneral(2);
     	GoodTwin.createGoodTwin(2);
-    	SincronizzaFirst.syncro(2);
+    	/*SincronizzaFirst.syncro(2);
     	SincronizzaSecond.syncroSecond(2);
     	/*GeneralBadTwin.createBadTwinGeneral(3);
     	GoodTwin.createGoodTwin(3);
