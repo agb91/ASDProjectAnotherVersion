@@ -47,6 +47,25 @@ public class InVector extends GenericGraphHandler{
 		return false;
 	}
 	
+	public static boolean InDoppia( TransizioneDoppia ago, Vector<TransizioneDoppia> pagliaio)
+	{
+		String fago = ago.getSorgente();
+		String dago = ago.getDestinazione();
+		String evago = ago.getEvento();
+		for (int i=0; i<pagliaio.size(); i++)
+		{
+			String fpagliaio = pagliaio.get(i).getSorgente();
+			String dpagliaio = pagliaio.get(i).getDestinazione();
+			String evpagliaio = pagliaio.get(i).getEvento();
+			if(fago.equalsIgnoreCase(fpagliaio) && dago.equalsIgnoreCase(dpagliaio)
+					&& evago.equalsIgnoreCase(evpagliaio))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static boolean notExistGoodRels(String id, int level)
 	{
 		for(int l=0; l<=level; l++)

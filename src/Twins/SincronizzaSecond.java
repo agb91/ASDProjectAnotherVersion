@@ -24,8 +24,15 @@ public class SincronizzaSecond extends SincronizzaCommon {
 
 	public static void syncroSecond(int level)
 	{
-		if(!inInteger(level, Globals.syncroSecondDid) && level!=1)
+		if(!inInteger(level, Globals.syncroSecondDid))
 		{
+			if(level==1)
+			{
+				System.out.println("assurdo logico: dovrei fare la syscrosecond "
+						+ "di livello 1, usando la syncrofirst di livello 0"
+						+ "la quale non esiste (parto a farle da 1)");
+				System.exit(2);
+			}
 			SincronizzaFirst.syncroToSecond(level-1);
 			System.out.println("inizio la sincronizzazione di tipo 2 di livello: " + level);
 			createDataSecond(level );
@@ -45,14 +52,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 				}
 			}
 			writeInDb(level);
-			
-			//se secondTa non è 0, allora è un caso importante, viola c1! non lo memorizzo
-			// perchè voglio che lavolta dopo lo mostri eseguito (se successivamente decido)
-			// si non rieseguirlo dovrò salvare in global il second ta.... altrimenti va perso
-			if(secondTa.size()==0)
-			{
-				Globals.syncroSecondDid.addElement(level);
-			}
+			Globals.syncroSecondDid.addElement(level);
 		}
 	}
 	
@@ -190,6 +190,10 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							//System.out.println("bool: " + bool);
 							if(bool)
 							{
+								/*if(secondSdiff.get(i).equalsIgnoreCase("n2-n2"))
+								{
+									System.err.println("bingo while second");
+								}*/
 								//System.out.println("SONO QUI!");
 								TransizioneDoppia tsecondo = new TransizioneDoppia();
 								tsecondo.setSorgente(secondSdiff.get(i));
@@ -198,10 +202,16 @@ public class SincronizzaSecond extends SincronizzaCommon {
 								//System.out.println("ecco che aggiungo: " + destinazione1+"-"+destinazione2);
 								secondSdue.add(destinazione1+"-"+destinazione2);
 								secondTdue.add(tsecondo);
+								/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
+										+ destinazione1+"-"+destinazione2 + "ev: "
+												+ evento1);*/
 								if(guasto1.equalsIgnoreCase("y"))
 								{
 									//System.out.println("QUESTA!!!");
-									secondTa.addElement(tsecondo);
+									if(!InVector.InDoppia(tsecondo, secondTa))
+									{
+										secondTa.addElement(tsecondo);
+									}
 								}
 							}
 						
@@ -261,19 +271,29 @@ public class SincronizzaSecond extends SincronizzaCommon {
 						{
 							TransizioneDoppia tsecondo = new TransizioneDoppia();
 							tsecondo.setSorgente(nomeAttuale);
+							/*if(nomeAttuale.equalsIgnoreCase("n2-n2"))
+							{
+								System.err.println("bingo superiore second");
+							}*/
 							tsecondo.setDestinazione(destinazione1+"-"+destinazione2);
 							tsecondo.setEvento(evento1);
 							//System.out.println("PRIMA ecco Sdue: " + 
 							//secondSdue.size() + "----vs----" + secondStemp.size());
 							secondSdue.add(destinazione1+"-"+destinazione2);
+							//if(!InVector.InDoppia(tsecondo, secondTdue))
+							//{
 							secondTdue.add(tsecondo);
-							//System.out.println("DOPO ecco Sdue: " + 
-							//secondSdue.size() + "----vs----" + secondStemp.size());
-							//System.out.println("secondT2 size: " + secondTdue.size() + "----0"+ guasto1);
+							//}
+							/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
+									+ destinazione1+"-"+destinazione2 + "ev: "
+											+ evento1);*/
 							if(guasto1.equalsIgnoreCase("y"))
 							{
 								//System.out.println("QUESTA!!!");
-								secondTa.addElement(tsecondo);
+								if(!InVector.InDoppia(tsecondo, secondTa))
+								{
+									secondTa.addElement(tsecondo);
+								}
 							}
 						}
 					}
@@ -319,7 +339,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	{
 		secondSprimo = getAllNodesUntil(level-1, Globals.allNodesSyncroGeneral);
 		secondTprimo = getAllRelationsUntil(level-1, Globals.allRelationsSyncroGeneral);
-		secondTaPrimo = Globals.allTa.get(level-1);
+		//secondTaPrimo = Globals.allTa.get(level-1);
 		//System.out.println("s eretidati: " + secondSprimo.size());
 		
 	
@@ -356,10 +376,15 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		}
 		
 		secondTa.clear();
-		for(int i=0; i<secondTaPrimo.size(); i++)
+		for(int l=1; l<level; l++)
 		{
-			secondTa.add(secondTaPrimo.get(i));	
+			for(int i=0; i<Globals.firstTaPerLevel.get(l-1).size(); i++)
+			{
+				secondTa.add(Globals.firstTaPerLevel.get(l-1).get(i));	
+			}
+			//System.out.println("ne trovo: " + secondTa.size());
 		}
+
 		
 		//System.out.println("secondTa size: "+secondTa.size());
 		secondStemp.clear();

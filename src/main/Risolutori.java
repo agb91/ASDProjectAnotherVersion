@@ -62,6 +62,54 @@ public class Risolutori {
 			else
 			{
 				GoodTwin.createGoodTwin(i);
+				SincronizzaFirst.syncro(i);;
+				
+				if(SincronizzaFirst.checkC1(i))
+				{
+					i++;
+				}
+				else
+				{
+					if(SincronizzaFirst.checkC4(i))
+					{
+						System.out.println("non posso diagnosticare il livello " + i);
+						System.out.println("********************************************************");
+						System.out.println("||    il livello generale di diagnosticabilità è "+(i-1) + "    ||" );
+						System.out.println("********************************************************");
+						ancora = false;
+					}
+					i++;					
+				}
+			}
+		}
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		System.out.println("Questo metodo ha rischiesto " + seconds + ";  \n\n\n\n");
+	}
+	
+	/*public static void second()
+	{
+		long startTime = System.currentTimeMillis();
+		int i=1;
+		boolean ancora = true;
+		while(ancora)
+		{
+			if(i==1)
+			{
+				FirstBadTwin.createBadTwinLevel1();
+			}
+			else
+			{
+				GeneralBadTwin.createBadTwinGeneral(i);
+			}
+			if(SincronizzaSecond.checkC2C3(i))
+			{
+				GoodTwin.createGoodTwin(i);
+				i++;
+			}
+			else
+			{
+				GoodTwin.createGoodTwin(i);
 				SincronizzaSecond.syncroSecond(i);
 				
 				if(SincronizzaSecond.checkC1(i))
@@ -86,7 +134,7 @@ public class Risolutori {
 		long seconds = (endTime - startTime);
 		System.out.println("Questo metodo ha rischiesto " + seconds + ";  \n\n\n\n");
 	}
-	
+	*/
 	public static void third()
 	{
 		long startTime = System.currentTimeMillis();

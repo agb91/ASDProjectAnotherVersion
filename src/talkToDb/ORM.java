@@ -144,6 +144,7 @@ public class ORM extends GenericGraphHandler {
 			}
 			String from = "";
 			String to = "";
+			//System.err.println("ecco la dimensione : " + n.size());
 			if(i<n.size())
 			{
 				from = n.get(i).getNome();
@@ -160,11 +161,15 @@ public class ORM extends GenericGraphHandler {
 			{
 				to = getRandomNode(n);
 			}
+			if(to.equalsIgnoreCase("inizio"))
+			{
+				to = n.get(1).getNome();
+			}
 			String nome = from + "--" + evento + "--" + to + "--" + guasto;
 			//System.out.println("oss: " + oss);
 			Transizione nuova = new Transizione(nome, evento, oss, guasto,
 					from, to);
-			if(!from.equalsIgnoreCase("inizio") && !to.equalsIgnoreCase("inizio"))
+			if(!from.equalsIgnoreCase("inizio"))
 			{
 				ris.addElement(nuova);
 			}

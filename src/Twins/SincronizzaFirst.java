@@ -33,7 +33,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			System.out.println("inizio la sincronizzazione di tipo 1 di livello: " + level);
 			createData(level);
 			algoritmo();
-			/*for(int i = 0 ; i<Sdue.size(); i++)
+		/*	for(int i = 0 ; i<Sdue.size(); i++)
 			{
 				System.out.println("nodi sincros:  " + Sdue.get(i));
 			}*/
@@ -210,6 +210,10 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							
 							if(bool)
 							{
+								if(sorgente1.equalsIgnoreCase("n2") && sorgente2.equalsIgnoreCase("n2"))
+								{
+									System.out.println("bingo grosso");
+								}
 								//
 								//System.out.println("evento1: " + evento1 + ";  evento2: " + evento2 
 								//		+ ";  sorgente1: " + sorgente1 + ";   sorgente2 :" + sorgente2
@@ -226,9 +230,15 @@ public class SincronizzaFirst extends SincronizzaCommon{
 								}
 								if(nuovaTransizione(tsecondo , Tdue))
 								{
+									/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
+											+ destinazione1+"-"+destinazione2 + "ev: "
+													+ evento1);*/
 									if(guasto1.equalsIgnoreCase("y"))
 									{
-										Ta.addElement(tsecondo);
+										if(!InVector.InDoppia(tsecondo, Ta))
+										{
+											Ta.addElement(tsecondo);
+										}
 										//tsecondo.setGuasto("y");
 									}
 									Tdue.addElement(tsecondo);
@@ -289,6 +299,11 @@ public class SincronizzaFirst extends SincronizzaCommon{
 						
 						if(bool)
 						{
+							/*if(sorgente1.equalsIgnoreCase("n2"))
+							{
+								System.err.print("bingo first, la dest è: " + destinazione1+"-"+destinazione2);
+								System.err.println("guasto2 : N; guasto 1:" + guasto1 );
+							}*/
 							TransizioneDoppia tsecondo = new TransizioneDoppia();
 							tsecondo.setSorgente(stato+"-"+stato);
 							tsecondo.setDestinazione(destinazione1+"-"+destinazione2);
@@ -299,17 +314,23 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							{
 								Sdue.addElement(nuovo);
 							}
-							//System.out.println("stato: " + destinazione1+"-"+destinazione2);
-							if(nuovaTransizione(tsecondo, Tdue))
+							/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
+									+ destinazione1+"-"+destinazione2 + "ev: "
+											+ evento1);*/
+							if(guasto1.equalsIgnoreCase("y"))
 							{
-								if(guasto1.equalsIgnoreCase("y"))
+								if(!InVector.InDoppia(tsecondo, Ta))
 								{
 									Ta.addElement(tsecondo);
-									//Globals.lastTa.addElement(tsecondo);
-									//tsecondo.setGuasto("y");
 								}
-								Tdue.addElement(tsecondo);
+								//Globals.lastTa.addElement(tsecondo);
+								//tsecondo.setGuasto("y");
 							}
+							//if(!InVector.InDoppia(tsecondo, Tdue))
+							//{
+							Tdue.addElement(tsecondo);
+							//}
+						
 
 						}
 					}			

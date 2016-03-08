@@ -32,7 +32,7 @@ public class Main {
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	System.out.println("leggo da xml...");
     	db.readXml();// legge l'xml e lo scrive nel db di neo4j
-    	//db.readTest(5,11,20);
+    	//db.readTest(5,14,10);
     	System.out.println("controllo se rispetta i requisiti");
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	System.out.println("comincio il programma principale");
