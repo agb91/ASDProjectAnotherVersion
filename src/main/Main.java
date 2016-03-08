@@ -31,32 +31,32 @@ public class Main {
 		System.out.println("costruisco i database e la struttura...");
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	System.out.println("leggo da xml...");
-    	//db.readXml();// legge l'xml e lo scrive nel db di neo4j
-    	db.readTest();
+    	db.readXml();// legge l'xml e lo scrive nel db di neo4j
+    	//db.readTest(5,11,20);
     	System.out.println("controllo se rispetta i requisiti");
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	System.out.println("comincio il programma principale");
 		
-    	FirstBadTwin.createBadTwinLevel1();
+    	/*FirstBadTwin.createBadTwinLevel1();
     	GoodTwin.createGoodTwin(1);
     	SincronizzaFirst.syncro(1);
     	GeneralBadTwin.createBadTwinGeneral(2);
     	GoodTwin.createGoodTwin(2);
     	SincronizzaFirst.syncro(2);
     	SincronizzaSecond.syncroSecond(2);
-    	GeneralBadTwin.createBadTwinGeneral(3);
+    	/*GeneralBadTwin.createBadTwinGeneral(3);
     	GoodTwin.createGoodTwin(3);
     	SincronizzaFirst.syncro(3);
-    	SincronizzaSecond.syncroSecond(3);
+    	SincronizzaSecond.syncroSecond(3);*/
     	
-    	/*Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
-    	Menu.ask(); */	
-    	
+    	Menu.ask();
+    	Menu.ask(); 
+    
     	
     	System.out.println("ho finito");
     

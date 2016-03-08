@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<grafo>
+    <nodo>
+        <nome>inizio</nome>
+    </nodo>
+    <nodo>
+        <nome>n0</nome>
+    </nodo>
+    <nodo>
+        <nome>n1</nome>
+    </nodo>
+    <nodo>
+        <nome>n2</nome>
+    </nodo>
+    <nodo>
+        <nome>n3</nome>
+    </nodo>
+    <nodo>
+        <nome>n4</nome>
+    </nodo>
+
+    <transizione>
+        <nome>T0</nome>
+        <evento></evento>
+        <osservabile>n</osservabile>
+        <guasto>n</guasto>
+        <from>inizio</from>
+        <to>n0</to>
+    </transizione> 
+    
+     <transizione>
+        <nome>T1</nome>
+        <evento></evento>
+        <osservabile>n</osservabile>
+        <guasto>n</guasto>
+        <from>n0</from>
+        <to>n1</to>
+    </transizione> 
+    
+    <transizione>
+        <nome>T2</nome>
+        <evento>b</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n1</from>
+        <to>n2</to>
+    </transizione> 
+    
+    <transizione>
+        <nome>T3</nome>
+        <evento>a</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n2</from>
+        <to>n3</to>
+    </transizione> 
+    
+    <transizione>
+        <nome>T4</nome>
+        <evento></evento>
+        <osservabile>n</osservabile>
+        <guasto>y</guasto>
+        <from>n3</from>
+        <to>n4</to>
+    </transizione> 
+    
+    <transizione>
+        <nome>T5</nome>
+        <evento>c</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n4</from>
+        <to>n0</to>
+   </transizione>  
+   
+   <transizione>
+        <nome>T6</nome>
+        <evento>a</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n1</from>
+        <to>n4</to>
+   </transizione> 
+   
+   <transizione>
+        <nome>T7</nome>
+        <evento>c</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n2</from>
+        <to>n3</to>
+   </transizione>    
+   
+   <transizione>
+        <nome>T8</nome>
+        <evento>a</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n3</from>
+        <to>n1</to>
+   </transizione>
+   
+   <transizione>
+        <nome>T9</nome>
+        <evento>c</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n4</from>
+        <to>n1</to>
+   </transizione>
+   
+   <transizione>
+        <nome>T10</nome>
+        <evento>b</evento>
+        <osservabile>y</osservabile>
+        <guasto>n</guasto>
+        <from>n0</from>
+        <to>n1</to>
+   </transizione>
+</grafo>

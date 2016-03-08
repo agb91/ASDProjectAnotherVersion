@@ -96,7 +96,7 @@ public class ORM extends GenericGraphHandler {
 	
 	private String randomLetter()
 	{
-		String alphabet = "abcdefgh";
+		String alphabet = "abc";
 		int i = randomize(alphabet.length()-1);
 		return alphabet.substring(i, i+1);
 	}
@@ -122,24 +122,25 @@ public class ORM extends GenericGraphHandler {
 		return attuale.getNome();
 	}
 	
-	private Vector<Transizione> testGetRelationsList(Vector<Nodo> n, int num)
+	private Vector<Transizione> testGetRelationsList(Vector<Nodo> n, int num, int pG)
 	{
 		Vector<Transizione> ris = new Vector<Transizione>();
-		Transizione prima = new Transizione("prima", "a", "y", "n",
+		Transizione prima = new Transizione("prima", "", "n", "n",
 				"inizio", "test0");
 		ris.addElement(prima);
 		for(int i=0; i<num; i++)
 		{
 			String evento = randomLetter();
-			String oss = randomYN(95);
+			String oss = randomYN(65);
 			if(oss.equalsIgnoreCase("n"))
 			{
 				evento = "";
 			}
-			String guasto = randomYN(1); //perchè voglio pochi guasti...
+			String guasto = randomYN(pG); //perchè voglio pochi guasti...
 			if(guasto.equalsIgnoreCase("y"))
 			{
 				oss = "n";
+				evento = "";
 			}
 			String from = "";
 			String to = "";
@@ -160,6 +161,7 @@ public class ORM extends GenericGraphHandler {
 				to = getRandomNode(n);
 			}
 			String nome = from + "--" + evento + "--" + to + "--" + guasto;
+			//System.out.println("oss: " + oss);
 			Transizione nuova = new Transizione(nome, evento, oss, guasto,
 					from, to);
 			if(!from.equalsIgnoreCase("inizio") && !to.equalsIgnoreCase("inizio"))
@@ -170,10 +172,10 @@ public class ORM extends GenericGraphHandler {
 		return ris;
 	}
 	
-	public void readTest()
+	public void readTest(int nNum, int rNum, int probGuasti)
 	{
-		Vector<Nodo> n = testGetNodesList(5);
-		Vector<Transizione> t = testGetRelationsList(n, 25);
+		Vector<Nodo> n = testGetNodesList(nNum);
+		Vector<Transizione> t = testGetRelationsList(n, rNum, probGuasti);
 		for(int i=0; i<n.size(); i++)
 		{
 			Nodo appoggio = n.get(i);

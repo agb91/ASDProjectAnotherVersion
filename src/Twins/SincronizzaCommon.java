@@ -62,9 +62,11 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		return true;
 	}
 
-	protected static boolean checkPrima(Vector<TransizioneDoppia> Ta,int level)
-	{
-		if(Ta.size()==0)
+	protected static boolean checkPrima(Vector<Vector<TransizioneDoppia>> Ta,int level)
+	{	
+		//PROVA 1 2 2 3 1
+
+		if(Ta.get(level).size()==0)
 		{
 			System.out.println("vale C1: "
 					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
@@ -113,6 +115,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 	{
 		boolean ris = false;
 		
+	//	TODO2 BUG NOTO DEL FATTO CHE TA POTREBBE ESSERE INCONSISTENTE IN ALCUNU CASI!
 		if(ta.size()==0)
 		{
 			return false;

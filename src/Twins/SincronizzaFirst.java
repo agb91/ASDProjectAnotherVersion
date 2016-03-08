@@ -36,13 +36,21 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			/*for(int i = 0 ; i<Sdue.size(); i++)
 			{
 				System.out.println("nodi sincros:  " + Sdue.get(i));
-			}
+			}*/
 			for(int i = 0 ; i<Ta.size(); i++)
 			{
-				System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
+				System.out.println("fiorst: ta: sorg:" + Ta.get(i).getSorgente() + 
 						";   dest : " + Ta.get(i).getDestinazione()
 						+ ";    evento: " + Ta.get(i).getEvento());
-			}*/
+			}
+			if(Globals.firstTaPerLevel.get(level).size()<Ta.size())
+			{
+				Globals.firstTaPerLevel.get(level).clear();		
+				for(int i = 0 ; i<Ta.size(); i++)
+				{				
+					Globals.firstTaPerLevel.get(level).addElement(Ta.get(i));
+				}
+			}
 			writeInDb(level);
 			Globals.syncroFirstDid.addElement(level);
 		}
@@ -51,7 +59,16 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	
 	public static boolean checkC4(int level)
 	{
-		return checkQuarta(Sdue, level, Ta, Tdue, "f");
+		boolean ris = checkQuarta(Sdue, level, Globals.firstTaPerLevel.get(level), Tdue, "f");
+		if(ris)
+		{
+			System.out.println("a livello " + level + " c4 è vera");
+		}
+		else
+		{
+			System.out.println("a livello " + level + " c4 è falsa" );
+		}
+		return ris;
 	}
 	
 	public static void syncroToSecond(int level)
@@ -304,7 +321,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	public static boolean checkC1(int level)
 	{
 		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
-		if (checkPrima(Ta, level))
+		if (checkPrima(Globals.firstTaPerLevel, level))
 		{
 			System.out.println("al livello: " + level + ", la condizione C1 è vera");
 			return true;

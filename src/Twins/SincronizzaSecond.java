@@ -30,17 +30,35 @@ public class SincronizzaSecond extends SincronizzaCommon {
 			System.out.println("inizio la sincronizzazione di tipo 2 di livello: " + level);
 			createDataSecond(level );
 			algoritmoSecond( level);
-			//System.out.println("ta ha il numero di elementi: " + secondTa.size());
-			//System.out.println("che va da: " + secondTa.get(0).getSorgente());
-			//System.out.println("che va to: " + secondTa.get(0).getDestinazione());
+			for(int i = 0 ; i<secondTa.size(); i++)
+			{
+				System.out.println("second: ta: sorg:" + secondTa.get(i).getSorgente() + 
+						";   dest : " + secondTa.get(i).getDestinazione()
+						+ ";    evento: " + secondTa.get(i).getEvento());
+			}
+			if(Globals.secondTaPerLevel.get(level).size()<secondTa.size())
+			{
+				Globals.secondTaPerLevel.get(level).clear();
+				for(int i = 0 ; i<secondTa.size(); i++)
+				{
+					Globals.secondTaPerLevel.get(level).addElement(secondTa.get(i));
+				}
+			}
 			writeInDb(level);
-			Globals.syncroSecondDid.addElement(level);
+			
+			//se secondTa non è 0, allora è un caso importante, viola c1! non lo memorizzo
+			// perchè voglio che lavolta dopo lo mostri eseguito (se successivamente decido)
+			// si non rieseguirlo dovrò salvare in global il second ta.... altrimenti va perso
+			if(secondTa.size()==0)
+			{
+				Globals.syncroSecondDid.addElement(level);
+			}
 		}
 	}
 	
 	public static boolean checkC4(int level)
 	{
-		boolean risp = checkQuarta(secondSdue, level, secondTa, secondTdue,  "s");
+		boolean risp = checkQuarta(secondSdue, level, Globals.secondTaPerLevel.get(level), secondTdue,  "s");
 		//System.out.println("sono la c4 di: del secondo metodo; restituisco: " + risp + " sono chiamato dal livello : "+ level);
 		return risp; 
 	}
@@ -75,8 +93,8 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	
 	public static boolean checkC1(int level)
 	{
-		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
-		if (checkPrima(secondTa, level))
+		//primo caso, se non ha transizioni ambigue allora è vera
+		if (checkPrima(Globals.secondTaPerLevel, level))
 		{
 			System.out.println("al livello: " + level + ", la condizione C1 è vera");
 			return true;

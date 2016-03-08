@@ -23,6 +23,9 @@ public class Globals {
 	public static Vector <Vector<Relationship>> allRelationsGoodGeneral = new Vector<Vector<Relationship>>();
 	public static Vector<Integer> goodTwinDid = new Vector<Integer>();
 	
+	public static Vector<Vector<TransizioneDoppia>> firstTaPerLevel = new Vector<Vector<TransizioneDoppia>>();
+	public static Vector<Vector<TransizioneDoppia>> secondTaPerLevel = new Vector<Vector<TransizioneDoppia>>();
+	
 	public static Vector<Vector<Node>> allNodesSyncroGeneral = new Vector<Vector<Node>>();
 	public static Vector<Vector<Node>> allNodesSyncroGeneralSecond = new Vector<Vector<Node>>();
 	public static Vector<Vector<TransizioneDoppia>> allTa = new Vector<Vector<TransizioneDoppia>>();
@@ -47,6 +50,8 @@ public class Globals {
 			allRelationsSyncroGeneral.addElement(new Vector<Relationship>());
 			allRelationsSyncroGeneralSecond.addElement(new Vector<Relationship>());
 			allTa.addElement(new Vector<TransizioneDoppia>());
+			firstTaPerLevel.addElement(new Vector<TransizioneDoppia>());
+			secondTaPerLevel.addElement(new Vector<TransizioneDoppia>());
 		}
 		badTwinDid.addElement(Integer.valueOf(0));
 		goodTwinDid.addElement(Integer.valueOf(0));

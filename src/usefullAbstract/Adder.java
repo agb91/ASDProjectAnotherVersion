@@ -195,7 +195,7 @@ public class Adder {
 	}
 	
 
-	protected static boolean notExist(String ago, int level )
+	/*protected static boolean notExist(String ago, int level )
 	{
 		for(int l=0; l<=level; l++)
 		{
@@ -211,7 +211,7 @@ public class Adder {
 			}	
 		}		
 		return true;	
-	}
+	}*/
 	
 
 	
@@ -220,7 +220,7 @@ public class Adder {
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			if(notExist(nome, level))
+			if(InVector.notExistBadRels(nome, level))
 			{
 				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
 				relationship.setProperty( "type", pulisci(nome) );
@@ -386,6 +386,11 @@ public class Adder {
 		        }
 		    }
 		}
+		if(userNodes.size()==0)
+		{
+			System.out.println("non trovo il nodo: " + nameToFind);
+		}
+		
 		return userNodes.get(0);
 
 	}
@@ -411,11 +416,15 @@ public class Adder {
 			}
 			tx.success();
 		}
+		if(returned==null)
+		{
+			System.out.println("non trovo il nodo: " + n2);
+		}
 		return returned;
 	}
 	
 
-	protected static boolean notExistGood(String ago, int level)
+	/*protected static boolean notExistGood(String ago, int level)
 	{
 		for(int l=0; l<=level; l++)
 		{
@@ -431,7 +440,7 @@ public class Adder {
 			}	
 		}		
 		return true;
-	}
+	}*/
 
 	
 	protected static void addRelationGood(String n1, String n2, String nome, 
@@ -439,7 +448,7 @@ public class Adder {
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDbGood.beginTx() )
 		{
-			if(notExistGood(nome, level))
+			if(InVector.notExistGoodRels(nome, level))
 			{
 				Node n1Node = findNodeByNameGood(pulisci(n1));
 				Node n2Node = findNodeByNameGood(pulisci(n2));

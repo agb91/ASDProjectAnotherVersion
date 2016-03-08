@@ -47,7 +47,25 @@ public class InVector extends GenericGraphHandler{
 		return false;
 	}
 	
-	public static boolean notExistGoodRels(String n1, String n2, String ev, int level)
+	public static boolean notExistGoodRels(String id, int level)
+	{
+		for(int l=0; l<=level; l++)
+		{
+			for(int i=0; i<Globals.allRelationsGoodGeneral.get(l).size(); i++)
+			{
+				Relationship attuale = Globals.allRelationsGoodGeneral.get(l).get(i);
+				String pagliaio = pulisci(attuale.getProperties("type").values().toString());
+				if(pagliaio.equalsIgnoreCase(id))
+				{
+					//System.out.println("ho scartato; " + ago);
+					return false;
+				}
+			}	
+		}		
+		return true;
+	}
+	
+	/*public static boolean notExistGoodRels(String n1, String n2, String ev, int level)
 	{
 		for(int l=0; l<=level; l++)
 		{
@@ -68,7 +86,7 @@ public class InVector extends GenericGraphHandler{
 		}		
 		return true;
 	}
-
+*/
 
 	public static boolean notExistSyncro(String ago)
 	{
@@ -151,7 +169,7 @@ public class InVector extends GenericGraphHandler{
 	}
 	
 	
-	public static boolean notExistBadRels(String n1, String n2, String guasto, String event, int level )
+	/*public static boolean notExistBadRels(String n1, String n2, String guasto, String event, int level )
 	{
 		for(int l=0; l<=level; l++)
 		{
@@ -173,8 +191,25 @@ public class InVector extends GenericGraphHandler{
 			}	
 		}		
 		return true;	
-	}
+	}*/
 	
+	public static boolean notExistBadRels(String id, int level )
+	{
+		for(int l=0; l<=level; l++)
+		{
+			for(int i=0; i<Globals.allRelationsGeneral.get(l).size(); i++)
+			{
+				Relationship attuale = Globals.allRelationsGeneral.get(l).get(i);
+				String pagliaio = pulisci(attuale.getProperties("type").values().toString());
+				if(pagliaio.equalsIgnoreCase(id))
+				{
+					//System.out.println("ho scartato; " + ago);
+					return false;
+				}
+			}	
+		}		
+		return true;	
+	}
 	
 	public static boolean stessoEvento(String a , String b)
 	{
