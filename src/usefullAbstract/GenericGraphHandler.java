@@ -2,7 +2,9 @@ package usefullAbstract;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import org.neo4j.graphalgo.GraphAlgoFactory;
@@ -283,18 +285,32 @@ public class GenericGraphHandler extends Adder{
 		return ris;
 	}
 	
-	protected static Vector<Relationship> getAllRelationsUntil(int level, Vector<Vector<Relationship>> who)
+	protected static Vector<Relationship> getAllRelationsUntil(int level, Vector<HashMap<String, Relationship>> who)
 	{
 		Vector<Relationship> ris = new Vector<Relationship>();
 		for(int l=0; l<=level; l++ )
 		{
-			for(int i=0; i< who.get(l).size(); i++)
-			{
-				Relationship nuova = who.get(l).get(i);
-				ris.add(nuova);
+			Iterator<String> keyset = who.get(l).keySet().iterator();
+			while(keyset.hasNext())
+			{ 
+				String key = keyset.next();
+				ris.addElement(who.get(l).get(key));
 			}
 		}
 		return ris;
+	}
+	
+	protected static void killRelation(String id,  
+			Vector<HashMap<String, Relationship>> hash)
+	{
+		for(int a=0; a<hash.size(); a++)
+		{
+			if(hash.get(a).get(id)!=null)
+			{
+				hash.get(a).get(id).delete();
+			}
+			hash.get(a).remove(id);
+		}	
 	}
 	
 	protected static Vector<String> riempiTPrimo(int level)
@@ -302,15 +318,21 @@ public class GenericGraphHandler extends Adder{
 		Vector<String> ris = new Vector<String>();
 		for(int l=1; l<=level; l++)
 		{
-			for(int i=0; i<Globals.allRelationsGeneral.get(l-1).size(); i++)
-			{
-				Relationship attuale = Globals.allRelationsGeneral.get(l-1).get(i);
-				String osservabilita = attuale.getProperties("oss").values().toString();
-				if(osservabilita.contains("y"))
+			HashMap<String, Relationship> hash = new HashMap<String, Relationship>();
+			hash = Globals.allRelationsGeneralHash.get(l-1);
+			
+			Iterator<String> keyset = hash.keySet().iterator();
+			while(keyset.hasNext())
+			{ 
+				String key = keyset.next();
+				Relationship appoggio = (Relationship) hash.get(key);
+				String osservabilita = pulisci(appoggio.getProperties("oss").values().toString());
+				if(osservabilita.equalsIgnoreCase("y"))
 				{
-					String nome = attuale.getProperties("type").values().toString();
+					String nome = appoggio.getProperties("type").values().toString();
 					ris.add(nome);
 				}
+	
 			}
 		}
 		return ris;

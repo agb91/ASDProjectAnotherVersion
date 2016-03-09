@@ -28,20 +28,13 @@ import usefullAbstract.GenericGraphHandler;
 
 public class CheckRequirements extends GenericGraphHandler{
 	
-	/*private static Vector<Node> allNodes;
-	private static Vector<Relationship> allRelations;
-	private static GraphDatabaseService graphDb;*/
+	private static Vector<Relationship> rels = new Vector<Relationship>();
 	private static boolean isCyclic = false;
-	
-	/*public static void prepare()
-	{
-		allNodes = _allNodes;
-		allRelations = _allRels;
-		graphDb = _graphDb;
-	}*/
+
 	
 	public static void check()
 	{
+		rels = getAllRelationsUntil(0, Globals.allRelationsGeneralHash);
 		//ogni stato ha almeno una transizione uscente
 		checkOutComing();
 		
@@ -77,9 +70,9 @@ public class CheckRequirements extends GenericGraphHandler{
 	{
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int i=0; i<Globals.allRelationsGeneral.get(0).size(); i++)
+			for(int i=0; i<rels.size(); i++)
 			{
-				Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
+				Relationship attuale = rels.get(i);
 				String osservabile = attuale.getProperties("oss").values().toString();
 				osservabile = pulisci(osservabile);
 				if(osservabile.equalsIgnoreCase("n"))
@@ -103,9 +96,9 @@ public class CheckRequirements extends GenericGraphHandler{
 	{
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int i=0; i<Globals.allRelationsGeneral.get(0).size(); i++)
+			for(int i=0; i<rels.size(); i++)
 			{
-				Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
+				Relationship attuale = rels.get(i);
 				String guasto = attuale.getProperties("guasto").values().toString();
 				guasto = pulisci(guasto);
 				String osservabile = attuale.getProperties("oss").values().toString();
@@ -125,15 +118,15 @@ public class CheckRequirements extends GenericGraphHandler{
 	
 	private static void checkTwin()
 	{
-		int max = Globals.allRelationsGeneral.get(0).size();
+		int max = rels.size();
 		for(int i=0; i<max; i++)
 		{
-			Relationship attuale = Globals.allRelationsGeneral.get(0).get(i);
+			Relationship attuale = rels.get(i);
 			for(int a=0; a<max; a++)
 			{
 				if(a!=i)
 				{
-					twin(attuale, Globals.allRelationsGeneral.get(0).get(a));
+					twin(attuale, rels.get(a));
 				}			
 			}
 		}
@@ -300,9 +293,9 @@ public class CheckRequirements extends GenericGraphHandler{
 		{
 	    	int a=0;
 	    	String nomeNodo = n.getProperties("name").values().toString();
-	    	while(a<Globals.allRelationsGeneral.get(0).size())
+	    	while(a<rels.size())
 	    	{
-	    	   Relationship r = Globals.allRelationsGeneral.get(0).get(a);	
+	    	   Relationship r = rels.get(a);	
 	    	   String from = r.getProperties("from").values().toString();
 	    	   if(verbose)
 	    	   {

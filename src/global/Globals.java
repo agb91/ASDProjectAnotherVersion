@@ -1,5 +1,6 @@
 package global;
 
+import java.util.HashMap;
 import java.util.Vector;
 
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -16,11 +17,12 @@ public class Globals {
 	public static GraphDatabaseService graphDbSyncroSecond;
 	
 	public static Vector <Node> allNodes = new Vector<Node>();
-	public static Vector <Vector<Relationship>> allRelationsGeneral = new Vector<Vector<Relationship>>();
+	public static Vector <HashMap<String, Relationship>> allRelationsGeneralHash = new Vector<HashMap<String, Relationship>>();
+	
 	public static Vector<Integer> badTwinDid = new Vector<Integer>();
 		
 	public static Vector <Node> allNodesGood = new Vector<Node>();
-	public static Vector <Vector<Relationship>> allRelationsGoodGeneral = new Vector<Vector<Relationship>>();
+	public static Vector <HashMap<String, Relationship>> allRelationsGoodGeneralHash = new Vector<HashMap<String, Relationship>>();
 	public static Vector<Integer> goodTwinDid = new Vector<Integer>();
 	
 	public static Vector<Vector<TransizioneDoppia>> firstTaPerLevel = new Vector<Vector<TransizioneDoppia>>();
@@ -29,10 +31,10 @@ public class Globals {
 	public static Vector<Vector<Node>> allNodesSyncroGeneral = new Vector<Vector<Node>>();
 	public static Vector<Vector<Node>> allNodesSyncroGeneralSecond = new Vector<Vector<Node>>();
 	public static Vector<Vector<TransizioneDoppia>> allTa = new Vector<Vector<TransizioneDoppia>>();
-	public static Vector<Vector<Relationship>> allRelationsSyncroGeneral = 
-			new Vector<Vector<Relationship>>();
-	public static Vector<Vector<Relationship>> allRelationsSyncroGeneralSecond = 
-			new Vector<Vector<Relationship>>();
+	public static Vector<HashMap<String, Relationship>> allRelationsSyncroGeneralHash = 
+			new Vector<HashMap<String, Relationship>>();
+	public static Vector<HashMap<String, Relationship>> allRelationsSyncroGeneralSecondHash = 
+			new Vector<HashMap<String, Relationship>>();
 	public static Vector<Integer> syncroFirstDid = new Vector<Integer>();
 	public static Vector<Integer> syncroSecondDid = new Vector<Integer>();
 
@@ -43,12 +45,12 @@ public class Globals {
 	{
 		for(int i=0; i<10; i++)
 		{
-			allRelationsGeneral.addElement(new Vector<Relationship>());
-			allRelationsGoodGeneral.addElement(new Vector<Relationship>());
+			allRelationsGeneralHash.addElement(new HashMap<String, Relationship>());
+			allRelationsGoodGeneralHash.addElement(new HashMap<String, Relationship>());
 			allNodesSyncroGeneral.addElement(new Vector<Node>());
 			allNodesSyncroGeneralSecond.addElement(new Vector<Node>());
-			allRelationsSyncroGeneral.addElement(new Vector<Relationship>());
-			allRelationsSyncroGeneralSecond.addElement(new Vector<Relationship>());
+			allRelationsSyncroGeneralHash.addElement(new HashMap<String, Relationship>());
+			allRelationsSyncroGeneralSecondHash.addElement(new HashMap<String, Relationship>());
 			allTa.addElement(new Vector<TransizioneDoppia>());
 			firstTaPerLevel.addElement(new Vector<TransizioneDoppia>());
 			secondTaPerLevel.addElement(new Vector<TransizioneDoppia>());

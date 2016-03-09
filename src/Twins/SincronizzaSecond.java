@@ -1,5 +1,7 @@
 package Twins;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.neo4j.graphdb.Node;
@@ -255,7 +257,15 @@ public class SincronizzaSecond extends SincronizzaCommon {
 			{
 				//per definizione ti = transizioni con evento composto di livello level
 				//nel bad twin
-				Vector<Relationship> T = Globals.allRelationsGeneral.get(level);
+				Vector<Relationship> T = new Vector<Relationship>();
+				HashMap<String, Relationship> hash= Globals.allRelationsGeneral.get(level);
+				Iterator<String> keyset = hash.keySet().iterator();
+				while(keyset.hasNext())
+				{ 
+					String key = keyset.next();
+					T.addElement(hash.get(key));
+				}
+				//Vector<Relationship> T = Globals.allRelationsGeneral.get(level);
 				for(int a=0; a<T.size(); a++)
 				{
 					for(int k=0; k<T.size(); k++)

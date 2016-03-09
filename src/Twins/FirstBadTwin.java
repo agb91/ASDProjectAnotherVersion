@@ -31,9 +31,10 @@ public class FirstBadTwin extends GenericGraphHandler {
 						String nomeNodo = nodoAttuale.getProperties("name").values().toString();
 						//System.out.println("--------------------------\n\n");
 						//System.out.println("nodo: " + nomeNodo);
-						for(int a=1; a<Globals.allRelationsGeneral.get(0).size(); a++)
+						Vector<Relationship> rels =getAllRelationsUntil(0, Globals.allRelationsGeneralHash);
+						for(int a=1; a<rels.size(); a++)
 						{
-							Relationship transazioneAttuale = Globals.allRelationsGeneral.get(0).get(a);
+							Relationship transazioneAttuale = rels.get(a);
 							String from = transazioneAttuale.getProperties("from").values().toString();
 							Node destinazione = transazioneAttuale.getEndNode();
 							String osservabilita = transazioneAttuale.getProperties("oss").values().toString();

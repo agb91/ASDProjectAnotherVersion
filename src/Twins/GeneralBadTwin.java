@@ -104,7 +104,7 @@ public class GeneralBadTwin extends GenericGraphHandler{
 	public static boolean checkC2C3(int level)
 	{
 		//secondo caso se è deterministico allora è diagnosticabile
-		if(deterministic(Globals.allRelationsGeneral.get(level)))
+		if(deterministic(getAllRelationsUntil(level, Globals.allRelationsGeneral)))
 		{
 			System.out.println("vale C2: il bad twin è deterministico");
 			return true;

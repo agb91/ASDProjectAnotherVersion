@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
@@ -61,17 +62,41 @@ public class ORM extends GenericGraphHandler {
 	{
 		for (int l=0; l<=level; l++)
 		{
-			for(int i=1; i<Globals.allRelationsGeneral.get(l).size(); i++)
-			{
-				Relationship attuale = Globals.allRelationsGeneral.get(l).get(i);
-				String osservabilita = attuale.getProperties("oss").values().toString();
-				if(osservabilita.toLowerCase().contains("n"))
+			HashMap <String,Relationship> hash= new HashMap<String, Relationship>();
+			hash = Globals.allRelationsGeneralHash.get(l);
+			Iterator<String> keyset = hash.keySet().iterator();
+			//System.err.println(keyset.next());
+			Vector<String> cancellare = new Vector<String>();
+			while(keyset.hasNext())
+			{ 
+				String key = keyset.next();
+				//System.out.println("chiavi: " + key);
+				Relationship appoggio = hash.get(key);
+				String osservabilita = pulisci(appoggio.getProperties("oss").values().toString());
+				if(osservabilita.equalsIgnoreCase("n"))
 				{
-					//System.out.println("cancello la relazione: " + Globals.allRelations.get(i).getStartNode() + "--->" + Globals.allRelations.get(i).getEndNode());
-					Globals.allRelationsGeneral.get(l).get(i).delete();
-					Globals.allRelationsGeneral.get(l).remove(i);
-					i--;
+					//System.out.println("cancello la relazione: " + key);
+					cancellare.add(String.valueOf(key));
 				}
+			}
+			//System.out.println("here");
+			for(int i=0; i<cancellare.size(); i++)
+			{
+				if(!cancellare.get(i).equalsIgnoreCase("T0"))
+				{
+					System.out.println("cancello la relazione: " + cancellare.get(i));
+					/*for(int a=0; a<Globals.allRelationsGeneralHash.size(); a++)
+					{
+						if(Globals.allRelationsGeneralHash.get(a).get(cancellare.get(i))!=null)
+						{
+							Globals.allRelationsGeneralHash.get(a).get(cancellare.get(i)).delete();
+						}
+						Globals.allRelationsGeneralHash.get(a).remove(cancellare.get(i));
+					}*/
+					killRelation(cancellare.get(i), Globals.allRelationsGeneralHash);
+					hash.remove(cancellare.get(i));
+				}
+				
 			}
 		}
 	}
@@ -232,7 +257,7 @@ public class ORM extends GenericGraphHandler {
 		protected static void addRelation(String n1n, String n2n, Node n1, Node n2, String nome, String oss, String ev, String gu)
 	{
 		Relationship relationship = null;
-		if(!InVector.inRel(nome, Globals.allRelationsGeneral.get(0)))
+		if(!InVector.inRel(nome, Globals.allRelationsGeneralHash.get(0)))
 		{
 			try ( Transaction tx = Globals.graphDb.beginTx() )
 			{
@@ -249,7 +274,7 @@ public class ORM extends GenericGraphHandler {
 				
 				System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2 
 						+ "con evento:" + ev +"; guasto: " + gu);
-				Globals.allRelationsGeneral.get(0).addElement(relationship);
+				Globals.allRelationsGeneralHash.get(0).put(pulisci(nome), relationship);
 				tx.success();
 			
 			}
@@ -282,26 +307,7 @@ public class ORM extends GenericGraphHandler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-		
-	/*private static Node findNodeByName(String nameToFind)
-	{
-		ArrayList<Node> userNodes = new ArrayList<>();
-		Label label = DynamicLabel.label( "Nome" );
-		try ( Transaction tx = Globals.graphDb.beginTx() )
-		{
-		    try ( ResourceIterator<Node> users =
-		    		Globals.graphDb.findNodes( label, "name", nameToFind ) )
-		    {
-		        while ( users.hasNext() )
-		        {
-		            userNodes.add( users.next() );
-		        }
-		    }
-		}
-		return userNodes.get(0);
-
-	}*/
+	}	
 		
 	public static void setLabelSystem()
 	{

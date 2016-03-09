@@ -22,7 +22,7 @@ public class Find extends GenericGraphHandler{
 	{
 		ot = pulisci(ot);
 		Vector<Tripletta> risultato = new Vector<Tripletta>();
-		Vector<Relationship> allRelationsUntilNow = getAllRelationsUntil(level, Globals.allRelationsGeneral); //perchè è compreso questo...
+		Vector<Relationship> allRelationsUntilNow = getAllRelationsUntil(level, Globals.allRelationsGeneralHash); //perchè è compreso questo...
 		for(int q=1; q<allRelationsUntilNow.size(); q++)
 		{
 			Relationship transazioneAttuale = allRelationsUntilNow.get(q);

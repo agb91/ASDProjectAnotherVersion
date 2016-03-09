@@ -236,7 +236,7 @@ public class Adder {
 				relationship.setProperty("from", pulisci(nomeN1));
 				relationship.setProperty("to", pulisci(nomeN2));
 	
-				Globals.allRelationsGeneral.get(level).addElement(relationship);
+				Globals.allRelationsGeneralHash.get(level).put(pulisci(nome), relationship);
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}
 			tx.success();
@@ -264,7 +264,7 @@ public class Adder {
 				relationship.setProperty("from", pulisci(nomeN1));
 				relationship.setProperty("to", pulisci(nomeN2));
 	
-				Globals.allRelationsSyncroGeneral.get(level).addElement(relationship);
+				Globals.allRelationsSyncroGeneral.get(level).put(pulisci(nome), relationship);
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}
 			tx.success();
@@ -293,7 +293,7 @@ public class Adder {
 				relationship.setProperty("from", pulisci(nomeN1));
 				relationship.setProperty("to", pulisci(nomeN2));
 	
-				Globals.allRelationsSyncroGeneralSecond.get(level).addElement(relationship);
+				Globals.allRelationsSyncroGeneralSecond.get(level).put(pulisci(nome), relationship);
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			
 			}
@@ -464,7 +464,7 @@ public class Adder {
 				relationship.setProperty("from", pulisci(n1));
 				relationship.setProperty("to", pulisci(n2));
 				tx.success();
-				Globals.allRelationsGoodGeneral.get(level).addElement(relationship);
+				Globals.allRelationsGoodGeneralHash.get(level).put(pulisci(nome), relationship);
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}	
 		}

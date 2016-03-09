@@ -1,6 +1,8 @@
 package usefullAbstract;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.neo4j.graphdb.Node;
@@ -13,25 +15,16 @@ import global.Globals;
 public class InVector extends GenericGraphHandler{
 	
 	// se se ago è dentro pagliaio
-	public static boolean inRel(String id, Vector<Relationship> pagliaio)
+	public static boolean inRel(String id, HashMap<String, Relationship> pagliaio)
 	{
 		if(pagliaio.size()==0)
 		{
 			return false;
 		}
-
-		try ( Transaction tx = Globals.graphDb.beginTx() )
+		if(pagliaio.get(id)!=null)
 		{
-			for(int i=0; i<pagliaio.size(); i++)
-			{
-				String idPagliaio = pulisci(pagliaio.get(i).getProperties("type").values().toString());
-				if(idPagliaio.equalsIgnoreCase(id))
-				{					
-					return true;
-				}
-			}
-			tx.success();
-		}	
+			return true;
+		}
 		return false;
 	}
 	
@@ -94,59 +87,27 @@ public class InVector extends GenericGraphHandler{
 	
 	public static boolean notExistGoodRels(String id, int level)
 	{
+		boolean esiste = false;
 		for(int l=0; l<=level; l++)
 		{
-			for(int i=0; i<Globals.allRelationsGoodGeneral.get(l).size(); i++)
+			if(Globals.allRelationsGoodGeneralHash.get(l).get(id)!=null)
 			{
-				Relationship attuale = Globals.allRelationsGoodGeneral.get(l).get(i);
-				String pagliaio = pulisci(attuale.getProperties("type").values().toString());
-				if(pagliaio.equalsIgnoreCase(id))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}	
+				esiste = true;
+			}
 		}		
-		return true;
+		return !esiste;
 	}
 	
-	/*public static boolean notExistGoodRels(String n1, String n2, String ev, int level)
-	{
-		for(int l=0; l<=level; l++)
-		{
-			for(int i=0; i<Globals.allRelationsGoodGeneral.get(l).size(); i++)
-			{
-				Relationship attuale = Globals.allRelationsGoodGeneral.get(l).get(i);
-				String pagliaioN1 = pulisci(attuale.getProperties("from").values().toString());
-				String pagliaioN2 = pulisci(attuale.getProperties("to").values().toString());
-				String pagliaioEv = pulisci(attuale.getProperties("event").values().toString());
-				
-				if(stessoStato(pagliaioN1,n1) && stessoStato(pagliaioN2,n2)
-						&& stessoEvento(ev, pagliaioEv))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}	
-		}		
-		return true;
-	}
-*/
 
 	public static boolean notExistSyncro(String ago)
 	{
-		for(int l=0; l<Globals.allRelationsSyncroGeneral.size(); l++)
+		boolean esiste = false;
+		for(int l=0; l<Globals.allRelationsSyncroGeneralHash.size(); l++)
 		{
-			for(int i=0; i<Globals.allRelationsSyncroGeneral.get(l).size(); i++)
+			if(Globals.allRelationsSyncroGeneralHash.get(l).get(ago)!=null)
 			{
-				Relationship attuale = Globals.allRelationsSyncroGeneral.get(l).get(i);
-				String pagliaio = pulisci(attuale.getProperties("type").values().toString());
-				if(pagliaio.equalsIgnoreCase(ago))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}
+				esiste = true;
+			}		
 		}
 		for(int l=0; l<Globals.allNodesSyncroGeneral.size(); l++)
 		{
@@ -157,34 +118,25 @@ public class InVector extends GenericGraphHandler{
 				if(pagliaio.equalsIgnoreCase(ago))
 				{
 					//System.out.println("ho scartato; " + ago);
-					return false;
+					esiste = true;
 				}
 			}
 		}
-		return true;	
+		return !esiste;	
 	}
 	
-	public static boolean notExistSyncroSecondRels(String s, String d, String e)
+	public static boolean notExistSyncroSecondRels(String id)
 	{
-		s = pulisci(s);
-		d = pulisci(d);
-		e = pulisci(e);
-		for(int l=0; l<Globals.allRelationsSyncroGeneralSecond.size(); l++)
+		boolean esiste = false;
+		id = pulisci(id);
+		for(int l=0; l<Globals.allRelationsSyncroGeneralSecondHash.size(); l++)
 		{
-			for(int i=0; i<Globals.allRelationsSyncroGeneralSecond.get(l).size(); i++)
+			if(Globals.allRelationsGoodGeneralHash.get(l).get(id)!=null)
 			{
-				Relationship attuale = Globals.allRelationsSyncroGeneralSecond.get(l).get(i);
-				String pagliaios = pulisci(attuale.getProperties("from").values().toString());
-				String pagliaiod = pulisci(attuale.getProperties("to").values().toString());
-				String pagliaioe = pulisci(attuale.getProperties("event").values().toString());
-				if(stessoStato(pagliaios,s) && stessoStato(pagliaiod,d) && pagliaioe.equalsIgnoreCase(e))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
+				esiste = true;
 			}
 		}
-		return true;
+		return !esiste;
 	}
 	
 	public static boolean notExistSyncroSecondNode(String ago)
@@ -214,46 +166,18 @@ public class InVector extends GenericGraphHandler{
 	}
 	
 	
-	/*public static boolean notExistBadRels(String n1, String n2, String guasto, String event, int level )
-	{
-		for(int l=0; l<=level; l++)
-		{
-			for(int i=0; i<Globals.allRelationsGeneral.get(l).size(); i++)
-			{
-				Relationship attuale = Globals.allRelationsGeneral.get(l).get(i);
-				String pagliaioN1 = pulisci(attuale.getProperties("from").values().toString());
-				String pagliaioN2 = pulisci(attuale.getProperties("to").values().toString());
-				String pagliaioGu = pulisci(attuale.getProperties("event").values().toString());
-				String pagliaioEv = pulisci(attuale.getProperties("guasto").values().toString());
-							
-				
-				if(stessoStato(pagliaioN1,n1) && stessoStato(pagliaioN2, n2)
-						&& stessoEvento(pagliaioEv, event) && pagliaioGu.equalsIgnoreCase(guasto))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}	
-		}		
-		return true;	
-	}*/
-	
 	public static boolean notExistBadRels(String id, int level )
 	{
-		for(int l=0; l<=level; l++)
+		boolean esiste = false;
+		id = pulisci(id);
+		for(int l=0; l<level; l++)
 		{
-			for(int i=0; i<Globals.allRelationsGeneral.get(l).size(); i++)
+			if(Globals.allRelationsGeneralHash.get(l).get(id)!=null)
 			{
-				Relationship attuale = Globals.allRelationsGeneral.get(l).get(i);
-				String pagliaio = pulisci(attuale.getProperties("type").values().toString());
-				if(pagliaio.equalsIgnoreCase(id))
-				{
-					//System.out.println("ho scartato; " + ago);
-					return false;
-				}
-			}	
-		}		
-		return true;	
+				esiste = true;
+			}
+		}
+		return !esiste;	
 	}
 	
 	public static boolean stessoEvento(String a , String b)
