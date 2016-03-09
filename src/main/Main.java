@@ -38,16 +38,22 @@ public class Main {
     	System.out.println("comincio il programma principale");
 		
     	FirstBadTwin.createBadTwinLevel1();
-    	GoodTwin.createGoodTwin(1);
-    	/*SincronizzaFirst.syncro(1);
+    	//GoodTwin.createGoodTwin(1);
+    	//SincronizzaFirst.syncro(1);
     	GeneralBadTwin.createBadTwinGeneral(2);
-    	GoodTwin.createGoodTwin(2);
-    	/*SincronizzaFirst.syncro(2);
-    	SincronizzaSecond.syncroSecond(2);
-    	/*GeneralBadTwin.createBadTwinGeneral(3);
-    	GoodTwin.createGoodTwin(3);
-    	SincronizzaFirst.syncro(3);
-    	SincronizzaSecond.syncroSecond(3);*/
+    	//GoodTwin.createGoodTwin(2);
+    	//SincronizzaFirst.syncro(2);
+    	//SincronizzaSecond.syncroSecond(2);
+    	GeneralBadTwin.createBadTwinGeneral(3);
+    	//GoodTwin.createGoodTwin(3);
+    	//SincronizzaFirst.syncro(3);
+    	//SincronizzaSecond.syncroSecond(3);
+    	GeneralBadTwin.createBadTwinGeneral(4);
+    	GeneralBadTwin.createBadTwinGeneral(5);
+    	GeneralBadTwin.createBadTwinGeneral(6);
+    	GeneralBadTwin.createBadTwinGeneral(7);
+    	GeneralBadTwin.createBadTwinGeneral(8);
+    	GeneralBadTwin.createBadTwinGeneral(9);
     	
     	/*Menu.ask();
     	Menu.ask();

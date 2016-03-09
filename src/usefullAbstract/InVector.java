@@ -170,7 +170,7 @@ public class InVector extends GenericGraphHandler{
 	{
 		boolean esiste = false;
 		id = pulisci(id);
-		for(int l=0; l<level; l++)
+		for(int l=0; l<=level; l++)
 		{
 			if(Globals.allRelationsGeneralHash.get(l).get(id)!=null)
 			{

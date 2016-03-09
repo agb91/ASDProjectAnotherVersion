@@ -79,7 +79,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	public static boolean checkC2C3(int level)
 	{
 		 //secondo caso se è deterministico allora è diagnosticabile
-		if (checkSeconda(getAllRelationsUntil(level, Globals.allRelationsGeneral), level))
+		if (checkSeconda(getAllRelationsUntil(level, Globals.allRelationsGeneralHash), level))
 		{
 			System.out.println("al livello: " + level + ", la condizione C2 è vera");
 			return true;
@@ -92,7 +92,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		//cerco le transizioni di guasto: prendo il loro evento.
 		// se per tutti quegli eventi non esistono transizioni di guasto
 		// che abbiano come evento quegli eventi allora è diagnosticabile
-		if(checkTerza(getAllRelationsUntil(level, Globals.allRelationsGeneral), level))
+		if(checkTerza(getAllRelationsUntil(level, Globals.allRelationsGeneralHash), level))
 		{
 			System.out.println("al livello: " + level + ", la condizione C3 è vera");
 			return true;
@@ -162,17 +162,17 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	
 	private static void bloccoWhileSecondo(int level)
 	{
+		int kl=0;
 		//System.out.println("entro in while;");
 		while(!checkEqual(secondSdue, secondStemp))
 		{
+			kl++;
 			getSecondDiff(); 
 			//System.out.println("sono qui");
 			secondStemp.clear();
 			secondStemp.addAll(secondSdue);
 			
-			Vector<Relationship> T = getAllRelationsUntil(level, Globals.allRelationsGeneral);
-			//System.out.println("questa è la dimensione diT: " + T.size());
-			//System.out.println("secondSdiff: " + secondSdiff.size());
+			Vector<Relationship> T = getAllRelationsUntil(level, Globals.allRelationsGeneralHash);
 			//todo
 			for(int i=0; i<secondSdiff.size(); i++)
 			{
@@ -200,7 +200,10 @@ public class SincronizzaSecond extends SincronizzaCommon {
 									&& InVector.stessoEvento(evento1,evento2) 
 									&& sorgente1.equalsIgnoreCase(sa) 
 									&& sorgente2.equalsIgnoreCase(sb);
-							//System.out.println("bool: " + bool);
+							/*if(bool && i==1)
+							{
+								System.err.println("secondo: bool vero, liv: "+kl + " i:" + i);
+							}*/
 							if(bool)
 							{
 								/*if(secondSdiff.get(i).equalsIgnoreCase("n2-n2"))
@@ -214,6 +217,8 @@ public class SincronizzaSecond extends SincronizzaCommon {
 								tsecondo.setEvento(evento1);
 								//System.out.println("ecco che aggiungo: " + destinazione1+"-"+destinazione2);
 								secondSdue.add(destinazione1+"-"+destinazione2);
+								//System.err.println("dest new: " + destinazione1+"-"+destinazione2);
+								
 								secondTdue.add(tsecondo);
 								/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
 										+ destinazione1+"-"+destinazione2 + "ev: "
@@ -258,7 +263,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 				//per definizione ti = transizioni con evento composto di livello level
 				//nel bad twin
 				Vector<Relationship> T = new Vector<Relationship>();
-				HashMap<String, Relationship> hash= Globals.allRelationsGeneral.get(level);
+				HashMap<String, Relationship> hash= Globals.allRelationsGeneralHash.get(level);
 				Iterator<String> keyset = hash.keySet().iterator();
 				while(keyset.hasNext())
 				{ 
@@ -301,6 +306,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							//System.out.println("PRIMA ecco Sdue: " + 
 							//secondSdue.size() + "----vs----" + secondStemp.size());
 							secondSdue.add(destinazione1+"-"+destinazione2);
+							//System.err.println("dest new: " + destinazione1+"-"+destinazione2);
 							//if(!InVector.InDoppia(tsecondo, secondTdue))
 							//{
 							secondTdue.add(tsecondo);
@@ -359,7 +365,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	private static void createDataSecond(int level)
 	{
 		secondSprimo = getAllNodesUntil(level-1, Globals.allNodesSyncroGeneral);
-		secondTprimo = getAllRelationsUntil(level-1, Globals.allRelationsSyncroGeneral);
+		secondTprimo = getAllRelationsUntil(level-1, Globals.allRelationsSyncroGeneralHash);
 		
 	
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )

@@ -171,9 +171,9 @@ public class GenericGraphHandler extends Adder{
 	
 	protected static boolean checkEqual(Vector<String> primo, Vector<String> secondo)
 	{
-	/*	System.out.println("------------------------------------------");
-		System.out.println(primo.toString());
-		System.out.println(secondo.toString());*/
+		//System.out.println("------------------------------------------");
+		//System.out.println(primo.toString());
+		//System.out.println(secondo.toString());
 
 		if(primo.size() != secondo.size())
 		{
@@ -316,23 +316,22 @@ public class GenericGraphHandler extends Adder{
 	protected static Vector<String> riempiTPrimo(int level)
 	{
 		Vector<String> ris = new Vector<String>();
-		for(int l=1; l<=level; l++)
+		for(int l=0; l<level; l++)
 		{
 			HashMap<String, Relationship> hash = new HashMap<String, Relationship>();
-			hash = Globals.allRelationsGeneralHash.get(l-1);
+			hash = Globals.allRelationsGeneralHash.get(l);
 			
 			Iterator<String> keyset = hash.keySet().iterator();
 			while(keyset.hasNext())
 			{ 
 				String key = keyset.next();
-				Relationship appoggio = (Relationship) hash.get(key);
+				Relationship appoggio = hash.get(key);
 				String osservabilita = pulisci(appoggio.getProperties("oss").values().toString());
 				if(osservabilita.equalsIgnoreCase("y"))
 				{
 					String nome = appoggio.getProperties("type").values().toString();
-					ris.add(nome);
-				}
-	
+					ris.addElement(nome);
+				}	
 			}
 		}
 		return ris;

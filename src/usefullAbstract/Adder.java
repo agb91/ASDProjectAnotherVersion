@@ -223,8 +223,9 @@ public class Adder {
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			if(InVector.notExistBadRels(nome, level))
+			if(InVector.notExistBadRels(pulisci(nome), level))
 			{
+				//System.err.println("level: " + level);
 				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
 				relationship.setProperty( "type", pulisci(nome) );
 				relationship.setProperty( "oss", pulisci(oss) );
@@ -235,8 +236,10 @@ public class Adder {
 				String nomeN2 = n2.getProperties("name").values().toString();	
 				relationship.setProperty("from", pulisci(nomeN1));
 				relationship.setProperty("to", pulisci(nomeN2));
-	
+				//System.err.println("chiave: " + nome);
+				//System.err.println("prima: " +  Globals.allRelationsGeneralHash.get(level).size());
 				Globals.allRelationsGeneralHash.get(level).put(pulisci(nome), relationship);
+				//System.err.println("dopo: " +  Globals.allRelationsGeneralHash.get(level).size());
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}
 			tx.success();
@@ -264,7 +267,7 @@ public class Adder {
 				relationship.setProperty("from", pulisci(nomeN1));
 				relationship.setProperty("to", pulisci(nomeN2));
 	
-				Globals.allRelationsSyncroGeneral.get(level).put(pulisci(nome), relationship);
+				Globals.allRelationsSyncroGeneralHash.get(level).put(pulisci(nome), relationship);
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}
 			tx.success();
@@ -278,7 +281,9 @@ public class Adder {
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
-			if(InVector.notExistSyncroSecondRels(n1s, n2s, ev))
+			//System.err.println("ecco la transizione  " + pulisci(nome));
+			//if(InVector.notExistSyncroSecondRels(n1s, n2s, ev))
+			if(InVector.notExistSyncroSecondRels(pulisci(nome)))
 			{
 				//System.out.println("nodo: " + n1s);
 				Node n1 = findNodeByNameSyncroSecond(n1s);
@@ -293,7 +298,7 @@ public class Adder {
 				relationship.setProperty("from", pulisci(nomeN1));
 				relationship.setProperty("to", pulisci(nomeN2));
 	
-				Globals.allRelationsSyncroGeneralSecond.get(level).put(pulisci(nome), relationship);
+				Globals.allRelationsSyncroGeneralSecondHash.get(level).put(pulisci(nome), relationship);
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			
 			}
@@ -337,7 +342,7 @@ public class Adder {
 		}
 		if(userNodes.size()==0)
 		{
-			System.out.println("non trovo il nodo: " + n1s+ "--fine nome");
+			System.out.println("non trovo il nodo: " + n1s+ "||--fine nome");
 		}
 		return userNodes.get(0);
 

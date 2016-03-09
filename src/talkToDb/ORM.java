@@ -84,7 +84,7 @@ public class ORM extends GenericGraphHandler {
 			{
 				if(!cancellare.get(i).equalsIgnoreCase("T0"))
 				{
-					System.out.println("cancello la relazione: " + cancellare.get(i));
+					//System.out.println("cancello la relazione: " + cancellare.get(i));
 					/*for(int a=0; a<Globals.allRelationsGeneralHash.size(); a++)
 					{
 						if(Globals.allRelationsGeneralHash.get(a).get(cancellare.get(i))!=null)

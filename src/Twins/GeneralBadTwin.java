@@ -21,7 +21,7 @@ public class GeneralBadTwin extends GenericGraphHandler{
 		{
 			try ( Transaction tx = Globals.graphDb.beginTx() )
 			{
-				Vector<Relationship> allRelationsUntilNow = getAllRelationsUntil(livello, Globals.allRelationsGeneral);
+				Vector<Relationship> allRelationsUntilNow = getAllRelationsUntil(livello, Globals.allRelationsGeneralHash);
 				//System.out.println("aRUN size :  " + allRelationsUntilNow.size());
 				Vector<String> tPrimo = new Vector<String>();
 				tPrimo = riempiTPrimo(livello);
@@ -33,12 +33,16 @@ public class GeneralBadTwin extends GenericGraphHandler{
 				{
 					Node nodoAttuale = Globals.allNodes.get(i);
 					String nomeNodo = pulisci(nodoAttuale.getProperties("name").values().toString());
-					for(int a=1; a<allRelationsUntilNow.size(); a++)
+					for(int a=0; a<allRelationsUntilNow.size(); a++)
 					{
 						Relationship transazioneAttuale = allRelationsUntilNow.get(a);
 						String nomeTransizione = transazioneAttuale.getProperties("type").values().toString();					
 						//System.out.println("nome transizione attuale:   " + nomeTransizione);
 						String from = pulisci(transazioneAttuale.getProperties("from").values().toString());
+						if(from.equalsIgnoreCase("inizio"))
+						{
+							continue;
+						}
 						String osservabile = pulisci(transazioneAttuale.getProperties("oss").values().toString());
 						Node destinazione = transazioneAttuale.getEndNode();
 						boolean bool = from.equalsIgnoreCase(nomeNodo) && osservabile.equalsIgnoreCase("y");
@@ -86,12 +90,8 @@ public class GeneralBadTwin extends GenericGraphHandler{
 						}
 					}
 				}		
-				/*for(int d = 0; d<tPrimo.size(); d++)
-				{
-					System.out.println("t primo: " + tPrimo.get(d));
-				}*/
-				ORM.updateDb(livello);
-				removeIsolatedStatesBad(livello);
+				//ORM.updateDb(livello);
+				//removeIsolatedStatesBad(livello);
 				System.out.println("---------------------------------------------");
 				System.out.println("created bad twin level" + livello);
 				tx.success();
@@ -104,7 +104,7 @@ public class GeneralBadTwin extends GenericGraphHandler{
 	public static boolean checkC2C3(int level)
 	{
 		//secondo caso se è deterministico allora è diagnosticabile
-		if(deterministic(getAllRelationsUntil(level, Globals.allRelationsGeneral)))
+		if(deterministic(Globals.allRelationsGeneral.get(level)))
 		{
 			System.out.println("vale C2: il bad twin è deterministico");
 			return true;

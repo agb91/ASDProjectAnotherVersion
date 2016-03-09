@@ -103,7 +103,7 @@ public class GoodTwin extends GenericGraphHandler{
 				}
 			}
 		}
-		System.err.println(Globals.allRelationsGoodGeneralHash.get(1).get("E--C--F--y"));
+		//System.err.println(Globals.allRelationsGoodGeneralHash.get(1).get("E--C--F--y"));
 		for(int i=0; i<daCancellare.size(); i++)
 		{
 			for(int l=0; l<Globals.allRelationsGoodGeneralHash.size(); l++)
@@ -121,7 +121,7 @@ public class GoodTwin extends GenericGraphHandler{
 				}
 			}
 		}
-		System.err.println(Globals.allRelationsGoodGeneralHash.get(1).get("E--C--F--y"));
+		//System.err.println(Globals.allRelationsGoodGeneralHash.get(1).get("E--C--F--y"));
 	}
 	
 	public static void removeIsolatedStatesGood()
