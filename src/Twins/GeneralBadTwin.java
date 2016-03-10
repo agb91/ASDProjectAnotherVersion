@@ -104,7 +104,7 @@ public class GeneralBadTwin extends GenericGraphHandler{
 	}
 		
 	
-	public static boolean checkC2C3(int level)
+	/*public static boolean checkC2C3(int level)
 	{
 		//secondo caso se è deterministico allora è diagnosticabile
 		if(deterministic(Globals.allRelationsGeneral.get(level)))
@@ -132,7 +132,7 @@ public class GeneralBadTwin extends GenericGraphHandler{
 			System.out.println("non vale la C3");
 		}
 		return false;
-	}
+	}*/
 	
 	private static boolean identici( String evento)
 	{

@@ -26,28 +26,43 @@ import talkToDb.ORM.RelTypes;
 
 public class GenericGraphHandler extends Adder{
 	
-	
 	/*
 	 * se 2 transizioni diverse hanno stessa sorgente e stesso evento allora
 	 *  NON DETERMISTICO
 	 */
-	protected static boolean deterministic(Vector<Relationship> T)
+	protected static boolean deterministic(HashMap<String, Relationship> T)
 	{
 		boolean deterministico = true;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int i=0; i<T.size(); i++)
+			Vector<String> sks1 = new Vector<String>();
+			Vector<String> sks2 = new Vector<String>();
+			Iterator<String> ks1 = T.keySet().iterator();
+			Iterator<String> ks2 = T.keySet().iterator();
+			while(ks1.hasNext())
+			{ 
+				String a1 = ks1.next();
+				sks1.addElement(a1);
+			}
+			while(ks2.hasNext())
 			{
-				Relationship t1 = T.get(i);
-				String sorgente1 = pulisci(T.get(i).getProperties("from").values().toString()); 
-				String evento1 = pulisci(T.get(i).getProperties("event").values().toString()); 
+				String a2 = ks2.next();
+				sks2.addElement(a2);
+			}
+			
+			for(int i=0; i<sks1.size(); i++)
+			{
+				Relationship t1 = T.get(sks1.get(i));
+				String sorgente1 = pulisci(t1.getProperties("from").values().toString()); 
+				String evento1 = pulisci(t1.getProperties("event").values().toString()); 
 				
-				for(int a=0; a<T.size(); a++)
+				for(int a=0; a<sks2.size(); a++)
 				{
+					Relationship t2 = T.get(sks2.get(a));
 					if(a!=i)
 					{
-						String sorgente2 = pulisci(T.get(a).getProperties("from").values().toString()); 
-						String evento2 = pulisci(T.get(a).getProperties("event").values().toString()); 
+						String sorgente2 = pulisci(t2.getProperties("from").values().toString()); 
+						String evento2 = pulisci(t2.getProperties("event").values().toString()); 
 					
 						boolean nonD = sorgente2.equalsIgnoreCase(sorgente1) 
 								&& InVector.stessoEvento(evento2, evento1);
@@ -80,23 +95,6 @@ public class GenericGraphHandler extends Adder{
 		return false;
 	}
 	
-	/*protected static boolean hasOnePath(Node s, Node e)
-	{
-		Path path = null;
-		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
-		{
-			PathFinder<Path> finder =
-					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
-							Direction.OUTGOING ), 15 );
-			path = finder.findSinglePath( s, e );
-			tx.success();
-		}	
-		if(path.length()>1)
-		{
-			return true;
-		}
-		return false;
-	}*/
 	
 	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
 	protected static Iterator<Path> findPath(Node s, Node e)
@@ -136,24 +134,41 @@ public class GenericGraphHandler extends Adder{
 	//cerco le transizioni di guasto: prendo il loro evento.
 	// se per tutti quegli eventi non esistono transizioni di guasto
 	// che abbiano come evento quegli eventi allora è diagnosticabile
-	protected static boolean thirdCondition(Vector<Relationship> T)
+	protected static boolean thirdCondition(HashMap<String, Relationship> T)
 	{
 		boolean risp = true;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			for(int k=0; k<T.size(); k++)
+			Vector<String> sks1 = new Vector<String>();
+			Vector<String> sks2 = new Vector<String>();
+			Iterator<String> ks1 = T.keySet().iterator();
+			Iterator<String> ks2 = T.keySet().iterator();
+			while(ks1.hasNext())
+			{ 
+				String a1 = ks1.next();
+				sks1.addElement(a1);
+			}
+			while(ks2.hasNext())
 			{
-				String guastoK = pulisci(T.get(k).getProperties("guasto").values().toString()); 
-				String osservabileK = pulisci(T.get(k).getProperties("oss").values().toString()); 
-				String eventoK = pulisci(T.get(k).getProperties("event").values().toString()); 
+				String a2 = ks2.next();
+				sks2.addElement(a2);
+			}
+			
+			for(int k=0; k<sks1.size(); k++)
+			{
+				Relationship tk = T.get(sks1.get(k));
+				String guastoK = pulisci(tk.getProperties("guasto").values().toString()); 
+				String osservabileK = pulisci(tk.getProperties("oss").values().toString()); 
+				String eventoK = pulisci(tk.getProperties("event").values().toString()); 
 				if(guastoK.equalsIgnoreCase("y") && osservabileK.equalsIgnoreCase("y"))
 				{
-					for( int s=0; s<T.size(); s++)
+					for( int s=0; s<sks2.size(); s++)
 					{
 						if(s!=k)
 						{
-							String guastoS = pulisci(T.get(s).getProperties("guasto").values().toString()); 
-							String eventoS = pulisci(T.get(s).getProperties("event").values().toString());
+							Relationship ts = T.get(sks2.get(s));
+							String guastoS = pulisci(ts.getProperties("guasto").values().toString()); 
+							String eventoS = pulisci(ts.getProperties("event").values().toString());
 							if(eventoS.equalsIgnoreCase(eventoK) && guastoS.equalsIgnoreCase("n"))
 							{
 								return false;

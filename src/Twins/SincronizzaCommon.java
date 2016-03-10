@@ -74,7 +74,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		}
 	}
 	
-	protected static boolean checkSeconda(Vector<Relationship> T, int level)
+	protected static boolean checkSeconda(HashMap<String, Relationship> T, int level)
 	{
 		if(deterministic(T))
 		{
@@ -89,7 +89,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		return false;
 	}
 	
-	protected static boolean checkTerza(Vector<Relationship> T, int level)
+	protected static boolean checkTerza(HashMap<String, Relationship> T, int level)
 	{
 		if(thirdCondition(T))
 		{
@@ -105,16 +105,32 @@ public class SincronizzaCommon extends GenericGraphHandler{
 	}
 		
 	protected static boolean checkQuarta(Vector<String> in, int level, 
-			Vector<TransizioneDoppia> ta, Vector<TransizioneDoppia> Tdue, String who)
+			HashMap<String, TransizioneDoppia> ta, HashMap<String, TransizioneDoppia> Tdue, String who)
 	{
 		boolean ris = false;
 		
 		if(ta.size()==0)
 		{
+			//System.err.println("facile, esco subito");
 			return false;
 		}
 		searchCycle(in, who);
+		Iterator<String> ks = Globals.inCycleNodes.keySet().iterator();
+		//System.err.println("dim in cycle nodes : " + Globals.inCycleNodes.size());
+		while(ks.hasNext())
+		{ 
+			String a = ks.next();
+			System.err.println(" nodi in cicli : " + Globals.inCycleNodes.get(a));
+		}
 		searchFirstAmbiguous(ta, Tdue, in, who);
+	/*	
+		Iterator<String> ks = Globals.primeTransizioniAmbigue.keySet().iterator();
+		while(ks.hasNext())
+		{ 
+			String a = ks.next();
+			System.err.println("prime ambigue: " +
+					Globals.primeTransizioniAmbigue.get(a).getSorgente());
+		}*/
 		ris = checkIfFromAmbiguousGoToCycle(who);
 		
 		return ris;
@@ -125,85 +141,112 @@ public class SincronizzaCommon extends GenericGraphHandler{
 	{
 		//prima trovo tutte le destinazioni delle transizioni ambigue
 		Vector<String> destinazioniAmbigue = new Vector<String>();
-		for(int i=0; i<Globals.primeTransizioniAmbigue.size(); i++)
-		{
-			TransizioneDoppia attuale = Globals.primeTransizioniAmbigue.get(i);
+		Iterator<String> ks = Globals.primeTransizioniAmbigue.keySet().iterator();
+		while(ks.hasNext())
+		{ 
+			String a = ks.next();
+			TransizioneDoppia attuale = Globals.primeTransizioniAmbigue.get(a);
 			String dest = attuale.getDestinazione();
 		//	System.err.println("destinazione ambigua: " + dest);
 			destinazioniAmbigue.addElement(dest);
 		}
+
 		
-		//poi verifico se esse sono in un ciclo
 		for(int a=0; a<destinazioniAmbigue.size(); a++)
 		{
-			for(int i=0; i<Globals.inCycleNodes.size(); i++)
+			String altra = destinazioniAmbigue.get(a);
+			String sa = altra.split("-")[0];
+			String sb = altra.split("-")[1];
+			altra = sb + "-" + sa;
+			if(Globals.inCycleNodes.get(destinazioniAmbigue.get(a))!=null)
 			{
-				String nome = Globals.inCycleNodes.get(i);
-				//System.err.println("confronto: " +nome + "; con " + destinazioniAmbigue.get(a));
-				if(stessoStato(nome, destinazioniAmbigue.get(a)))
-				{
-					return true;
-				}
+				return true;
+			}
+			
+			if(Globals.inCycleNodes.get(altra)!=null)
+			{
+				return true;
 			}
 		}
-
-		/*if(who.equalsIgnoreCase("f"))
-			{
-				try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
-				{
 		
-			// ultimo caso: non è in un ciclo ma può raggiungere un nodo
-			// che è in un ciclo
+		if(who.equalsIgnoreCase("f"))
+		{
 			for(int a=0; a<destinazioniAmbigue.size(); a++)
 			{
+				String sa = destinazioniAmbigue.get(a).split("-")[0];
+				String sb = destinazioniAmbigue.get(a).split("-")[1];
+				String altra = sb + "-" + sa;
+				//SISTEMA LA COSA DEL NODO CHE PUÒAVERE IL NOME INVERTITO
 				Node primo = findNodeByNameSyncro(destinazioniAmbigue.get(a));
-				for(int i=0; i<Globals.inCycleNodes.size(); i++)
-				{
-					Node secondo = findNodeByNameSyncro(Globals.inCycleNodes.get(i));
-					Vector<Relationship> path = findPathRels(primo, secondo);
-					if(path.size()>0)
+				Node primo2 = findNodeByNameSyncro(altra);
+				Iterator<String> ksz = Globals.inCycleNodes.keySet().iterator();
+				while(ksz.hasNext())
+				{ 
+					String az = ksz.next();
+					Node secondo = findNodeByNameSyncro(Globals.inCycleNodes.get(az));
+					//System.err.println("da qui!");
+					HashMap<String, Relationship> appoggio = findPathRels(primo, secondo);
+					if(appoggio!=null)
 					{
-						//System.out.println("FATTO2");
-						return true;
+						if(appoggio.size()>0)
+						{
+							//System.out.println("FATTO2");
+							return true;
+						}
+					}
+					
+
+					HashMap<String, Relationship> appoggio2 = findPathRels(primo2, secondo);
+					if(appoggio2!=null)
+					{
+						if(appoggio2.size()>0)
+						{
+							//System.out.println("FATTO2");
+							return true;
+						}
 					}
 				}
+
+				
 			}
-			}
-			tx.success();
-		}*/
+		}
 		return false;
 	}
 	
-	protected static void searchFirstAmbiguous(Vector<TransizioneDoppia> ta, 
-			Vector<TransizioneDoppia> Tdue, Vector<String> nodi, String who)
+	protected static void searchFirstAmbiguous(HashMap<String, TransizioneDoppia> ta, 
+			HashMap<String, TransizioneDoppia> Tdue, Vector<String> nodi, String who)
 	{
-		for(int i=0; i<ta.size(); i++)
-		{
+		Iterator<String> ksta = ta.keySet().iterator();
+		while(ksta.hasNext())
+		{ 
+			String i = ksta.next();
 			String sorgenteAmbigua = ta.get(i).getSorgente();
 			boolean prima = true;
-			Vector<Relationship> path = null;
+			HashMap<String, Relationship> path = new HashMap<String, Relationship>();
 			if(who.equalsIgnoreCase("f"))
 			{
 				Node from = findNodeByNameSyncro(nodi.get(0));
 				Node to = findNodeByNameSyncro(sorgenteAmbigua);
 				path = findPathRels(from,to);
 			}
-			else
+			/*else
 			{
 				Node from = findNodeByNameSyncroSecond(nodi.get(0));
 				Node to = findNodeByNameSyncroSecond(sorgenteAmbigua);
 				path = findPathRelsSecond(from,to);
-			}
-			for(int a=0; a<path.size(); a++)
-			{
-				if(InVector.inVettoreSyncro(path.get(a), ta, who))
+			}*/
+			Iterator<String> ks = path.keySet().iterator();
+			while(ks.hasNext())
+			{ 
+				String a = ks.next();
+				if(InVector.inVettoreSyncroHash(path.get(a), ta, who))
 				{
 					prima = false;
 				}
 			}
 			if(prima)
 			{
-				Globals.primeTransizioniAmbigue.addElement(ta.get(i));
+				Globals.primeTransizioniAmbigue.put(i, ta.get(i));
 			}
 		}
 	}
@@ -213,7 +256,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		Globals.inCycleNodes.clear();
 		for(int i=0; i<sdue.size(); i++)
 		{
-		   if(!InVector.inVettore(sdue.get(i), Globals.inCycleNodes))
+		   if(!InVector.inVettoreHash(sdue.get(i), Globals.inCycleNodes))
 		   {
 			   if(who.equalsIgnoreCase("f"))
 			   {
@@ -229,115 +272,123 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		   }
 		}
 	}
-
-	public static Vector<Relationship> findPathRels(Node s, Node e)
-	{
-		Iterator<Path> iteratore = findPath(s,e);
-		Iterator<Relationship> result = null;
-		Vector<Relationship> ris = new Vector<Relationship>();
-		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
-		{
-			do
-			{
-				Path path = iteratore.next();
-				result = path.relationships().iterator();
-				if(result.hasNext()) //se è vuoto non mi interessa..
-				{
-					ris.clear();
-	                do
-	                {
-						ris.addElement(result.next());
-	                }while(result.hasNext());
-	                if(ris.size()!=0)
-	                {
-	                	return ris;
-	                }
-				}    
-			}while(iteratore.hasNext());
-			tx.success();
-		}
-		return ris;
-	}
 	
-	public static Vector<Relationship> findPathRelsSecond(Node s, Node e)
+	
+	public static HashMap<String, Relationship> findPathRelsSecond(Node s, Node e)
 	{
-		Iterator<Path> iteratore = findPathSecond(s,e);
-		Iterator<Relationship> result = null;
-		Vector<Relationship> ris = new Vector<Relationship>();
+		HashMap<String, Relationship> ris = new HashMap<String, Relationship>();
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
-			do
+			//System.err.println("n1: " + s.getProperties("name").values().toString() +
+			//		";  n2: " + e.getProperties("name").values().toString());
+			Iterator<Path> iteratore = findPathSecond(s,e);
+			//System.err.println(iteratore.hasNext() + "--");
+			Iterator<Relationship> result = null;
+			if(iteratore.hasNext())
 			{
-				Path path = iteratore.next();
-				result = path.relationships().iterator();
-				if(result.hasNext()) //se è vuoto non mi interessa..
+				do
 				{
-					ris.clear();
-	                do
-	                {
-						ris.addElement(result.next());
-	                }while(result.hasNext());
-	                if(ris.size()!=0)
-	                {
-	                	return ris;
-	                }
-				}    
-			}while(iteratore.hasNext());
+					Path path = iteratore.next();
+					result = path.relationships().iterator();
+					if(result.hasNext()) //se è vuoto non mi interessa..
+					{
+						ris.clear();
+		                do
+		                {
+		                	Relationship add = result.next();
+		                	String key = pulisci(add.getProperties("type").values().toString());
+							ris.put(key ,add);
+		                }while(result.hasNext());
+		                if(ris.size()!=0)
+		                {
+		                	return ris;
+		                }
+					}    
+				}while(iteratore.hasNext());
+			}
+			tx.success();
+		}
+		return ris;
+	}
+	
+	public static HashMap<String, Relationship> findPathRels(Node s, Node e)
+	{
+		HashMap<String, Relationship> ris = new HashMap<String, Relationship>();
+		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+		{
+			//System.err.println("n1: " + s.getProperties("name").values().toString() +
+			//		";  n2: " + e.getProperties("name").values().toString());
+			Iterator<Path> iteratore = findPath(s,e);
+			//System.err.println(iteratore.hasNext() + "--");
+			Iterator<Relationship> result = null;
+			if(iteratore.hasNext())
+			{
+				do
+				{
+					Path path = iteratore.next();
+					result = path.relationships().iterator();
+					if(result.hasNext()) //se è vuoto non mi interessa..
+					{
+						ris.clear();
+		                do
+		                {
+		                	Relationship add = result.next();
+		                	String key = pulisci(add.getProperties("type").values().toString());
+							ris.put(key ,add);
+		                }while(result.hasNext());
+		                if(ris.size()!=0)
+		                {
+		                	return ris;
+		                }
+					}    
+				}while(iteratore.hasNext());
+			}
 			tx.success();
 		}
 		return ris;
 	}
 
-	
+
 	public static void findPathNodes(Node s, Node e)
 	{
-		Vector<Relationship> path = findPathRels(s,e);
+		HashMap<String, Relationship> path = findPathRels(s,e);
 		//System.out.println("ecco un percorso lungo: " + path.size());
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
-			for(int i=0; i<path.size(); i++)
-			{
-				Relationship attuale = path.get(i);
+			Iterator<String> ks = path.keySet().iterator();
+			while(ks.hasNext())
+			{ 
+				String a = ks.next();
+				Relationship attuale = path.get(a);
 				String sorgente = attuale.getProperties("from").values().toString();
 				sorgente = pulisci(sorgente);
 				String destinazione = attuale.getProperties("to").values().toString();
 				destinazione = pulisci(destinazione);
-				if(!InVector.inVettore(sorgente,Globals.inCycleNodes))
-				{
-					Globals.inCycleNodes.addElement(sorgente);
-				}
-				if(!InVector.inVettore(destinazione,Globals.inCycleNodes))
-				{
-					Globals.inCycleNodes.addElement(destinazione);
-				}
-					
+				Globals.inCycleNodes.put(sorgente, sorgente);
+				Globals.inCycleNodes.put(destinazione, destinazione);
 			}
 			tx.success();
 		}
+
 	}
 	
 	public static void findPathNodesSecond(Node s, Node e)
 	{
-		Vector<Relationship> path = findPathRelsSecond(s,e);
+		HashMap<String, Relationship> path = findPathRelsSecond(s,e);
 		//System.out.println("ecco un percorso lungo: " + path.size());
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
-			for(int i=0; i<path.size(); i++)
-			{
-				Relationship attuale = path.get(i);
+			Iterator<String> ks = path.keySet().iterator();
+			while(ks.hasNext())
+			{ 
+				String a = ks.next();
+				Relationship attuale = path.get(a);
 				String sorgente = attuale.getProperties("from").values().toString();
 				sorgente = pulisci(sorgente);
 				String destinazione = attuale.getProperties("to").values().toString();
 				destinazione = pulisci(destinazione);
-				if(!InVector.inVettore(sorgente,Globals.inCycleNodes))
-				{
-					Globals.inCycleNodes.addElement(sorgente);
-				}
-				if(!InVector.inVettore(destinazione,Globals.inCycleNodes))
-				{
-					Globals.inCycleNodes.addElement(destinazione);
-				}
-					
+				Globals.inCycleNodes.put(sorgente, sorgente);
+				Globals.inCycleNodes.put(destinazione, destinazione);
 			}
 			tx.success();
 		}

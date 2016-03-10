@@ -60,20 +60,27 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	
 	public static boolean checkC4(int level)
 	{
-		Vector<TransizioneDoppia> daCheckare = new Vector<TransizioneDoppia>();
+		if(Globals.syncroC4Vera.get(level)!=null)
+		{
+			System.out.println("al livello " + level + " c4 è vera");
+			return true;
+		}
+		HashMap<String,TransizioneDoppia> daCheckare = new HashMap<String,TransizioneDoppia>();
 		for(int l=0; l<=level; l++)
 		{
 			for(int i=0; i<Globals.firstTaPerLevel.get(l).size(); i++)
 			{
-				if(!InVector.InDoppia(Globals.firstTaPerLevel.get(l).get(i), daCheckare))
-				{
-					daCheckare.addElement(Globals.firstTaPerLevel.get(l).get(i));
-				}
+				String id = Globals.firstTaPerLevel.get(l).get(i).getSorgente() + "-"
+						+ Globals.firstTaPerLevel.get(l).get(i).getDestinazione() + "-"
+						+ Globals.firstTaPerLevel.get(l).get(i).getEvento();
+				daCheckare.put(id ,Globals.firstTaPerLevel.get(l).get(i));
 			}
 		}
+		//System.err.println("tocheck: " + daCheckare.size());
 		boolean ris = checkQuarta(Sdue, level, daCheckare, Tdue, "f");
 		if(ris)
 		{
+			Globals.syncroC4Vera.put(level, level);
 			System.out.println("a livello " + level + " c4 è vera");
 		}
 		else

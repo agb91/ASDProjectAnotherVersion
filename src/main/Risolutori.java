@@ -5,6 +5,7 @@ import Twins.GeneralBadTwin;
 import Twins.GoodTwin;
 import Twins.SincronizzaFirst;
 import Twins.SincronizzaSecond;
+import global.Globals;
 
 public class Risolutori {
 	
@@ -35,7 +36,7 @@ public class Risolutori {
 			level++;
 		}
 		long endTime = System.currentTimeMillis();
-		long seconds = (endTime - startTime);
+		long seconds = (endTime - startTime) - Globals.writeTime;
 		System.out.println("Questo metodo ha rischiesto " + seconds + " milliseconds ;  \n\n\n\n");
 	}
 	
@@ -83,7 +84,7 @@ public class Risolutori {
 			}
 		}
 		long endTime = System.currentTimeMillis();
-		long seconds = (endTime - startTime);
+		long seconds = (endTime - startTime) - Globals.writeTime;
 		System.out.println("Questo metodo ha rischiesto " + seconds + ";  \n\n\n\n");
 	}
 	
@@ -219,7 +220,7 @@ public class Risolutori {
 		
 		
 		long endTime = System.currentTimeMillis();
-		long seconds = (endTime - startTime);
+		long seconds = (endTime - startTime) - Globals.writeTime;
 		System.out.println("Questo metodo ha rischiesto " + seconds + ";  \n\n\n\n");
 	
 	}

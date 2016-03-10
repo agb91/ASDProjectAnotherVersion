@@ -32,12 +32,18 @@ public class TransizioneDoppia {
 		this.evento = evento;
 	}
 	public String getSorgente() {
+		String[] vettore = sorgente.split("-");
+		Arrays.sort(vettore);
+		sorgente = vettore[0] + "-" + vettore[1];
 		return sorgente;
 	}
 	public void setSorgente(String sorgente) {
 		this.sorgente = sorgente;
 	}
 	public String getDestinazione() {
+		String[] vettore = destinazione.split("-");
+		Arrays.sort(vettore);
+		destinazione = vettore[0] + "-" + vettore[1];
 		return destinazione;
 	}
 	public void setDestinazione(String destinazione) {

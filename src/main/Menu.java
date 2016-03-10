@@ -1,5 +1,6 @@
 package main;
 
+import global.Globals;
 import utility.Reader;
 
 public class Menu {

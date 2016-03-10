@@ -346,6 +346,7 @@ public class ORM extends GenericGraphHandler {
 	
 	public static Node addNode(String name)
 	{
+		long startTime = System.currentTimeMillis();
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
@@ -355,6 +356,9 @@ public class ORM extends GenericGraphHandler {
 	        Globals.allNodes.addElement(userNode);
 		    tx.success();
 		}    
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
 		return userNode;
 	}
 	

@@ -1,6 +1,7 @@
 package usefullAbstract;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 
 import org.neo4j.graphdb.DynamicLabel;
@@ -99,6 +100,39 @@ public class Adder {
 		return false;
 	}
 	
+	protected static boolean inVettoreSyncroHash(Relationship ago,
+			HashMap<String, TransizioneDoppia> pagliaio, String who)
+	{
+		if(who.equalsIgnoreCase("f"))
+		{
+			try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
+			{
+				String idAgo = ago.getProperties("type").values().toString();
+				idAgo = pulisci(idAgo);
+				if(pagliaio.get(idAgo)!=null)
+				{
+					return true;
+				}
+				tx.success();
+			}	
+		}
+		else
+		{
+			try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
+			{
+				String idAgo = ago.getProperties("type").values().toString();
+				idAgo = pulisci(idAgo);
+				if(pagliaio.get(idAgo)!=null)
+				{
+					return true;
+				}
+				tx.success();
+			}	
+		}
+		return false;
+	}
+	
+	
 	protected static boolean inVettore(Relationship ago, Vector<Relationship> pagliaio)
 	{
 		for(int i=0; i<pagliaio.size(); i++)
@@ -117,6 +151,7 @@ public class Adder {
 	
 	protected static void addNodeSyncro( String n, int level)
 	{
+		long startTime = System.currentTimeMillis();
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
@@ -128,7 +163,11 @@ public class Adder {
 		        Globals.allNodesSyncroGeneral.get(level).addElement(userNode);
 			    tx.success();
 			}   
-		}    		
+		}    	
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
+
 	}
 	
 	
@@ -167,6 +206,7 @@ public class Adder {
 		
 	protected static void addNodeSyncroSecond( String n, int level)
 	{
+		long startTime = System.currentTimeMillis();
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
@@ -179,10 +219,14 @@ public class Adder {
 			    tx.success();
 			    //Globals.lastSyncroNodes.add(userNode);
 			}   
-		}    		
+		}   
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
 	}
 	
 	protected static void addNodeGood(String n) {
+		long startTime = System.currentTimeMillis();
 		Node userNode = null;
 		try ( Transaction tx = Globals.graphDbGood.beginTx() )
 		{
@@ -194,7 +238,10 @@ public class Adder {
 		        Globals.allNodesGood.addElement(userNode);
 			}
 		    tx.success();
-		}    		
+		}    
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
 	}
 	
 
@@ -220,6 +267,7 @@ public class Adder {
 	
 	protected static Relationship addRelationBad(Node n1, Node n2, String nome, String oss, String ev, String gu, int level)
 	{
+		long startTime = System.currentTimeMillis();
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
@@ -244,12 +292,15 @@ public class Adder {
 			}
 			tx.success();
 		}	
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
 		return relationship;
 	}
 	
 	protected static Relationship addRelationSyncro(String n1s, String n2s, String nome, String oss, String ev, int level)
 	{
-		
+		long startTime = System.currentTimeMillis();
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
@@ -272,12 +323,15 @@ public class Adder {
 			}
 			tx.success();
 		}	
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
 		return relationship;
 	}
 	
 	protected static Relationship addRelationSyncroSecond(String n1s, String n2s, String nome, String oss, String ev, int level)
 	{
-		
+		long startTime = System.currentTimeMillis();
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
@@ -304,12 +358,14 @@ public class Adder {
 			}
 			tx.success();
 		}	
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
 		return relationship;
 	}
 	
 	protected static Node findNodeByNameSyncro(String n1s)
 	{
-		
 		String a = n1s.split("-")[0];
 		String b = n1s.split("-")[1];
 		String n2s = b+"-"+a;
@@ -453,6 +509,7 @@ public class Adder {
 	
 	protected static void addRelationGood(String n1, String n2, String nome, 
 			String oss, String ev, String gu, int level) {
+		long startTime = System.currentTimeMillis();
 		Relationship relationship = null;
 		try ( Transaction tx = Globals.graphDbGood.beginTx() )
 		{
@@ -473,6 +530,9 @@ public class Adder {
 				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
 			}	
 		}
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+		Globals.writeTime += seconds;
 	}
 	
 

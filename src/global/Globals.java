@@ -16,6 +16,8 @@ public class Globals {
 	public static GraphDatabaseService graphDbSyncro;
 	public static GraphDatabaseService graphDbSyncroSecond;
 	
+	public static long writeTime = 0;
+	
 	public static Vector <Node> allNodes = new Vector<Node>();
 	public static Vector <HashMap<String, Relationship>> allRelationsGeneralHash = new Vector<HashMap<String, Relationship>>();
 	
@@ -24,6 +26,10 @@ public class Globals {
 	public static Vector <Node> allNodesGood = new Vector<Node>();
 	public static Vector <HashMap<String, Relationship>> allRelationsGoodGeneralHash = new Vector<HashMap<String, Relationship>>();
 	public static Vector<Integer> goodTwinDid = new Vector<Integer>();
+	
+	public static HashMap<Integer,Integer> syncroC4Vera = new HashMap<Integer,Integer>();
+	public static HashMap<Integer,Integer> syncroSecondC4Vera = new HashMap<Integer,Integer>();
+	
 	
 	public static Vector<Vector<TransizioneDoppia>> firstTaPerLevel = new Vector<Vector<TransizioneDoppia>>();
 	public static Vector<Vector<TransizioneDoppia>> secondTaPerLevel = new Vector<Vector<TransizioneDoppia>>();
@@ -38,8 +44,9 @@ public class Globals {
 	public static Vector<Integer> syncroFirstDid = new Vector<Integer>();
 	public static Vector<Integer> syncroSecondDid = new Vector<Integer>();
 
-	public static Vector<String> inCycleNodes = new Vector<String>();
-	public static Vector<TransizioneDoppia> primeTransizioniAmbigue = new Vector<TransizioneDoppia>();
+	public static HashMap<String,String> inCycleNodes = new HashMap<String,String>();
+	public static HashMap<String, TransizioneDoppia> primeTransizioniAmbigue =
+			new HashMap<String, TransizioneDoppia>();
 	
 	public static void initialize()
 	{

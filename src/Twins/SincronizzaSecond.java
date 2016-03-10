@@ -15,11 +15,11 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	
 	//second method
 	protected static Vector<Node> secondSprimo = new Vector<Node>();
-	protected static Vector<Relationship> secondTprimo = new Vector<Relationship>();
+	protected static HashMap<String, Relationship> secondTprimo = new HashMap<String, Relationship>();
 	protected static Vector<TransizioneDoppia> secondTa = new Vector<TransizioneDoppia>();
 	protected static Vector<TransizioneDoppia> secondTaPrimo = new Vector<TransizioneDoppia>();
 	protected static Vector<String> secondSdue = new Vector<String>();
-	protected static Vector<TransizioneDoppia> secondTdue = new Vector<TransizioneDoppia>();
+	protected static HashMap<String, TransizioneDoppia> secondTdue = new HashMap<String, TransizioneDoppia>();
 	protected static Vector<String> secondStemp = new Vector<String>();
 	protected static Vector<String> secondSdiff = new Vector<String>();
 	
@@ -60,26 +60,41 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	
 	public static boolean checkC4(int level)
 	{
-		Vector<TransizioneDoppia> daCheckare = new Vector<TransizioneDoppia>();
+		if(Globals.syncroSecondC4Vera.get(level)!=null)
+		{
+			System.out.println("a livello " + level + " c4 è vera");
+			return true;
+		}
+		
+		HashMap<String,TransizioneDoppia> daCheckare = new HashMap<String,TransizioneDoppia>();
 		for(int l=0; l<=level; l++)
 		{
 			for(int i=0; i<Globals.secondTaPerLevel.get(l).size(); i++)
 			{
-				if(!InVector.InDoppia(Globals.secondTaPerLevel.get(l).get(i), daCheckare))
-				{
-					daCheckare.addElement(Globals.secondTaPerLevel.get(l).get(i));
-				}
+				String id = Globals.secondTaPerLevel.get(l).get(i).getSorgente() + "-"
+						+ Globals.secondTaPerLevel.get(l).get(i).getDestinazione() + "-"
+						+ Globals.secondTaPerLevel.get(l).get(i).getEvento();
+				daCheckare.put(id ,Globals.secondTaPerLevel.get(l).get(i));
 			}
 		}
-		boolean risp = checkQuarta(secondSdue, level, daCheckare, secondTdue,  "s");
-		//System.out.println("sono la c4 di: del secondo metodo; restituisco: " + risp + " sono chiamato dal livello : "+ level);
-		return risp; 
+		
+		boolean ris = checkQuarta(secondSdue, level, daCheckare, secondTdue,  "s");
+		if(ris)
+		{
+			Globals.syncroSecondC4Vera.put(level, level);
+			System.out.println("a livello " + level + " c4 è vera");
+		}
+		else
+		{
+			System.out.println("a livello " + level + " c4 è falsa" );
+		}
+		return ris; 
 	}
 	
 	public static boolean checkC2C3(int level)
 	{
 		 //secondo caso se è deterministico allora è diagnosticabile
-		if (checkSeconda(getAllRelationsUntil(level, Globals.allRelationsGeneralHash), level))
+		if (checkSeconda(getAllRelationsUntilHash(level, Globals.allRelationsGeneralHash), level))
 		{
 			System.out.println("al livello: " + level + ", la condizione C2 è vera");
 			return true;
@@ -92,7 +107,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		//cerco le transizioni di guasto: prendo il loro evento.
 		// se per tutti quegli eventi non esistono transizioni di guasto
 		// che abbiano come evento quegli eventi allora è diagnosticabile
-		if(checkTerza(getAllRelationsUntil(level, Globals.allRelationsGeneralHash), level))
+		if(checkTerza(getAllRelationsUntilHash(level, Globals.allRelationsGeneralHash), level))
 		{
 			System.out.println("al livello: " + level + ", la condizione C3 è vera");
 			return true;
@@ -129,9 +144,11 @@ public class SincronizzaSecond extends SincronizzaCommon {
 			//System.out.println("scrivo il nodo: " + nome);
 			addNodeSyncroSecond(nome, level);
 		}
-		for(int i=0; i<secondTdue.size(); i++)
-		{
-			TransizioneDoppia attuale = secondTdue.get(i);
+		Iterator<String> ks = secondTdue.keySet().iterator();
+		while(ks.hasNext())
+		{ 
+			String a = ks.next();
+			TransizioneDoppia attuale = secondTdue.get(a);
 			String n1 = attuale.getSorgente();
 			String n2 = attuale.getDestinazione();
 			String oss = "y";
@@ -142,17 +159,6 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		}
 	}
 	
-	/*protected static boolean diagnosableC1()
-	{
-		//primo caso, se non ha transizioni ambigue allora è diagnosticabile
-		if(Ta.size()==0)
-		{
-			System.out.println("vale C1: "
-					+ "non ci sono transizioni ambigue nell'automa sincronizzato");
-			return true;
-		}
-		return false;
-	}*/
 	
 	private static void algoritmoSecond(int level)
 	{
@@ -162,17 +168,15 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	
 	private static void bloccoWhileSecondo(int level)
 	{
-		int kl=0;
-		//System.out.println("entro in while;");
 		while(!checkEqual(secondSdue, secondStemp))
 		{
-			kl++;
+		
 			getSecondDiff(); 
 			//System.out.println("sono qui");
 			secondStemp.clear();
 			secondStemp.addAll(secondSdue);
 			
-			Vector<Relationship> T = getAllRelationsUntil(level, Globals.allRelationsGeneralHash);
+			HashMap<String,Relationship> T = getAllRelationsUntilHash(level, Globals.allRelationsGeneralHash);
 			//todo
 			for(int i=0; i<secondSdiff.size(); i++)
 			{
@@ -181,12 +185,27 @@ public class SincronizzaSecond extends SincronizzaCommon {
 				String sb = secondSdiff.get(i).split("-")[1];
 				try ( Transaction tx = Globals.graphDb.beginTx() )
 				{
-					for(int a=0; a<T.size(); a++)
+					Vector<String> sks1 = new Vector<String>();
+					Vector<String> sks2 = new Vector<String>();
+					Iterator<String> ks1 = T.keySet().iterator();
+					Iterator<String> ks2 = T.keySet().iterator();
+					while(ks1.hasNext())
+					{ 
+						String a1 = ks1.next();
+						sks1.addElement(a1);
+					}
+					while(ks2.hasNext())
 					{
-						for(int k=0; k<T.size(); k++)
+						String a2 = ks2.next();
+						sks2.addElement(a2);
+					}
+					
+					for(int s=0; s<sks1.size(); s++ )
+					{ 
+						for(int p =0; p<sks2.size(); p++)
 						{
-							Relationship t1 = T.get(a);
-							Relationship t2 = T.get(k);
+							Relationship t1 = T.get(sks1.get(s));
+							Relationship t2 = T.get(sks2.get(p));
 							String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 							String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 							String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -196,15 +215,16 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							String destinazione1 = pulisci(t1.getProperties("to").values().toString());
 							String destinazione2 = pulisci(t2.getProperties("to").values().toString());
 					
-							boolean bool = (a!=k) && guasto2.equalsIgnoreCase("n")
+							boolean bool = (p!=s) && guasto2.equalsIgnoreCase("n")
 									&& InVector.stessoEvento(evento1,evento2) 
 									&& sorgente1.equalsIgnoreCase(sa) 
 									&& sorgente2.equalsIgnoreCase(sb);
-							/*if(bool && i==1)
-							{
-								System.err.println("secondo: bool vero, liv: "+kl + " i:" + i);
-							}*/
-							if(bool)
+							boolean bool2 = (p!=s) && guasto2.equalsIgnoreCase("n")
+									&& InVector.stessoEvento(evento1,evento2) 
+									&& sorgente1.equalsIgnoreCase(sb) 
+									&& sorgente2.equalsIgnoreCase(sa);
+							
+							if(bool || bool2)
 							{
 								/*if(secondSdiff.get(i).equalsIgnoreCase("n2-n2"))
 								{
@@ -219,7 +239,9 @@ public class SincronizzaSecond extends SincronizzaCommon {
 								secondSdue.add(destinazione1+"-"+destinazione2);
 								//System.err.println("dest new: " + destinazione1+"-"+destinazione2);
 								
-								secondTdue.add(tsecondo);
+								secondTdue.put(tsecondo.getSorgente() + "-" + 
+										tsecondo.getDestinazione() + "-" 
+										+ tsecondo.getEvento() , tsecondo);
 								/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
 										+ destinazione1+"-"+destinazione2 + "ev: "
 												+ evento1);*/
@@ -262,21 +284,29 @@ public class SincronizzaSecond extends SincronizzaCommon {
 			{
 				//per definizione ti = transizioni con evento composto di livello level
 				//nel bad twin
-				Vector<Relationship> T = new Vector<Relationship>();
-				HashMap<String, Relationship> hash= Globals.allRelationsGeneralHash.get(level);
-				Iterator<String> keyset = hash.keySet().iterator();
-				while(keyset.hasNext())
+				HashMap<String, Relationship> T = Globals.allRelationsGeneralHash.get(level);
+				
+				Iterator<String> ks1 = T.keySet().iterator();
+				Iterator<String> ks2 = T.keySet().iterator();
+				Vector<String> sks1 = new Vector<String>();
+				Vector<String> sks2 = new Vector<String>();
+				while(ks1.hasNext())
 				{ 
-					String key = keyset.next();
-					T.addElement(hash.get(key));
+					String a1 = ks1.next();
+					sks1.addElement(a1);
 				}
-				//Vector<Relationship> T = Globals.allRelationsGeneral.get(level);
-				for(int a=0; a<T.size(); a++)
+				while(ks2.hasNext())
 				{
-					for(int k=0; k<T.size(); k++)
+					String a2 = ks2.next();
+					sks2.addElement(a2);
+				}
+				
+				for(int s=0; s<sks1.size(); s++ )
+				{ 
+					for(int p =0; p<sks2.size(); p++)
 					{
-						Relationship t1 = T.get(a);
-						Relationship t2 = T.get(k);
+						Relationship t1 = T.get(sks1.get(s));
+						Relationship t2 = T.get(sks2.get(p));
 						String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 						String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 						String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -289,11 +319,15 @@ public class SincronizzaSecond extends SincronizzaCommon {
 						String id2 = pulisci(t2.getProperties("type").values().toString());
 						
 						
-						boolean bool= (a!=k) && guasto2.equalsIgnoreCase("n")
+						boolean bool= (p!=s) && guasto2.equalsIgnoreCase("n")
 								&& InVector.stessoEvento(evento1,evento2) && 
 								sorgente1.equalsIgnoreCase(sa) &&
 								sorgente2.equalsIgnoreCase(sb);
-						if(bool)
+						boolean bool2= (p!=s) && guasto2.equalsIgnoreCase("n")
+								&& InVector.stessoEvento(evento1,evento2) && 
+								sorgente1.equalsIgnoreCase(sb) &&
+								sorgente2.equalsIgnoreCase(sa);
+						if(bool || bool2)
 						{
 							TransizioneDoppia tsecondo = new TransizioneDoppia();
 							tsecondo.setSorgente(nomeAttuale);
@@ -306,14 +340,9 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							//System.out.println("PRIMA ecco Sdue: " + 
 							//secondSdue.size() + "----vs----" + secondStemp.size());
 							secondSdue.add(destinazione1+"-"+destinazione2);
-							//System.err.println("dest new: " + destinazione1+"-"+destinazione2);
-							//if(!InVector.InDoppia(tsecondo, secondTdue))
-							//{
-							secondTdue.add(tsecondo);
-							//}
-							/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
-									+ destinazione1+"-"+destinazione2 + "ev: "
-											+ evento1);*/
+							secondTdue.put(tsecondo.getSorgente() + "-" + 
+									tsecondo.getDestinazione() + "-" 
+									+ tsecondo.getEvento() , tsecondo);
 							if(guasto1.equalsIgnoreCase("y"))
 							{
 								//System.out.println("QUESTA!!!");
@@ -365,26 +394,29 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	private static void createDataSecond(int level)
 	{
 		secondSprimo = getAllNodesUntil(level-1, Globals.allNodesSyncroGeneral);
-		secondTprimo = getAllRelationsUntil(level-1, Globals.allRelationsSyncroGeneralHash);
+		secondTprimo = getAllRelationsUntilHash(level-1, Globals.allRelationsSyncroGeneralHash);
 		
 	
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{		
 			//System.out.println("HEREEEEEE");
 			secondTdue.clear();
-			for(int i=0; i<secondTprimo.size(); i++)
-			{
-				String sorgente = secondTprimo.get(i).getProperties("from").values().toString();
+			Iterator<String> ks = secondTprimo.keySet().iterator();
+			while(ks.hasNext())
+			{ 
+				String an = ks.next();
+				Relationship attuale = secondTprimo.get(an);
+				String sorgente = attuale.getProperties("from").values().toString();
 				sorgente = pulisci(sorgente);
-				String destinazione = secondTprimo.get(i).getProperties("to").values().toString();
+				String destinazione = attuale.getProperties("to").values().toString();
 				destinazione = pulisci(destinazione);
-				String evento = secondTprimo.get(i).getProperties("event").values().toString();
+				String evento = attuale.getProperties("event").values().toString();
 				evento = pulisci(evento);
 				TransizioneDoppia nuova = new TransizioneDoppia();
 				nuova.setSorgente(sorgente);
 				nuova.setDestinazione(destinazione);
 				nuova.setEvento(evento);
-				secondTdue.add(nuova);
+				secondTdue.put(sorgente + "-" + destinazione + "-" + evento, nuova);
 			}
 			
 			secondSdue.clear();

@@ -40,6 +40,16 @@ public class InVector extends GenericGraphHandler{
 		return false;
 	}
 	
+	public static boolean inVettoreHash(String ago, HashMap<String,String> pagliaio)
+	{
+		if(pagliaio.get(ago)!=null)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
 	public static boolean InDoppia( TransizioneDoppia ago, Vector<TransizioneDoppia> pagliaio)
 	{
 		if(pagliaio.size()==0)
