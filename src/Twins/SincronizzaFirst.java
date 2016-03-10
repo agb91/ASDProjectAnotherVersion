@@ -2,6 +2,8 @@ package Twins;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.neo4j.graphdb.Node;
@@ -17,10 +19,10 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	//first method
 	protected static Vector<Node> S = new Vector<Node>();
 	protected static Vector<Node> Sprimo = new Vector<Node>();
-	protected static Vector<Relationship> T = new Vector<Relationship>();
-	protected static Vector<Relationship> Tprimo = new Vector<Relationship>();
+	protected static HashMap<String,Relationship> T = new HashMap<String,Relationship>();
+	protected static HashMap<String,Relationship> Tprimo = new HashMap<String,Relationship>();
 	protected static Vector<String> Sdue = new Vector<String>();
-	protected static Vector<TransizioneDoppia> Tdue = new Vector<TransizioneDoppia>();
+	protected static HashMap<String,TransizioneDoppia> Tdue = new HashMap<String,TransizioneDoppia>();
 	protected static Vector<TransizioneDoppia> Ta = new Vector<TransizioneDoppia>();
 	protected static Vector<String> Sprev = new Vector<String>();
 	protected static Vector<String> Sdiff = new Vector<String>();
@@ -91,13 +93,13 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			/*for(int i = 0 ; i<Sdue.size(); i++)
 			{
 				System.out.println("nodi sincros:  " + Sdue.get(i));
-			}
-			/*for(int i = 0 ; i<Ta.size(); i++)
+			}*/
+			for(int i = 0 ; i<Ta.size(); i++)
 			{
 				System.out.println("ta: sorg:" + Ta.get(i).getSorgente() + 
 						";   dest : " + Ta.get(i).getDestinazione()
 						+ ";    evento: " + Ta.get(i).getEvento());
-			}*/
+			}
 			writeInDb(level);
 		}
 	}
@@ -111,9 +113,11 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			String nome = Sdue.get(i);
 			addNodeSyncro(nome, level);
 		}
-		for(int i=0; i<Tdue.size(); i++)
-		{
-			TransizioneDoppia attuale = Tdue.get(i);
+		Iterator<String> ks = Tdue.keySet().iterator();
+		while(ks.hasNext())
+		{ 
+			String a = ks.next();
+			TransizioneDoppia attuale = Tdue.get(a);
 			String n1 = attuale.getSorgente();
 			String n2 = attuale.getDestinazione();
 			String oss = "y";
@@ -147,11 +151,9 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	
 	private static void bloccoWhileSincroAlgo(int level)
 	{
-		int kl=0;
 		//System.out.println("entro in while;");
 		while(!checkEqual(Sdue, Sprev))
 		{
-			kl++;
 			Sdiff.clear();
 			for(int i=0; i<Sdue.size(); i++)
 			{
@@ -179,7 +181,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			
 			for(int i=0; i<Sdiff.size(); i++)
 			{
-				//System.out.println("entro in sdiff");
+				//System.err.println("entro in sdiff");
 				String coppia = Sdiff.get(i);
 				//System.err.println("sa: " + coppia.split("-")[0] + ";  sb " + coppia.split("-")[1]);
 				String sa = coppia.split("-")[1];
@@ -187,14 +189,29 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				//System.out.println("qui T vale : " + T.size());
 				//Vector<Relationship> T = getAllRelationsUntil(level, Globals.allRelationsGeneralHash);
 				
-				for(int a=0; a<T.size(); a++)
+				Iterator<String> ks1 = T.keySet().iterator();
+				Iterator<String> ks2 = T.keySet().iterator();
+				Vector<String> sks1 = new Vector<String>();
+				Vector<String> sks2 = new Vector<String>();
+				while(ks1.hasNext())
+				{ 
+					String a1 = ks1.next();
+					sks1.addElement(a1);
+				}
+				while(ks2.hasNext())
 				{
-					for(int k=0; k<T.size(); k++)
+					String a2 = ks2.next();
+					sks2.addElement(a2);
+				}
+				
+				for(int s=0; s<sks1.size(); s++ )
+				{ 
+					for(int p =0; p<sks2.size(); p++)
 					{
 						try ( Transaction tx = Globals.graphDb.beginTx() )
 						{
-							Relationship t1 = T.get(a);
-							Relationship t2 = T.get(k);
+							Relationship t1 = T.get(sks1.get(s));
+							Relationship t2 = T.get(sks2.get(p));
 							String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 							String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 							String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -204,16 +221,20 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							String destinazione1 = pulisci(t1.getProperties("to").values().toString());
 							String destinazione2 = pulisci(t2.getProperties("to").values().toString());
 					
-							boolean bool = (a!=k && guasto2.equalsIgnoreCase("n") && 
+							boolean bool = (s!=p && guasto2.equalsIgnoreCase("n") && 
 									InVector.stessoEvento(evento1,evento2) &&
 									sorgente1.equalsIgnoreCase(sa)&& sorgente2.equalsIgnoreCase(sb));
+							
+							boolean bool2 = (s!=p && guasto2.equalsIgnoreCase("n") && 
+									InVector.stessoEvento(evento1,evento2) &&
+									sorgente1.equalsIgnoreCase(sb)&& sorgente2.equalsIgnoreCase(sa));
 							
 							/*if(bool)
 							{
 								System.err.println("primo: bool vero, liv:" + kl );
 							}*/
 							//System.err.println("boo: " + bool);
-							if(bool)
+							if(bool || bool2)
 							{
 								//System.out.println("evento1: " + evento1 + ";  evento2: " + evento2 
 								//		+ ";  sorgente1: " + sorgente1 + ";   sorgente2 :" + sorgente2
@@ -239,7 +260,8 @@ public class SincronizzaFirst extends SincronizzaCommon{
 										}
 										//tsecondo.setGuasto("y");
 									}
-									Tdue.addElement(tsecondo);
+									Tdue.put(tsecondo.getSorgente() + "-" + tsecondo.getDestinazione()
+									+ "-" +tsecondo.getEvento(),tsecondo);
 	
 								}
 							}
@@ -264,14 +286,31 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				tx.success();
 			}
 			
-			for(int a=0; a<T.size(); a++)
+			//System.err.println("T size: " + T.size());
+			Iterator<String> ks1 = T.keySet().iterator();
+			Iterator<String> ks2 = T.keySet().iterator();
+			Vector<String> sks1 = new Vector<String>();
+			Vector<String> sks2 = new Vector<String>();
+			while(ks1.hasNext())
+			{ 
+				String a1 = ks1.next();
+				sks1.addElement(a1);
+			}
+			while(ks2.hasNext())
 			{
-				for(int k=0; k<T.size(); k++)
+				String a2 = ks2.next();
+				sks2.addElement(a2);
+			}
+			
+			for(int s=0; s<sks1.size(); s++ )
+			{ 
+				for(int p =0; p<sks2.size(); p++)
 				{
 					try ( Transaction tx = Globals.graphDb.beginTx() )
 					{
-						Relationship t1 = T.get(a);
-						Relationship t2 = T.get(k);
+						//System.err.println(a1 + "----" + a2);
+						Relationship t1 = T.get(sks1.get(s));
+						Relationship t2 = T.get(sks2.get(p));
 						String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 						String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 						String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -280,11 +319,9 @@ public class SincronizzaFirst extends SincronizzaCommon{
 						String sorgente2 = pulisci(t2.getProperties("from").values().toString());
 						String destinazione1 = pulisci(t1.getProperties("to").values().toString());
 						String destinazione2 = pulisci(t2.getProperties("to").values().toString());
-						String id1 = pulisci(t1.getProperties("type").values().toString());
-						String id2 = pulisci(t2.getProperties("type").values().toString());
-						
-						
-						boolean bool = a!=k && guasto2.equalsIgnoreCase("n")
+												
+						boolean bool = s!=p 
+								&& guasto2.equalsIgnoreCase("n")
 								&& sorgente2.equalsIgnoreCase(stato) 
 								&& sorgente1.equalsIgnoreCase(stato)
 								&& InVector.stessoEvento(evento1,evento2);
@@ -296,6 +333,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 						
 						if(bool)
 						{
+							//System.err.println("here");
 							TransizioneDoppia tsecondo = new TransizioneDoppia();
 							tsecondo.setSorgente(stato+"-"+stato);
 							tsecondo.setDestinazione(destinazione1+"-"+destinazione2);
@@ -320,7 +358,8 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							}
 							//if(!InVector.InDoppia(tsecondo, Tdue))
 							//{
-							Tdue.addElement(tsecondo);
+							Tdue.put(tsecondo.getSorgente() + "-" + tsecondo.getDestinazione()
+							+ "-" +tsecondo.getEvento(), tsecondo);
 							//}
 						}
 					}			
@@ -359,22 +398,8 @@ public class SincronizzaFirst extends SincronizzaCommon{
 		
 		T.clear();
 		//risolvo problema puntatore
-		Vector<Relationship> appoggio = getAllRelationsUntil(level, Globals.allRelationsGeneralHash);
+		T = getAllRelationsUntilHash(level, Globals.allRelationsGeneralHash);
 		//System.err.println("dim: " + Globals.allRelationsGeneralHash.get(level).size());
-		
-		for(int i=0; i<appoggio.size(); i++)
-		{
-			try ( Transaction tx = Globals.graphDb.beginTx() )
-			{
-				String f = appoggio.get(i).getProperties("from").values().toString();
-				f = pulisci(f);
-				if(!f.equalsIgnoreCase("inizio"))
-				{
-					T.addElement(appoggio.get(i));
-				}
-				tx.success();
-			}
-		}
 		//System.err.println("T,size:   " + T.size());
 		
 		//SCELGO DI NON INCLUDERE IL NODO FITTIZIO INIZIALE
@@ -386,21 +411,8 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	
 		//SCELGO DI NON INCLUDERE LA TRANSIZIONE INIZIALE INIZIALE
 		Tprimo.clear();
-		Vector<Relationship> appoggioGood = getAllRelationsUntil(level, Globals.allRelationsGoodGeneralHash);
-		for(int i=0; i<appoggioGood.size(); i++)
-		{
-			try ( Transaction tx = Globals.graphDbGood.beginTx() )
-			{
-				String from = appoggioGood.get(i).getProperties("from").values().toString();
-				from = pulisci(from);
-				if(!from.equalsIgnoreCase("inizio"))
-				{
-					Tprimo.addElement(appoggioGood.get(i));
-				}
-				tx.success();
-			}
-		}
-		
+		HashMap<String,Relationship> Tprimo = getAllRelationsUntilHash(level, Globals.allRelationsGoodGeneralHash);
+				
 		// creo s2
 		Sdue.clear();
 		for(int i=0; i<Sprimo.size(); i++)
@@ -418,19 +430,21 @@ public class SincronizzaFirst extends SincronizzaCommon{
 		
 		//creo t2
 		Tdue.clear();
-		for(int i=0; i<Tprimo.size(); i++)
-		{
+		Iterator<String> k = Tprimo.keySet().iterator();
+		while(k.hasNext())
+		{ 
+			String a = k.next();
 			try ( Transaction tx = Globals.graphDbGood.beginTx() )
 			{
-				String nomeFrom = Tprimo.get(i).getProperties("from").values().toString();
+				String nomeFrom = Tprimo.get(a).getProperties("from").values().toString();
 				nomeFrom = pulisci(nomeFrom);
 				nomeFrom = nomeFrom + "-" +nomeFrom;
 				
-				String nomeTo = Tprimo.get(i).getProperties("to").values().toString();
+				String nomeTo = Tprimo.get(a).getProperties("to").values().toString();
 				nomeTo = pulisci(nomeTo);
 				nomeTo = nomeTo + "-" +nomeTo;
 				
-				String nomeEv = Tprimo.get(i).getProperties("event").values().toString();
+				String nomeEv = Tprimo.get(a).getProperties("event").values().toString();
 				nomeEv = pulisci(nomeEv);
 				//nomeEv = nomeEv + "-" +nomeEv;
 				
@@ -439,7 +453,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				nuova.setSorgente(nomeFrom);
 				nuova.setEvento(nomeEv);
 				
-				Tdue.addElement(nuova);
+				Tdue.put(nomeFrom + "-" + nomeTo+ "-" +nomeEv,nuova);
 				
 				tx.success();
 			}

@@ -197,7 +197,6 @@ public class GenericGraphHandler extends Adder{
 
 	
 	
-	
 	protected static void removeIsolatedStatesBad(int level)
 	{
 		boolean raggiungibile = false;
@@ -207,7 +206,7 @@ public class GenericGraphHandler extends Adder{
 			raggiungibile = checkPathFromRootBad(Globals.allNodes.get(i));
 			if(!raggiungibile)
 			{
-				//System.err.println("prima: "+ Globals.allNodes.size());
+				//System.err.println("morte al nodo: "+ i);
 				killNode(Globals.allNodes.get(i), i, level);
 				//System.err.println("dopo: "+ Globals.allNodes.size());
 				i--;
@@ -220,32 +219,40 @@ public class GenericGraphHandler extends Adder{
 	protected static void killNode(Node n, int index, int level)
 	{
 		Globals.allNodes.remove(index);
-		String nomeNode = n.getProperties("name").values().toString();
-		for(int l=0; l<Globals.allRelationsGeneral.size(); l++)
+		String nomeNode = pulisci(n.getProperties("name").values().toString());
+		Vector<String> daCancellare = new Vector<String>();
+		//System.err.println("vittima: " + nomeNode);
+		for(int l=0; l<Globals.allRelationsGeneralHash.size(); l++)
 		{
-			for(int a=0; a<Globals.allRelationsGeneral.get(l).size(); a++)
-			{
-				Relationship r = Globals.allRelationsGeneral.get(l).get(a);
-				String fromr = r.getProperties("from").values().toString();
-				if(stessoStato(fromr,nomeNode))
+			Iterator<String> keyset = Globals.allRelationsGeneralHash.get(l).keySet().iterator();
+			while(keyset.hasNext())
+			{ 
+				String a = keyset.next();
+				Relationship r = Globals.allRelationsGeneralHash.get(l).get(a);
+				String fromr = pulisci(r.getProperties("from").values().toString());
+				//System.err.println(fromr);
+				if(fromr.equalsIgnoreCase(nomeNode))
 				{
-					Globals.allRelationsGeneral.get(l).get(a).delete();
-					Globals.allRelationsGeneral.get(l).remove(a);
-					a--;		
+					//System.out.println("cancellare: " + a);
+					daCancellare.add(a);
 				}
 			}
 		}
-		for(int l=0; l<Globals.allRelationsGoodGeneral.size(); l++)
+		
+		for(int i=0; i<daCancellare.size(); i++)
 		{
-			for(int a=0; a<Globals.allRelationsGoodGeneral.get(l).size(); a++)
+			for(int l=0; l<Globals.allRelationsGeneralHash.size(); l++)
 			{
-				Relationship r = Globals.allRelationsGoodGeneral.get(l).get(a);
-				String fromr = r.getProperties("from").values().toString();
-				if(stessoStato(fromr,nomeNode))
+				try ( Transaction tx1 = Globals.graphDb.beginTx() )
 				{
-					Globals.allRelationsGoodGeneral.get(l).get(a).delete();
-					Globals.allRelationsGoodGeneral.get(l).remove(a);
-					a--;		
+					//System.err.println("cancello : " + daCancellare.get(i));
+					//killRelation(daCancellare.get(i), Globals.allRelationsGoodGeneralHash);
+					if(Globals.allRelationsGeneralHash.get(l).get(daCancellare.get(i))!=null)
+					{
+						Globals.allRelationsGeneralHash.get(l).get(daCancellare.get(i)).delete();
+					}
+					Globals.allRelationsGeneralHash.get(l).remove(daCancellare.get(i));
+					tx1.success();
 				}
 			}
 		}
@@ -295,6 +302,21 @@ public class GenericGraphHandler extends Adder{
 			{ 
 				String key = keyset.next();
 				ris.addElement(who.get(l).get(key));
+			}
+		}
+		return ris;
+	}
+	
+	protected static HashMap<String, Relationship> getAllRelationsUntilHash(int level, Vector<HashMap<String, Relationship>> who)
+	{
+		HashMap<String, Relationship> ris = new HashMap<String, Relationship>();
+		for(int l=0; l<=level; l++ )
+		{
+			Iterator<String> keyset = who.get(l).keySet().iterator();
+			while(keyset.hasNext())
+			{ 
+				String key = keyset.next();
+				ris.put(key, who.get(l).get(key));
 			}
 		}
 		return ris;

@@ -24,8 +24,11 @@ public class GoodTwin extends GenericGraphHandler{
 		if(!inInteger(l,Globals.goodTwinDid))
 		{
 			goodBase(l);
-			removeGuasti(l);
-			removeIsolatedStatesGood();
+			//removeGuasti(l);
+			if(l==1)
+			{
+				removeIsolatedStatesGood();
+			}
 			System.out.println("created good twin level: "+l);
 			Globals.goodTwinDid.addElement(Integer.valueOf(l));
 		}		
@@ -74,8 +77,11 @@ public class GoodTwin extends GenericGraphHandler{
 					ev = pulisci(attuale.getProperties("event").values().toString());
 					gu = pulisci(attuale.getProperties("guasto").values().toString());
 					tx.success();
-				}				
-				addRelationGood(n1, n2, nome, oss, ev, gu, level);
+				}		
+				if(gu.equalsIgnoreCase("n"))
+				{
+					addRelationGood(n1, n2, nome, oss, ev, gu, level);
+				}
 			}
 		}
 	}

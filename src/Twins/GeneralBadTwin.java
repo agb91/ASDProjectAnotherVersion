@@ -1,5 +1,7 @@
 package Twins;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.neo4j.graphdb.Node;
@@ -21,22 +23,21 @@ public class GeneralBadTwin extends GenericGraphHandler{
 		{
 			try ( Transaction tx = Globals.graphDb.beginTx() )
 			{
-				Vector<Relationship> allRelationsUntilNow = getAllRelationsUntil(livello, Globals.allRelationsGeneralHash);
+				HashMap<String,Relationship> allRelationsUntilNow = getAllRelationsUntilHash(livello, Globals.allRelationsGeneralHash);
 				//System.out.println("aRUN size :  " + allRelationsUntilNow.size());
 				Vector<String> tPrimo = new Vector<String>();
 				tPrimo = riempiTPrimo(livello);
-				/*for(int s=0; s<tPrimo.size(); s++)
-				{
-					System.out.println("tPrimo prima: " + tPrimo.get(s));
-				}*/
+				
 				for(int i=1; i<Globals.allNodes.size(); i++)
 				{
 					Node nodoAttuale = Globals.allNodes.get(i);
 					String nomeNodo = pulisci(nodoAttuale.getProperties("name").values().toString());
-					for(int a=0; a<allRelationsUntilNow.size(); a++)
-					{
+					Iterator<String> keyset = allRelationsUntilNow.keySet().iterator();
+					while(keyset.hasNext())
+					{ 
+						String a = keyset.next();
 						Relationship transazioneAttuale = allRelationsUntilNow.get(a);
-						String nomeTransizione = transazioneAttuale.getProperties("type").values().toString();					
+						String nomeTransizione = pulisci(transazioneAttuale.getProperties("type").values().toString());					
 						//System.out.println("nome transizione attuale:   " + nomeTransizione);
 						String from = pulisci(transazioneAttuale.getProperties("from").values().toString());
 						if(from.equalsIgnoreCase("inizio"))
@@ -45,11 +46,12 @@ public class GeneralBadTwin extends GenericGraphHandler{
 						}
 						String osservabile = pulisci(transazioneAttuale.getProperties("oss").values().toString());
 						Node destinazione = transazioneAttuale.getEndNode();
-						boolean bool = from.equalsIgnoreCase(nomeNodo) && osservabile.equalsIgnoreCase("y");
+						boolean bool = from.equalsIgnoreCase(nomeNodo) 
+								&& osservabile.equalsIgnoreCase("y");
 						//System.out.println("nome nodo: " + nomeNodo + ";   from : " + from + ";  bool : "+ bool);
 						if(bool)
 						{
-							String eventoTransizione = transazioneAttuale.getProperties("event").values().toString();
+							String eventoTransizione = pulisci(transazioneAttuale.getProperties("event").values().toString());
 							int cardinalita = getCardinalita(eventoTransizione);
 							boolean fault;
 							String guasto = pulisci(transazioneAttuale.getProperties("guasto").values().toString());
@@ -64,11 +66,12 @@ public class GeneralBadTwin extends GenericGraphHandler{
 							}
 							//System.out.println("fauls:  " + fault + ";     guasto: " + guasto);
 							// il grafo A è già definito globalmente
-							Vector<Tripletta> insiemeTriplette = Find.find(destinazione,(livello-cardinalita),fault,eventoTransizione, livello-1); 
-							//System.out.println("uscite dal find: " + insiemeTriplette.size());
-							for(int k = 0; k<insiemeTriplette.size(); k++)
-							{
-								Tripletta triplettaAttuale = insiemeTriplette.get(k);
+							HashMap<String,Tripletta> insiemeTriplette = Find.findHash(destinazione,(livello-cardinalita),fault,eventoTransizione, livello-1); 
+							Iterator<String> ks = insiemeTriplette.keySet().iterator();
+							while(ks.hasNext())
+							{ 
+								String an = ks.next();
+								Tripletta triplettaAttuale = insiemeTriplette.get(an);
 								//System.out.println(triplettaAttuale.getEventoOrdered() + "---" + triplettaAttuale.getsDestinazione());
 								String eventoTripletta = triplettaAttuale.getEvento();
 								String guastoAttuale = "n";

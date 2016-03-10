@@ -1,5 +1,6 @@
 package Twins;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -19,22 +20,15 @@ import usefullAbstract.InVector;
 
 public class SincronizzaCommon extends GenericGraphHandler{
 	
-	protected static boolean nuovaTransizione(TransizioneDoppia nuovo, Vector<TransizioneDoppia> pagliaio)
+	protected static boolean nuovaTransizione(TransizioneDoppia nuovo, HashMap<String,TransizioneDoppia> pagliaio)
 	{
 		String eventoNuovo = nuovo.getEvento();
-		//String guastoNuovo = nuovo.getGuasto();
-		//System.out.println("primoN: " + primoNuovo + ";   secondoN : " + secondoNuovo);
-		for(int i=0; i<pagliaio.size(); i++)
+		String fromNuovo = nuovo.getSorgente();
+		String toNuovo = nuovo.getDestinazione();
+		String id = fromNuovo + "-" + toNuovo + "-" + eventoNuovo;
+		if(pagliaio.get(id)!=null)
 		{
-			TransizioneDoppia attuale = pagliaio.get(i);
-			String evento = attuale.getEvento();
-			//String guasto = attuale.getGuasto();
-			if(stessoStato(attuale.getSorgente(),nuovo.getSorgente()) 
-				&& stessoStato(attuale.getDestinazione(),nuovo.getDestinazione())
-				&& InVector.stessoEvento(eventoNuovo,evento))
-			{
-				return false;
-			}
+			return false;
 		}
 		return true;
 	}
