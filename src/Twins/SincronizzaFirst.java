@@ -76,8 +76,13 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				daCheckare.put(id ,Globals.firstTaPerLevel.get(l).get(i));
 			}
 		}
+		long startTime4 = System.currentTimeMillis();
 		//System.err.println("tocheck: " + daCheckare.size());
 		boolean ris = checkQuarta(Sdue, level, daCheckare, Tdue, "f");
+		long endTime4 = System.currentTimeMillis();
+		long seconds = (endTime4 - startTime4);
+		System.err.println("il c4 ha rischiesto " + seconds + " milliseconds ;  \n\n\n\n");
+
 		if(ris)
 		{
 			Globals.syncroC4Vera.put(level, level);

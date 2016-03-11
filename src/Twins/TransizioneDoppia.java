@@ -46,6 +46,7 @@ public class TransizioneDoppia {
 		destinazione = vettore[0] + "-" + vettore[1];
 		return destinazione;
 	}
+	
 	public void setDestinazione(String destinazione) {
 		this.destinazione = destinazione;
 	}
