@@ -37,7 +37,7 @@ public class Main {
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	System.out.println("comincio il programma principale");
 		
-    /*	FirstBadTwin.createBadTwinLevel1();
+    	FirstBadTwin.createBadTwinLevel1();
     	GoodTwin.createGoodTwin(1);
     	SincronizzaFirst.syncro(1);
     	GeneralBadTwin.createBadTwinGeneral(2);
@@ -48,7 +48,7 @@ public class Main {
     	GoodTwin.createGoodTwin(3);
     	SincronizzaFirst.syncro(3);
     	SincronizzaSecond.syncroSecond(3);
-    	GeneralBadTwin.createBadTwinGeneral(4);
+    /*	GeneralBadTwin.createBadTwinGeneral(4);
     	GoodTwin.createGoodTwin(4);
     	SincronizzaFirst.syncro(4);
     	SincronizzaSecond.syncroSecond(4);
@@ -64,13 +64,13 @@ public class Main {
     	GeneralBadTwin.createBadTwinGeneral(8);
     	GeneralBadTwin.createBadTwinGeneral(9);*/
     	
+    	/*Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
-    	Menu.ask();
-    	Menu.ask(); 
+    	Menu.ask(); */
     
     	
     	System.out.println("ho finito");

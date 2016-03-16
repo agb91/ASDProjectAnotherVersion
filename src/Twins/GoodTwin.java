@@ -2,6 +2,7 @@ package Twins;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import org.neo4j.graphdb.DynamicLabel;
@@ -24,7 +25,6 @@ public class GoodTwin extends GenericGraphHandler{
 		if(!inInteger(l,Globals.goodTwinDid))
 		{
 			goodBase(l);
-			//removeGuasti(l);
 			if(l==1)
 			{
 				removeIsolatedStatesGood();
@@ -153,23 +153,20 @@ public class GoodTwin extends GenericGraphHandler{
 	public static void killNodeGood(Node n, int index)
 	{
 		Globals.allNodesGood.remove(index);
-		String nomeNode = n.getProperties("name").values().toString();
-		for(int l=0; l<Globals.allRelationsGoodGeneralHash.size(); l++)
-		{	
-			HashMap <String, Relationship> hash = new HashMap <String, Relationship>();
-			Iterator<String> keyset = Globals.allRelationsGoodGeneralHash.get(l).keySet().iterator();
-			while(keyset.hasNext())
-			{ 
-				String key = keyset.next();
-				Relationship r = Globals.allRelationsGoodGeneralHash.get(l).get(key);
-				String fromr = r.getProperties("from").values().toString();
-				if(fromr.contains(nomeNode))
-				{
-					killRelation(key, Globals.allRelationsGoodGeneralHash);
-				}
-			}
-		}		
-		n.delete();
+		String nomeNode = pulisci(n.getProperties("name").values().toString());
+		Iterator<String> ks = Globals.allRelationsGoodGeneralHash.get(0).keySet().iterator();
+		while(ks.hasNext())
+		{
+			String k = ks.next();
+			Relationship r = Globals.allRelationsGoodGeneralHash.get(0).get(k);
+			String from = r.getProperties("from").values().toString();
+			from = pulisci(from);
+			if(from.equalsIgnoreCase(nomeNode))
+			{
+				Globals.allRelationsGoodGeneralHash.get(0).remove(k);
+			}			
+		}
+		System.err.println("rimosso nodo: " + nomeNode);
 	}
 	
 
@@ -178,7 +175,7 @@ public class GoodTwin extends GenericGraphHandler{
 		boolean raggiungibile = false;
 		
 		Node root = Globals.allNodesGood.get(0);
-		Iterator<Path> tuttiIPath = findPath(root,n);
+		Iterator<Path> tuttiIPath = findPathGood(root,n);
 		while(tuttiIPath.hasNext() && !raggiungibile)
 		{
 			Path path = tuttiIPath.next();

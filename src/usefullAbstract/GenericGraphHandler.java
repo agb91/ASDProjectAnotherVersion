@@ -73,6 +73,7 @@ public class GenericGraphHandler extends Adder{
 						//	System.out.println("seconda transizione: " + sorgente2 + " evento : " + evento2);
 						//	System.out.println("sto per dire che è NON deterministico");
 							deterministico = false;
+							return false;
 						}
 					}
 				}
@@ -95,9 +96,8 @@ public class GenericGraphHandler extends Adder{
 		return false;
 	}
 	
-	
 	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
-	protected static Iterator<Path> findPath(Node s, Node e)
+	protected static Iterator<Path> findPathSyncro(Node s, Node e)
 	{
 		Iterator<Path> iteratore = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
@@ -111,7 +111,42 @@ public class GenericGraphHandler extends Adder{
 			tx.success();
 		}	
 		return iteratore;
-	}	
+	}
+	
+	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
+	protected static Iterator<Path> findPathGood(Node s, Node e)
+	{
+		Iterator<Path> iteratore = null;
+		try ( Transaction tx = Globals.graphDbGood.beginTx() )
+		{
+			PathFinder<Path> finder =
+					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
+							Direction.OUTGOING ), 15 );
+			Iterable<Path> paths = finder.findAllPaths( s, e );
+			
+			iteratore = paths.iterator();
+			tx.success();
+		}	
+		return iteratore;
+	}
+	
+	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
+	protected static Iterator<Path> findPathBad(Node s, Node e)
+	{
+		Iterator<Path> iteratore = null;
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+			PathFinder<Path> finder =
+					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
+							Direction.OUTGOING ), 15 );
+			Iterable<Path> paths = finder.findAllPaths( s, e );
+			
+			iteratore = paths.iterator();
+			tx.success();
+		}	
+		return iteratore;
+	}
+	
 	
 	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
 	protected static Iterator<Path> findPathSecond(Node s, Node e)
@@ -158,9 +193,9 @@ public class GenericGraphHandler extends Adder{
 			{
 				Relationship tk = T.get(sks1.get(k));
 				String guastoK = pulisci(tk.getProperties("guasto").values().toString()); 
-				String osservabileK = pulisci(tk.getProperties("oss").values().toString()); 
+				//String osservabileK = pulisci(tk.getProperties("oss").values().toString()); 
 				String eventoK = pulisci(tk.getProperties("event").values().toString()); 
-				if(guastoK.equalsIgnoreCase("y") && osservabileK.equalsIgnoreCase("y"))
+				if(guastoK.equalsIgnoreCase("y"))
 				{
 					for( int s=0; s<sks2.size(); s++)
 					{
@@ -200,7 +235,7 @@ public class GenericGraphHandler extends Adder{
 		
 		for(int i=0; i<primo.size(); i++)
 		{
-			if(!stessoStato(primo.get(i),secondo.get(i)))
+			if(!(primo.get(i).equalsIgnoreCase(secondo.get(i))) )
 			{
 				//System.out.println("diversi:  " + primo.get(i) + "---" + secondo.get(i));
 				return false;
@@ -281,7 +316,7 @@ public class GenericGraphHandler extends Adder{
 		//System.out.println("analizzo il nodo : " + n.getProperties("name").values().toString());
 		
 		Node root = Globals.allNodes.get(0);
-		Iterator<Path> tuttiIPath = findPath(root,n);
+		Iterator<Path> tuttiIPath = findPathBad(root,n);
 		while(tuttiIPath.hasNext() && !raggiungibile)
 		{
 			Path path = tuttiIPath.next();
@@ -307,7 +342,8 @@ public class GenericGraphHandler extends Adder{
 		return ris;
 	}
 	
-	protected static Vector<Relationship> getAllRelationsUntil(int level, Vector<HashMap<String, Relationship>> who)
+	protected static Vector<Relationship> getAllRelationsUntil(int level, 
+			Vector<HashMap<String, Relationship>> who)
 	{
 		Vector<Relationship> ris = new Vector<Relationship>();
 		for(int l=0; l<=level; l++ )

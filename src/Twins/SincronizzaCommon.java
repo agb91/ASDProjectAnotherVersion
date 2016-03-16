@@ -41,20 +41,10 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		
 	protected static boolean nuovoStato(String nuovo, Vector<String> Sdue)
 	{
-		String primoNuovo = nuovo.split("-")[0];
-		String secondoNuovo = nuovo.split("-")[1];
-		//System.out.println("primoN: " + primoNuovo + ";   secondoN : " + secondoNuovo);
 		for(int i=0; i<Sdue.size(); i++)
 		{
 			String attuale = Sdue.get(i);
-			String primo = attuale.split("-")[0];
-			String secondo = attuale.split("-")[1];
-			//System.out.println("primo: " + primo + ";   secondo : " + secondo);
-			if(primo.equalsIgnoreCase(primoNuovo) && secondo.equalsIgnoreCase(secondoNuovo))
-			{
-				return false;
-			}
-			if(primo.equalsIgnoreCase(secondoNuovo) && secondo.equalsIgnoreCase(primoNuovo))
+			if(nuovo.equalsIgnoreCase(attuale))
 			{
 				return false;
 			}
@@ -429,7 +419,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		{
 			//System.err.println("n1: " + s.getProperties("name").values().toString() +
 			//		";  n2: " + e.getProperties("name").values().toString());
-			Iterator<Path> iteratore = findPath(s,e);
+			Iterator<Path> iteratore = findPathSyncro(s,e);
 			//System.err.println(iteratore.hasNext() + "--");
 			Iterator<Relationship> result = null;
 			if(iteratore.hasNext())

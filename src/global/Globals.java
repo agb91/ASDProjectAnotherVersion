@@ -27,9 +27,10 @@ public class Globals {
 	public static Vector <HashMap<String, Relationship>> allRelationsGoodGeneralHash = new Vector<HashMap<String, Relationship>>();
 	public static Vector<Integer> goodTwinDid = new Vector<Integer>();
 	
-	public static HashMap<Integer,Integer> syncroC4Vera = new HashMap<Integer,Integer>();
-	public static HashMap<Integer,Integer> syncroSecondC4Vera = new HashMap<Integer,Integer>();
-	
+	public static HashMap<Integer, String> c1= new HashMap<Integer, String>();
+	public static HashMap<Integer, String> c2= new HashMap<Integer, String>();
+	public static HashMap<Integer, String> c3= new HashMap<Integer, String>();
+	public static HashMap<Integer, String> c4= new HashMap<Integer, String>();
 	
 	public static Vector<Vector<TransizioneDoppia>> firstTaPerLevel = new Vector<Vector<TransizioneDoppia>>();
 	public static Vector<Vector<TransizioneDoppia>> secondTaPerLevel = new Vector<Vector<TransizioneDoppia>>();

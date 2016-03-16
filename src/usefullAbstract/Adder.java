@@ -173,34 +173,14 @@ public class Adder {
 	
 	protected static boolean stessoStato(String primo, String secondo)
 	{
-		//nel caso base, una sola lettera
-		if(primo.split("-").length == 1)
+		if(primo.equalsIgnoreCase(secondo))
 		{
-			if(primo.equalsIgnoreCase(secondo))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		String primoA = primo.split("-")[0];
-		String primoB = primo.split("-")[1];
-		String secondoA = secondo.split("-")[0];
-		String secondoB = secondo.split("-")[1];
-		
-		if(primoA.equalsIgnoreCase(secondoA) && primoB.equalsIgnoreCase(secondoB))
-		{
-			//System.err.println("sto per restiturire true");
 			return true;
 		}
-		if(primoA.equalsIgnoreCase(secondoB) && primoB.equalsIgnoreCase(secondoA))
+		else
 		{
-			//System.err.println("sto per restiturire true");
-			return true;
+			return false;
 		}
-		return false;
 	}
 	
 		
@@ -308,18 +288,24 @@ public class Adder {
 			{
 				Node n1 = findNodeByNameSyncro(n1s);
 				Node n2 = findNodeByNameSyncro(n2s);
-				relationship = n1.createRelationshipTo( n2, RelTypes.STD );
-				relationship.setProperty( "type", pulisci(nome) );
-				relationship.setProperty( "oss", pulisci(oss) );
-				ev = pulisci(ev);
-				relationship.setProperty("event", pulisci(ev));
-				String nomeN1 = n1.getProperties("name").values().toString();
-				String nomeN2 = n2.getProperties("name").values().toString();	
-				relationship.setProperty("from", pulisci(nomeN1));
-				relationship.setProperty("to", pulisci(nomeN2));
-	
-				Globals.allRelationsSyncroGeneralHash.get(level).put(pulisci(nome), relationship);
-				//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+				if(n1!=null && n2!=null)
+				{	
+					relationship = n1.createRelationshipTo( n2, RelTypes.STD );
+					relationship.setProperty( "type", pulisci(nome) );
+					relationship.setProperty( "oss", pulisci(oss) );
+					ev = pulisci(ev);
+					relationship.setProperty("event", pulisci(ev));
+					String nomeN1 = n1.getProperties("name").values().toString();
+					String nomeN2 = n2.getProperties("name").values().toString();	
+					relationship.setProperty("from", pulisci(nomeN1));
+					relationship.setProperty("to", pulisci(nomeN2));
+					Globals.allRelationsSyncroGeneralHash.get(level).put(pulisci(nome), relationship);
+					//System.out.println("ho aggiunto la relazione: " + nome + "  da: " + nomeN1 + "  a: " + nomeN2);
+				}
+				else
+				{
+					System.err.println("ho omesso delle transizioni");
+				}
 			}
 			tx.success();
 		}	
