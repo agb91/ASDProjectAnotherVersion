@@ -16,9 +16,9 @@ public class NodoTarjan {
 	}
 
 	public String getNome() {
-		String[] vettore = nome.split("-");
+		/*String[] vettore = nome.split("-");
 		Arrays.sort(vettore);
-		nome = vettore[0] + "-" + vettore[1];
+		nome = vettore[0] + "-" + vettore[1];*/
 		return nome;
 	}
 

@@ -385,6 +385,7 @@ public class Adder {
 		if(userNodes.size()==0)
 		{
 			System.out.println("non trovo il nodo: " + n1s+ "||--fine nome");
+			return null;
 		}
 		return userNodes.get(0);
 
