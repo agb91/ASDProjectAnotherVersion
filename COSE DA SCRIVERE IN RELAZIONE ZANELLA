@@ -1,0 +1,16 @@
+1) abbiamo benchmarkato (facendo un programmino di appoggio) vector e hashmap: hashmap è molto meglio in accesso quando ci sono tabelle molto grandi, mentre è peggio in scorrimento e scrittura, e lievemente peggio (in modo irrilevante) per quantità di dati piccole (nell'ordine di 20).
+Quindi: usiamo hashmap per le transizioni che possono essere davvero numerose (migliaia) e vector per i nodi (che sono molti di meno)
+
+2)Nella validazione, requisito che ogni ciclo abbia almeno una transizione osservabile abbiamo confrontato 2 soluzioni: A) fare un grafo che abbia solo le transizioni NON osservabili e vedere se c'è un ciclo B) usare i sistemi automatici di neo4j per trovare i cicli e cercare fisicamente se c'è almeno una transizione osservabile. A logica è più veloce A, a fatti è più veloce B (entrambe devono usare il Db, B lo fa in modo ottimizzato dal produttore del db stesso). La soluzione B è nostra, la soluzione A è plagiata dal gruppo di Paola e Ada, usiamo la B
+
+3) Durante tutti i benchmark cerchiamo di sottrarre i millisecondi imputabile all'accesso al db (che ovviamente sono tanti), otteniamo un risultato realistico ma è difficile capire se è davvero preciso (è più che accettabile)
+
+4) Per trovare i cicli usiamo l'algoritmo di Tarjan, il più veloce algoritmo noto per trovare componenti fortemente connesse. NB dove c'è una componente fortemente connessa è ovvio che c'è un ciclo, viceversa non è detto, lo usiamo con le dovute precauzioni (è la parte meglio implementata del nostro progetto)
+
+5) Usiamo 4 databases perchè ci interessa poter vedere anche in contemporanea a livello grafico la situazione di ogni twin o sincronizzazione
+
+6) Usiamo in modo diffusissimo la programmazione dinamica: se ci aspettiamo che un risultato di un problema venga usato più volte lo scriviamo in un'apposita variabile della classe Global, in modo che il programma non risolva MAI 2 volte lo stesso problema. Questo è da tenere conto quando facciamo benchmark (se un metodo scarso si trova tanti problemi già risolti sarà più veloce di un metodo veloce), precisamente ogni volta che verifichiamo la velocità di qualcosa riavviamo il programma
+
+7) alcuni dati sono nella forma "vettori di tabelle di hash", che è ibrida ma risulta la più veloce: ad esempio le transizioni del bad twin di 5 livello sono un vettore di dimensione 5 dove ogni slot contiene una tabella di hash con le transizioni aggiunte a quel livello. Il vantaggio è che se il sono a livello 5 ma voglio leggere le transizioni di livello 3 posso farlo leggendo solo i primi 3 slot del vettore
+
+8) per il secondo algoritmo risolutivo abbiamo 2 versioni (la specifica è ambigua, può essere interpretata in 2 modi, quando abbiamo chiesto a Z. quale usare Lei ha detto di provarli entrambi.. )
