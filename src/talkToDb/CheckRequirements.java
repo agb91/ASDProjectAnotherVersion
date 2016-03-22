@@ -24,6 +24,7 @@ import org.neo4j.kernel.GraphDatabaseAPI;
 
 import global.Globals;
 import usefullAbstract.GenericGraphHandler;
+import utility.PrintTime;
 
 
 public class CheckRequirements extends GenericGraphHandler{
@@ -32,22 +33,34 @@ public class CheckRequirements extends GenericGraphHandler{
 	private static boolean isCyclic = false;
 
 	
+	
 	public static void check()
 	{
 		rels = getAllRelationsUntil(0, Globals.allRelationsGeneralHash);
 		//ogni stato ha almeno una transizione uscente
+		long before = System.currentTimeMillis();
 		checkOutComing();
+		long after = System.currentTimeMillis();
+		PrintTime.stampTime("check transizioni uscenti", before, after);
 		
 		//i metodi add gestiscono già eventuali doppioni;
 		//più transizioni possono avere lo stesso evento
 		
 		//grafo è ciclico (ha almeno un ciclo), inoltre
 		// ogni ciclo deve avere almeno un evento osservabile
+		//todo SISTEMA COSI: 
+		//	fai un grafo senza le transizioni osservabili, solo non osservabili,
+		//	se ha cicli allora il controllo è violato
+		before = System.currentTimeMillis();
 		controlCycleRequirements();
+		after = System.currentTimeMillis();
+		PrintTime.stampTime("check no cicli non osservabili", before, after);
 		
 		//ogni nodi raggiungibile da radice
+		before = System.currentTimeMillis();
 		rootCanArrive();
-		
+		after = System.currentTimeMillis();
+		PrintTime.stampTime("check linket to root", before, after);
 		
 		//ogni relazione uscente da ogni nodo deve prima o poi 
 		//raggiungere relazioni osservabili, che è come dire che da ogni nodo si può
@@ -55,14 +68,23 @@ public class CheckRequirements extends GenericGraphHandler{
 		// arrivare ad un ciclo. se ogni nodo ha un'uscita, per forza prima o poi si 
 		//crea un ciclo, che per i controlli già fatti per forza è osservabile...
 		
-		//I don't wanna twin relations with the same "guasto" value
+		/*//I don't wanna twin relations with the same "guasto" value
+		before = System.currentTimeMillis();
 		checkTwin();
+		after = System.currentTimeMillis();
+		PrintTime.stampTime("check no twin transictions", before, after);*/
 		
 		//I expect that all "guasted" relations are not observable
+		before = System.currentTimeMillis();
 		checkGuastoNonOsservabile();
+		after = System.currentTimeMillis();
+		PrintTime.stampTime("check fault not observable", before, after);
 		
 		//I expect that all non obs haven't event
+		before = System.currentTimeMillis();
 		checkUnOsservable();
+		after = System.currentTimeMillis();
+		PrintTime.stampTime("check not observable with events", before, after);
 	
 	}
 	
@@ -215,16 +237,13 @@ public class CheckRequirements extends GenericGraphHandler{
 	
 	//restituisci solo le relazioni, scegli se stamparle 
 	//RESTITUISCI ogni possiblie percorso BASTA CHE SIA DIVERSO DA PERCORSO VUOTO
-	public static void findPathRels(Node s, Node e, Boolean haveToWrite)
+	public static void findPathRels(Node s, Node e)
 	{
 		Iterator<Path> iteratore = findPathL(s,e);
 		Iterator<Relationship> result = null;
 		Vector<Relationship> ris = new Vector<Relationship>();
 		try ( Transaction tx = Globals.graphDb.beginTx() )
 		{
-			//LO SO ANCHE IO CHE È UN CAZZO DI WHILE DENTRO UN WHILE MA TENUTO
-			//CONTO DEL FATTO CHE PUÒ TROVARE TANTI PERCORSI ALTERNATIVI
-			//È MEGLIO COSÌ
 			do
 			{
 				Path path = iteratore.next();
@@ -238,10 +257,6 @@ public class CheckRequirements extends GenericGraphHandler{
 	                {
 						ris.addElement(result.next());
 	                }while(result.hasNext());
-	                if(haveToWrite)
-	                {
-	                	writeVector(ris,s,e);
-	                }
                 	checkAllCycleOsservable(ris, e.getProperties("name").toString());
 				}    
 			}while(iteratore.hasNext());
@@ -348,13 +363,44 @@ public class CheckRequirements extends GenericGraphHandler{
 	}
 		
 	public static void controlCycleRequirements()
-	{
-		Vector<Cycle> rels = new Vector<Cycle>();
+	{		
+		/*Iterator<String> keyset = 
+				Globals.allRelationsGeneralHash.get(0).keySet().iterator();
+		
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+			for(int i=0; i<Globals.allNodes.size(); i++)
+			{
+				addNodeCheck(Globals.allNodes.get(i));
+			}
+			while(keyset.hasNext())
+			{ 
+				String a = keyset.next();
+				Relationship transizioneAttuale =
+						Globals.allRelationsGeneralHash.get(0).get(a);
+				String oss = transizioneAttuale.getProperties("oss").values().toString();
+				oss = pulisci(oss);
+				String from = transizioneAttuale.getProperties("from").values().toString();
+				from = pulisci(from);
+				String to = transizioneAttuale.getProperties("to").values().toString();
+				to = pulisci(to);
+				String nome = transizioneAttuale.getProperties("type").values().toString();
+				nome = pulisci(nome);
+				if(oss.equalsIgnoreCase("n"))
+				{
+					Globals.allRelationsNotObservable.put(a, transizioneAttuale);
+					addRelationCheck(from, to, nome, oss);
+				}
+			}
+			tx.success();
+		}
+		System.err.println("dimensione: "  + Globals.allRelationsNotObservable.size()); 
+		*/
 		for(int i=0; i<Globals.allNodes.size(); i++)
 		{
 		   Node n = Globals.allNodes.get(i);
 		   //System.out.println("STO ESAMINANDO IL NODO: " +i);
-		   findPathRels(n,n, false);
+		   findPathRels(n,n);
 		}
 		if(!isCyclic)
 		{

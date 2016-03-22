@@ -15,8 +15,12 @@ public class Globals {
 	public static GraphDatabaseService graphDbGood;
 	public static GraphDatabaseService graphDbSyncro;
 	public static GraphDatabaseService graphDbSyncroSecond;
+	//public static GraphDatabaseService graphDbCheck; // just for check
 	
 	public static long writeTime = 0;
+	
+	public static HashMap<String, Relationship> allRelationsNotObservable 
+						= new HashMap<String, Relationship>(); //just for check
 	
 	public static Vector <Node> allNodes = new Vector<Node>();
 	public static Vector <HashMap<String, Relationship>> allRelationsGeneralHash = new Vector<HashMap<String, Relationship>>();
@@ -51,7 +55,7 @@ public class Globals {
 	
 	public static void initialize()
 	{
-		for(int i=0; i<10; i++)
+		for(int i=0; i<13; i++)
 		{
 			allRelationsGeneralHash.addElement(new HashMap<String, Relationship>());
 			allRelationsGoodGeneralHash.addElement(new HashMap<String, Relationship>());

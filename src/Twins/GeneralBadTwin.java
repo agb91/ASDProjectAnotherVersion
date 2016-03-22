@@ -19,6 +19,8 @@ public class GeneralBadTwin extends GenericGraphHandler{
 	
 	public static void createBadTwinGeneral(int livello)
 	{
+		long prima = System.currentTimeMillis();
+		long dbTime = 0;
 		if(!inInteger(livello,Globals.badTwinDid))
 		{
 			try ( Transaction tx = Globals.graphDb.beginTx() )
@@ -85,16 +87,21 @@ public class GeneralBadTwin extends GenericGraphHandler{
 									String destination = pulisci(triplettaAttuale.getsDestinazione().getProperties("name").values().toString());
 									String id = sorgente + "--" + triplettaAttuale.getEventoOrdered() + "--" + destination + "--" + guastoAttuale;
 									//System.out.println("tripletta: " + id);
+									long before = System.currentTimeMillis();
 									addRelationBad(nodoAttuale, triplettaAttuale.getsDestinazione(), 
 											id, "y", triplettaAttuale.getEvento() , guastoAttuale, livello);
+									long after = System.currentTimeMillis();
+									dbTime += (after-before);
 									tPrimo.add(id);
 								}
 							}
 						}
 					}
 				}		
+				long dopo = System.currentTimeMillis();
+				System.err.println("tempo per bad twin : " + ((dopo-prima)- dbTime) );
 				//ORM.updateDb(livello);
-				//removeIsolatedStatesBad(livello);
+				//remove IsolatedStatesBad(livello);
 				System.out.println("---------------------------------------------");
 				System.out.println("created bad twin level" + livello);
 				tx.success();

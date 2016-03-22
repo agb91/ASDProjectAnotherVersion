@@ -23,6 +23,10 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	protected static Vector<String> secondStemp = new Vector<String>();
 	protected static Vector<String> secondSdiff = new Vector<String>();
 	
+	
+	private static long dopo;
+	private static long prima;
+	private static long dbTime=0;
 
 	public static void syncroSecond(int level)
 	{
@@ -218,8 +222,13 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	
 	private static void algoritmoSecond(int level)
 	{
+		dbTime = 0;
+		prima = System.currentTimeMillis();
 		bloccoSuperioreSecondo(level);
 		bloccoWhileSecondo(level);
+		dopo = System.currentTimeMillis();
+		System.err.println("tempo per la sincronizzazione secondo tipo: "
+					+ ((dopo-prima)-dbTime)	);
 	}
 	
 	private static void bloccoWhileSecondo(int level)
@@ -262,6 +271,8 @@ public class SincronizzaSecond extends SincronizzaCommon {
 						{
 							Relationship t1 = T.get(sks1.get(s));
 							Relationship t2 = T.get(sks2.get(p));
+							
+							long beforeI = System.currentTimeMillis();
 							String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 							String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 							String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -270,7 +281,9 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							String sorgente2 = pulisci(t2.getProperties("from").values().toString());
 							String destinazione1 = pulisci(t1.getProperties("to").values().toString());
 							String destinazione2 = pulisci(t2.getProperties("to").values().toString());
-					
+							long afterI = System.currentTimeMillis();
+							dbTime += (afterI-beforeI);
+							
 							boolean bool = (p!=s) && guasto2.equalsIgnoreCase("n")
 									&& InVector.stessoEvento(evento1,evento2) 
 									&& sorgente1.equalsIgnoreCase(sa) 
@@ -359,6 +372,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 					{
 						Relationship t1 = T.get(sks1.get(s));
 						Relationship t2 = T.get(sks2.get(p));
+						long beforeI = System.currentTimeMillis();
 						String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 						String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 						String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -367,6 +381,8 @@ public class SincronizzaSecond extends SincronizzaCommon {
 						String sorgente2 = pulisci(t2.getProperties("from").values().toString());
 						String destinazione1 = pulisci(t1.getProperties("to").values().toString());
 						String destinazione2 = pulisci(t2.getProperties("to").values().toString());
+						long afterI = System.currentTimeMillis();
+						dbTime += (afterI-beforeI);
 						
 						boolean bool= (p!=s) && guasto2.equalsIgnoreCase("n")
 								&& InVector.stessoEvento(evento1,evento2) && 

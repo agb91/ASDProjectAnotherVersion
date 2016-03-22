@@ -170,6 +170,32 @@ public class Adder {
 
 	}
 	
+	/*protected static void addNodeCheck( Node node)
+	{
+		String n = "";
+		try ( Transaction tx = Globals.graphDb.beginTx() )
+		{
+			n = node.getProperties("name").values().toString();
+			n = pulisci(n);
+			tx.success();
+		}
+		
+		long startTime = System.currentTimeMillis();
+		Node userNode = null;
+		try ( Transaction tx = Globals.graphDbCheck.beginTx() )
+		{
+		    Label label = DynamicLabel.label( "Nome" );
+	        userNode = Globals.graphDbCheck.createNode( label );
+	        userNode.setProperty( "name", n);
+	        tx.success();
+		}    	
+		long endTime = System.currentTimeMillis();
+		long seconds = (endTime - startTime);
+	//	Globals.writeTime += seconds;
+
+	}
+*/
+	
 	
 	protected static boolean stessoStato(String primo, String secondo)
 	{
@@ -277,6 +303,23 @@ public class Adder {
 		Globals.writeTime += seconds;
 		return relationship;
 	}
+	
+/*	protected static void addRelationCheck(String n1, String n2, String nome, String oss)
+	{
+		Relationship relationship = null;
+		try ( Transaction tx = Globals.graphDbCheck.beginTx() )
+		{
+			//System.err.println("level: " + level);
+			Node nodeN1 = findNodeByNameCheck(n1);
+			Node nodeN2 = findNodeByNameCheck(n2);
+			relationship = nodeN1.createRelationshipTo( nodeN2, RelTypes.STD );
+			relationship.setProperty( "type", pulisci(nome) );
+			relationship.setProperty( "oss", pulisci(oss) );
+			relationship.setProperty("from", pulisci(n1));
+			relationship.setProperty("to", pulisci(n2));
+			tx.success();
+		}	
+	}*/
 	
 	protected static Relationship addRelationSyncro(String n1s, String n2s, String nome, String oss, String ev, int level)
 	{
@@ -390,6 +433,33 @@ public class Adder {
 		return userNodes.get(0);
 
 	}
+	
+/*	protected static Node findNodeByNameCheck(String n1s)
+	{
+		ArrayList<Node> userNodes = new ArrayList<>();
+		Label label = DynamicLabel.label( "Nome" );
+		try ( Transaction tx = Globals.graphDbCheck.beginTx() )
+		{
+		    try ( ResourceIterator<Node> users =
+		    		Globals.graphDbCheck.findNodes( label, "name", n1s ) )
+		    {
+		        while ( users.hasNext() )
+		        {
+		            userNodes.add( users.next() );
+		        }
+		    }
+		    tx.success();
+		}
+		
+		if(userNodes.size()==0)
+		{
+			System.out.println("non trovo il nodo: " + n1s+ "||--fine nome");
+			return null;
+		}
+		return userNodes.get(0);
+
+	}*/
+
 	
 	protected static Node findNodeByNameSyncroSecond(String n1s)
 	{

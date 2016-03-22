@@ -27,6 +27,10 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	protected static Vector<String> Sprev = new Vector<String>();
 	protected static Vector<String> Sdiff = new Vector<String>();
 	
+	private static long prima;
+	private static long dopo;
+	private static long dbTime = 0;
+	
 	
 	public static void syncro(int level)
 	{
@@ -163,14 +167,22 @@ public class SincronizzaFirst extends SincronizzaCommon{
 		
 	private static void algoritmo(int level)
 	{
+		dbTime = 0;
+		long prima = System.currentTimeMillis();
 		//creo sprev
 		Sprev.clear();
 		for(int i=0; i<Sdue.size(); i++)
 		{
 			Sprev.addElement(Sdue.get(i));
 		}
+ 
 		bloccoSuperioreSincroAlgo(level);
 		bloccoWhileSincroAlgo(level);
+		
+		long dopo = System.currentTimeMillis();
+		System.err.println("tempo per la sincronizzazione primo tipo: "
+					+ ((dopo-prima)-dbTime));
+		
 	}
 	
 	
@@ -222,6 +234,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 						{
 							Relationship t1 = T.get(sks1.get(s));
 							Relationship t2 = T.get(sks2.get(p));
+							long beforeI = System.currentTimeMillis();
 							String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 							String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 							String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -230,7 +243,9 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							String sorgente2 = pulisci(t2.getProperties("from").values().toString());
 							String destinazione1 = pulisci(t1.getProperties("to").values().toString());
 							String destinazione2 = pulisci(t2.getProperties("to").values().toString());
-					
+							long afterI = System.currentTimeMillis();
+							dbTime += (afterI - beforeI);
+							
 							boolean bool = (s!=p && guasto2.equalsIgnoreCase("n") && 
 									InVector.stessoEvento(evento1,evento2) &&
 									sorgente1.equalsIgnoreCase(sa)&& sorgente2.equalsIgnoreCase(sb));
@@ -318,6 +333,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 						//System.err.println(a1 + "----" + a2);
 						Relationship t1 = T.get(sks1.get(s));
 						Relationship t2 = T.get(sks2.get(p));
+						long beforeI = System.currentTimeMillis();
 						String guasto1 = pulisci(t1.getProperties("guasto").values().toString());
 						String guasto2 = pulisci(t2.getProperties("guasto").values().toString());
 						String evento1 = pulisci(t1.getProperties("event").values().toString());
@@ -326,7 +342,9 @@ public class SincronizzaFirst extends SincronizzaCommon{
 						String sorgente2 = pulisci(t2.getProperties("from").values().toString());
 						String destinazione1 = pulisci(t1.getProperties("to").values().toString());
 						String destinazione2 = pulisci(t2.getProperties("to").values().toString());
-												
+						long afterI = System.currentTimeMillis();
+						dbTime += (afterI - beforeI);
+																	
 						boolean bool = s!=p 
 								&& guasto2.equalsIgnoreCase("n")
 								&& sorgente2.equalsIgnoreCase(stato) 

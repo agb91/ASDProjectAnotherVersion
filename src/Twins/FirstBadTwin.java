@@ -20,6 +20,8 @@ public class FirstBadTwin extends GenericGraphHandler {
 	// setta tutte le transizione ad "osservabile", nient'altro
 		public static void createBadTwinLevel1()
 		{
+			long bdTime = 0;
+			long prima = System.currentTimeMillis();
 			if(!inInteger(1,Globals.badTwinDid))
 			{
 				try ( Transaction tx = Globals.graphDb.beginTx() )
@@ -84,14 +86,20 @@ public class FirstBadTwin extends GenericGraphHandler {
 									String destination = pulisci(triplettaAttuale.getsDestinazione().getProperties("name").values().toString());
 									//System.out.println("sto addando con evento:  " + triplettaAttuale.getEvento());
 									String id = sorgente + "--" + triplettaAttuale.getEvento() +"--" + destination + "--" + guastoAttuale;
+									long before = System.currentTimeMillis();
 									addRelationBad(nodoAttuale, triplettaAttuale.getsDestinazione(), 
 											id, "y", triplettaAttuale.getEvento() 
 											, guastoAttuale, 1);
+									long after = System.currentTimeMillis();
+									bdTime += (after-before);
 									tPrimo.add(id);
 								}
 							}
 						}
-					}			
+					}	
+					long seconda = System.currentTimeMillis();
+					System.err.println("tempo per il first bad twin:" + 
+									( (seconda-prima)-bdTime) );
 					ORM.updateDb(1);
 					removeIsolatedStatesBad(1);
 					System.out.println("---------------------------------------------");

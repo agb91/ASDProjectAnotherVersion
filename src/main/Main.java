@@ -37,7 +37,18 @@ public class Main {
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
     	System.out.println("comincio il programma principale");
 		
+    	
     	/*FirstBadTwin.createBadTwinLevel1();
+    	for(int i=2; i<12; i++)
+    	{
+    		long before = System.currentTimeMillis();
+    		GeneralBadTwin.createBadTwinGeneral(i);
+    		long after = System.currentTimeMillis();
+    		long diff = after-before;
+    		System.err.println("tempo per il BT level " + i + " : " + diff );
+    	}*/
+    	
+    /*	FirstBadTwin.createBadTwinLevel1();
     	GoodTwin.createGoodTwin(1);
     	SincronizzaFirst.syncro(1);
     	GeneralBadTwin.createBadTwinGeneral(2);
