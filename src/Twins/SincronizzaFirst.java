@@ -379,6 +379,11 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							tsecondo.setEvento(evento1);
 							//tsecondo.setGuasto("n");
 							String nuovo = destinazione1+"-"+destinazione2;
+							/*if(nuovo.equalsIgnoreCase("B-E"))
+							{
+								System.err.println("prima tr : " + sorgente1 + "--->" + destinazione1 + ";  "
+										+ "seconda:   " + sorgente2 + "---->" + destinazione2 );
+							}*/
 							if(nuovoStato(nuovo,  Sdue))
 							{
 								//System.err.println("add: " +nuovo);

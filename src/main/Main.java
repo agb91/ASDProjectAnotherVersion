@@ -48,17 +48,18 @@ public class Main {
     		System.err.println("tempo per il BT level " + i + " : " + diff );
     	}*/
     	
-    /*	FirstBadTwin.createBadTwinLevel1();
+    	FirstBadTwin.createBadTwinLevel1();
     	GoodTwin.createGoodTwin(1);
     	SincronizzaFirst.syncro(1);
-    	GeneralBadTwin.createBadTwinGeneral(2);
+
+    	/*GeneralBadTwin.createBadTwinGeneral(2);
     	GoodTwin.createGoodTwin(2);
     	SincronizzaFirst.syncro(2);
     	SincronizzaSecond.syncroSecond(2);
     	GeneralBadTwin.createBadTwinGeneral(3);
     	GoodTwin.createGoodTwin(3);
     	SincronizzaFirst.syncro(3);
-    	SincronizzaSecond.syncroSecond(3);
+    	SincronizzaSecond.syncroSecond(3);*/
     /*	GeneralBadTwin.createBadTwinGeneral(4);
     	GoodTwin.createGoodTwin(4);
     	SincronizzaFirst.syncro(4);
@@ -75,13 +76,13 @@ public class Main {
     	GeneralBadTwin.createBadTwinGeneral(8);
     	GeneralBadTwin.createBadTwinGeneral(9);*/
     	
+    	/*Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
     	Menu.ask();
-    	Menu.ask();
-    	Menu.ask(); 
+    	Menu.ask(); */
     
     	
     	System.out.println("ho finito");

@@ -80,6 +80,7 @@ public class GoodTwin extends GenericGraphHandler{
 				}		
 				if(gu.equalsIgnoreCase("n"))
 				{
+					//System.err.println("addo a level: " + level);
 					addRelationGood(n1, n2, nome, oss, ev, gu, level);
 				}
 			}
@@ -152,20 +153,35 @@ public class GoodTwin extends GenericGraphHandler{
 	//poi elimino n
 	public static void killNodeGood(Node n, int index)
 	{
-		Globals.allNodesGood.remove(index);
 		String nomeNode = pulisci(n.getProperties("name").values().toString());
-		Iterator<String> ks = Globals.allRelationsGoodGeneralHash.get(0).keySet().iterator();
+		System.err.println("sto killando il nodo: " + nomeNode);
+		
+		Vector<String> toKill = new Vector<String>();
+	
+		Iterator<String> ks = Globals.allRelationsGoodGeneralHash.get(1).keySet().iterator();
 		while(ks.hasNext())
 		{
 			String k = ks.next();
-			Relationship r = Globals.allRelationsGoodGeneralHash.get(0).get(k);
+			Relationship r = Globals.allRelationsGoodGeneralHash.get(1).get(k);
 			String from = r.getProperties("from").values().toString();
 			from = pulisci(from);
+			String nome = r.getProperties("type").values().toString();
+			nome = pulisci(nome);
 			if(from.equalsIgnoreCase(nomeNode))
 			{
-				Globals.allRelationsGoodGeneralHash.get(0).remove(k);
+				System.err.println("tolgo la relazione: " + nome);
+				Globals.allRelationsGoodGeneralHash.get(1).get(k).delete();
+				toKill.addElement(k);
 			}			
 		}
+		
+		for(int i=0; i<toKill.size(); i++)
+		{
+			Globals.allRelationsGoodGeneralHash.get(1).remove(toKill.get(i));
+		}
+		
+		Globals.allNodesGood.get(index).delete();
+		Globals.allNodesGood.remove(index);
 		System.err.println("rimosso nodo: " + nomeNode);
 	}
 	

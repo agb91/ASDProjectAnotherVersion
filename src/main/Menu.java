@@ -10,6 +10,7 @@ public class Menu {
 	
 	public static void ask()
 	{
+		Globals.writeTime = 0;
 		String answer = Reader.read(question);
 		switch (answer) {
         case "1":  Risolutori.first();
