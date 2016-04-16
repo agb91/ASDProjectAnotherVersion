@@ -27,9 +27,12 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	private static long dopo;
 	private static long prima;
 	private static long dbTime=0;
+	
+	private static int nuovi;
 
 	public static void syncroSecond(int level)
 	{
+		nuovi = 0;
 		//long diffIn = 0;
 		//long startTime = System.currentTimeMillis();
 		if(!inInteger(level, Globals.syncroSecondDid))
@@ -225,7 +228,9 @@ public class SincronizzaSecond extends SincronizzaCommon {
 		dbTime = 0;
 		prima = System.currentTimeMillis();
 		bloccoSuperioreSecondo(level);
+		//System.err.println("dopo algo2-sez1: " + nuovi);
 		bloccoWhileSecondo(level);
+		//System.err.println("dopo algo2-sez2: " + nuovi);
 		dopo = System.currentTimeMillis();
 		System.err.println("tempo per la sincronizzazione secondo tipo: "
 					+ ((dopo-prima)-dbTime)	);
@@ -310,6 +315,8 @@ public class SincronizzaSecond extends SincronizzaCommon {
 								/*System.err.println("candidata: form" + tsecondo.getSorgente() + "; to: "
 										+ destinazione1+"-"+destinazione2 + "ev: "
 												+ evento1);*/
+								
+								nuovi++;
 								if(guasto1.equalsIgnoreCase("y"))
 								{
 									//System.out.println("QUESTA!!!");
@@ -408,6 +415,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							secondTdue.put(tsecondo.getSorgente() + "-" + 
 									tsecondo.getDestinazione() + "-" 
 									+ tsecondo.getEvento() , tsecondo);
+							nuovi++;
 							if(guasto1.equalsIgnoreCase("y"))
 							{
 								//System.out.println("QUESTA!!!");
@@ -479,7 +487,9 @@ public class SincronizzaSecond extends SincronizzaCommon {
 				nuova.setDestinazione(destinazione);
 				nuova.setEvento(evento);
 				secondTdue.put(sorgente + "-" + destinazione + "-" + evento, nuova);
+				nuovi++;
 			}
+			//System.err.println("secondo sistema, leggo dal precedente: " + secondTdue.size());
 			
 			secondSdue.clear();
 

@@ -39,10 +39,12 @@ public class NodoTarjan {
 	}
 
 	public void setMinDist(int minDist) {
+		//System.err.print("proposta: " + minDist + ";  attuale : " + this.minDist);
 		if(minDist<this.minDist)
 		{
 			this.minDist = minDist;
 		}
+		//System.err.println(";  inserita: " + this.minDist); 
 	}
 
 }

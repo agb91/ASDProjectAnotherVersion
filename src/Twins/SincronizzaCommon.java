@@ -110,7 +110,8 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			//System.err.println("facile, esco subito");
 			return false;
 		}
-		searchCycleTarjan(in, Tdue, who);
+		searchCycleTarjan(in, Tdue, who); 
+		TODO SISTEMA I CAPPI MANNAGGIA ' L CLERO 
 		//searchCycle(in, who);
 		//Iterator<String> ks = Globals.inCycleNodes.keySet().iterator();
 		//System.err.println("dim in cycle nodes : " + Globals.inCycleNodes.size());
@@ -119,7 +120,9 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			String a = ks.next();
 			System.err.println(" nodi in cicli : " + Globals.inCycleNodes.get(a));
 		}*/
+		//System.err.println("1");
 		searchFirstAmbiguous(ta, Tdue, in, who);
+		//System.err.println("2");
 	/*	
 		Iterator<String> ks = Globals.primeTransizioniAmbigue.keySet().iterator();
 		while(ks.hasNext())
@@ -129,6 +132,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 					Globals.primeTransizioniAmbigue.get(a).getSorgente());
 		}*/
 		ris = checkIfFromAmbiguousGoToCycle(who);
+		TODO CASO CHIAMATO DA 2? NON SUCCEDERÀ MAI MA SE SUCCEDE SISTEMA CHE È SUBITO FATTO
 		
 		return ris;
 	}
@@ -147,42 +151,34 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		//	System.err.println("destinazione ambigua: " + dest);
 			destinazioniAmbigue.addElement(dest);
 		}
-
 		
+		// se la destinazione della transizione ambigua è già in cicli.. è facile
 		for(int a=0; a<destinazioniAmbigue.size(); a++)
 		{
-			String altra = destinazioniAmbigue.get(a);
-			String sa = altra.split("-")[0];
-			String sb = altra.split("-")[1];
-			altra = sb + "-" + sa;
 			if(Globals.inCycleNodes.get(destinazioniAmbigue.get(a))!=null)
 			{
 				return true;
 			}
-			
-			if(Globals.inCycleNodes.get(altra)!=null)
-			{
-				return true;
-			}
+
 		}
 		
+		//altrimenti: cerco se da sua destinazione si arriva a nodi notamente in cicli
 		if(who.equalsIgnoreCase("f"))
 		{
 			for(int a=0; a<destinazioniAmbigue.size(); a++)
 			{
-				String sa = destinazioniAmbigue.get(a).split("-")[0];
-				String sb = destinazioniAmbigue.get(a).split("-")[1];
-				String altra = sb + "-" + sa;
-				//SISTEMA LA COSA DEL NODO CHE PUÒAVERE IL NOME INVERTITO
 				Node primo = findNodeByNameSyncro(destinazioniAmbigue.get(a));
-				Node primo2 = findNodeByNameSyncro(altra);
+				//System.err.println("nodo dest ambiguo: " + destinazioniAmbigue.get(a));
 				Iterator<String> ksz = Globals.inCycleNodes.keySet().iterator();
 				while(ksz.hasNext())
 				{ 
+					
 					String az = ksz.next();
+					//System.err.println("nodo noto in ciclo: " + 
+						//			Globals.inCycleNodes.get(az));
 					Node secondo = findNodeByNameSyncro(Globals.inCycleNodes.get(az));
-					//System.err.println("da qui!");
 					HashMap<String, Relationship> appoggio = findPathRels(primo, secondo);
+					
 					if(appoggio!=null)
 					{
 						if(appoggio.size()>0)
@@ -191,20 +187,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 							return true;
 						}
 					}
-					
-
-					HashMap<String, Relationship> appoggio2 = findPathRels(primo2, secondo);
-					if(appoggio2!=null)
-					{
-						if(appoggio2.size()>0)
-						{
-							//System.out.println("FATTO2");
-							return true;
-						}
-					}
 				}
-
-				
 			}
 		}
 		return false;
@@ -269,7 +252,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			String a = k.next();
 			if(V.get(a).getIndex()==(9876))
 			{
-				tarjan(a, V, tdue);				
+				tarjan(a, V, tdue);	
 			}
 		}
 	}
@@ -277,11 +260,16 @@ public class SincronizzaCommon extends GenericGraphHandler{
 	protected static void tarjan(String indexCiclo, HashMap<String, NodoTarjan> sdue, 
 			HashMap<String, TransizioneDoppia> tdue)
 	{
+		HashMap<String, String> adder = new HashMap<String, String>();
+				
 		sdue.get(indexCiclo).setIndex(indexTarjan);
 		sdue.get(indexCiclo).setMinDist(indexTarjan);
+		
+		//System.err.println("indice: " + indexTarjan);
 		indexTarjan++;
-		NodoTarjan v = sdue.get(indexCiclo); 
-		//System.err.println("addo : " +aggiungi.getNome());
+		NodoTarjan v = sdue.get(indexCiclo);  // aggiungo il nodo attuale alla pila
+		//System.err.println("-------------------------------------------");
+		//System.err.println("addo : " +v.getNome());
 		S.push(v);
 		Iterator<String> k = tdue.keySet().iterator();
 		while(k.hasNext())
@@ -290,17 +278,21 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			TransizioneDoppia attuale = tdue.get(a);
 			if(attuale.getSorgente().equalsIgnoreCase(v.getNome()))
 			{
+				//System.err.println("sorgente attesa: " + v.getNome());
 				//System.err.println("sorgente: " + attuale.getSorgente());
 				String dest = attuale.getDestinazione();
 				NodoTarjan found = sdue.get(dest);
 				//System.err.println("dest: " + dest + "; index: " + found.getIndex());
 				if(found.getIndex()==(9876))
 				{
+					//System.err.println("CICLO");
 					//System.err.println("prima : " + sdue.get(dest).getMinDist());
 					tarjan(sdue.get(dest).getNome(), sdue, tdue);
+					//System.err.println("////////////////////////777");
 					//System.err.println("dopo : " + sdue.get(dest).getMinDist());
 					int dm = sdue.get(dest).getMinDist();
 					sdue.get(indexCiclo).setMinDist(dm);
+					//System.err.println("settata : " + sdue.get(dest).getMinDist());
 				}
 				else
 				{
@@ -314,41 +306,64 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		}
 		if(sdue.get(indexCiclo).getMinDist()==sdue.get(indexCiclo).getIndex())
 		{
-			//System.err.println("trovato insieme di componenti fortemente connessi");
-			//HashMap<String, NodoTarjan> adder = new HashMap<String, NodoTarjan>();
+			adder.clear();
+			System.err.println("trovato insieme di componenti fortemente connessi:");
+			//System.err.println("1");
+			String nomeRadice = sdue.get(indexCiclo).getNome();
+			//System.err.println("con radice: " + nomeRadice);
 			boolean ancora = true;
-			//System.err.println("--------------------------------");
-			while(!S.isEmpty() && ancora)
+			//System.err.println("di dimensione: " + S.size());
+			do
 			{
+				//System.err.println("2");
 				NodoTarjan nuovo = S.pop();
+				//System.err.println("3");
 				//adder.put(nuovo.getNome(), nuovo);
+				String nomeNuovo = nuovo.getNome();
+				//System.err.println("aggiungo: " + nomeNuovo);
 			//	System.err.println("aggiungo: " + nuovo.getNome() + 
 			//			", uguaglianza: " + sdue.get(indexCiclo).getMinDist());
-				if(!nuovo.getNome().equalsIgnoreCase(sdue.get(indexCiclo).getNome()))
+				if(nomeNuovo.equalsIgnoreCase(nomeRadice))
 				{
-					//System.err.println("sgam: " + nuovo.getNome());
+					//System.err.println("sgam: ");
 					ancora= false;	
 				}
 				//System.err.println("addo: " + nuovo.getNome());
-				Globals.inCycleNodes.put(nuovo.getNome(), nuovo.getNome());
-			}
+				adder.put(nomeNuovo, nomeNuovo);
+				//Globals.inCycleNodes.put(nuovo.getNome(), nuovo.getNome());
+			}while(S.size()>0 && ancora);
 			//System.err.println("adder : " + adder.size());
 			//componentiConnesse.addElement(adder);
+			if(adder.size()>1) //ancora, i triviali non ci garbano..
+			{
+				Iterator<String> itera = adder.keySet().iterator();
+				while(itera.hasNext())
+				{ 
+					String chiaveAdder = itera.next();
+					String add = adder.get(chiaveAdder);
+					System.err.println("aggiungo: " + add);
+					Globals.inCycleNodes.put(add, add);
+				};
+			}
 		}
-		
 	}
 	
 	private static boolean inS(NodoTarjan n)
 	{
+		//System.err.println("ago: " + n.getNome());
 		for(int i=0; i<S.size(); i++)
 		{
 			String s = S.get(i).getNome();
+			//System.err.println("pagliaio : " + s);
+			
 			String s1 = n.getNome();
 			if (s.equalsIgnoreCase(s1))
 			{
+				//System.err.println("dico si");
 				return true;
 			}
 		}
+		//System.err.println("dico no");
 		return false;
 	}
 	
@@ -419,7 +434,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		{
 			//System.err.println("n1: " + s.getProperties("name").values().toString() +
 			//		";  n2: " + e.getProperties("name").values().toString());
-			Iterator<Path> iteratore = findPathSyncro(s,e);
+			Iterator<Path> iteratore = findPathSyncro(s,e, 5);
 			//System.err.println(iteratore.hasNext() + "--");
 			Iterator<Relationship> result = null;
 			if(iteratore.hasNext())

@@ -97,14 +97,14 @@ public class GenericGraphHandler extends Adder{
 	}
 	
 	//classe grezza: trova tutti i path mettendo sia nodi sia relazioni in raw
-	protected static Iterator<Path> findPathSyncro(Node s, Node e)
+	protected static Iterator<Path> findPathSyncro(Node s, Node e, int deepness)
 	{
 		Iterator<Path> iteratore = null;
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
 			PathFinder<Path> finder =
 					GraphAlgoFactory.allPaths(PathExpanders.forDirection(
-							Direction.OUTGOING ), 15 );
+							Direction.OUTGOING ), deepness );
 			Iterable<Path> paths = finder.findAllPaths( s, e );
 			
 			iteratore = paths.iterator();

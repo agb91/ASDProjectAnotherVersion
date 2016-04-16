@@ -31,9 +31,12 @@ public class SincronizzaFirst extends SincronizzaCommon{
 	private static long dopo;
 	private static long dbTime = 0;
 	
+	private static int nuovi;
+	
 	
 	public static void syncro(int level)
 	{
+		nuovi = 0;
 		//long startTime = System.currentTimeMillis();
 		if(!inInteger(level,Globals.syncroFirstDid))
 		{
@@ -177,7 +180,9 @@ public class SincronizzaFirst extends SincronizzaCommon{
 		}
  
 		bloccoSuperioreSincroAlgo(level);
+		//System.err.println("dopo algo1-sez1: " + nuovi);
 		bloccoWhileSincroAlgo(level);
+		//System.err.println("dopo algo1-sez2: " + nuovi);
 		
 		long dopo = System.currentTimeMillis();
 		System.err.println("tempo per la sincronizzazione primo tipo: "
@@ -284,6 +289,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 									}
 									Tdue.put(tsecondo.getSorgente() + "-" + tsecondo.getDestinazione()
 									+ "-" +tsecondo.getEvento(),tsecondo);
+									nuovi++;
 	
 								}
 							}
@@ -405,6 +411,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							//{
 							Tdue.put(tsecondo.getSorgente() + "-" + tsecondo.getDestinazione()
 							+ "-" +tsecondo.getEvento(), tsecondo);
+							nuovi++;
 							//}
 						}
 					}			
@@ -542,10 +549,12 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				nuova.setEvento(nomeEv);
 				
 				Tdue.put(nomeFrom + "-" + nomeTo+ "-" +nomeEv,nuova);
-				
+				nuovi++;
 				tx.success();
 			}
 		}
+		
+		//System.err.println("primo sistema, leggo dal precedente: " + Tdue.size());
 		
 
 	}
