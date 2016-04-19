@@ -145,6 +145,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 			String nome = Sdue.get(i);
 			addNodeSyncro(nome, level);
 		}
+		System.err.println("sincro primo tipo: al livello: " + level + ", ho transizioni: " + Tdue.size());
 		Iterator<String> ks = Tdue.keySet().iterator();
 		while(ks.hasNext())
 		{ 
@@ -178,11 +179,11 @@ public class SincronizzaFirst extends SincronizzaCommon{
 		{
 			Sprev.addElement(Sdue.get(i));
 		}
- 
+		//System.err.println("iniziale: " + Tdue.size());
 		bloccoSuperioreSincroAlgo(level);
-		//System.err.println("dopo algo1-sez1: " + nuovi);
+		//System.err.println("add in algo1-sez1: " + Tdue.size());
 		bloccoWhileSincroAlgo(level);
-		//System.err.println("dopo algo1-sez2: " + nuovi);
+		//System.err.println("add in algo1-sez2: " + Tdue.size());
 		
 		long dopo = System.currentTimeMillis();
 		System.err.println("tempo per la sincronizzazione primo tipo: "
@@ -314,9 +315,10 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				tx.success();
 			}
 			
-			//System.err.println("T size: " + T.size());
 			Iterator<String> ks1 = T.keySet().iterator();
 			Iterator<String> ks2 = T.keySet().iterator();
+			
+			
 			Vector<String> sks1 = new Vector<String>();
 			Vector<String> sks2 = new Vector<String>();
 			while(ks1.hasNext())
@@ -409,10 +411,14 @@ public class SincronizzaFirst extends SincronizzaCommon{
 							}
 							//if(!InVector.InDoppia(tsecondo, Tdue))
 							//{
+							int primas = Tdue.size(); 
 							Tdue.put(tsecondo.getSorgente() + "-" + tsecondo.getDestinazione()
 							+ "-" +tsecondo.getEvento(), tsecondo);
-							nuovi++;
-							//}
+							int dopos = Tdue.size(); 
+							if(primas != dopos)
+							{
+								nuovi++;
+							}
 						}
 					}			
 				}
@@ -525,7 +531,7 @@ public class SincronizzaFirst extends SincronizzaCommon{
 		
 		//creo t2
 		Tdue.clear();
-		Iterator<String> k = Tprimo.keySet().iterator();
+		/*Iterator<String> k = Tprimo.keySet().iterator();
 		while(k.hasNext())
 		{ 
 			String a = k.next();
@@ -549,10 +555,10 @@ public class SincronizzaFirst extends SincronizzaCommon{
 				nuova.setEvento(nomeEv);
 				
 				Tdue.put(nomeFrom + "-" + nomeTo+ "-" +nomeEv,nuova);
-				nuovi++;
+				//nuovi++;
 				tx.success();
 			}
-		}
+		}*/
 		
 		//System.err.println("primo sistema, leggo dal precedente: " + Tdue.size());
 		

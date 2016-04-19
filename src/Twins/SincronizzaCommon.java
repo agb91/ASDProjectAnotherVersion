@@ -111,7 +111,9 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			return false;
 		}
 		searchCycleTarjan(in, Tdue, who); 
-		TODO SISTEMA I CAPPI MANNAGGIA ' L CLERO 
+		//System.err.println("dopo tarjan " + Globals.inCycleNodes.size());
+		searchOtherCycle(in, who);
+		//System.err.println("dopo gioco dei cappi " + Globals.inCycleNodes.size());
 		//searchCycle(in, who);
 		//Iterator<String> ks = Globals.inCycleNodes.keySet().iterator();
 		//System.err.println("dim in cycle nodes : " + Globals.inCycleNodes.size());
@@ -132,7 +134,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 					Globals.primeTransizioniAmbigue.get(a).getSorgente());
 		}*/
 		ris = checkIfFromAmbiguousGoToCycle(who);
-		TODO CASO CHIAMATO DA 2? NON SUCCEDERÀ MAI MA SE SUCCEDE SISTEMA CHE È SUBITO FATTO
+		//TODO CASO CHIAMATO DA 2? NON SUCCEDERÀ MAI MA SE SUCCEDE SISTEMA CHE È SUBITO FATTO
 		
 		return ris;
 	}
@@ -177,7 +179,34 @@ public class SincronizzaCommon extends GenericGraphHandler{
 					//System.err.println("nodo noto in ciclo: " + 
 						//			Globals.inCycleNodes.get(az));
 					Node secondo = findNodeByNameSyncro(Globals.inCycleNodes.get(az));
-					HashMap<String, Relationship> appoggio = findPathRels(primo, secondo);
+					HashMap<String, Relationship> appoggio = findPathRels(primo, secondo, 5);
+					
+					if(appoggio!=null)
+					{
+						if(appoggio.size()>0)
+						{
+							//System.out.println("FATTO2");
+							return true;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			for(int a=0; a<destinazioniAmbigue.size(); a++)
+			{
+				Node primo = findNodeByNameSyncroSecond(destinazioniAmbigue.get(a));
+				//System.err.println("nodo dest ambiguo: " + destinazioniAmbigue.get(a));
+				Iterator<String> ksz = Globals.inCycleNodes.keySet().iterator();
+				while(ksz.hasNext())
+				{ 
+					
+					String az = ksz.next();
+					//System.err.println("nodo noto in ciclo: " + 
+						//			Globals.inCycleNodes.get(az));
+					Node secondo = findNodeByNameSyncroSecond(Globals.inCycleNodes.get(az));
+					HashMap<String, Relationship> appoggio = findPathRelsSecond(primo, secondo, 5);
 					
 					if(appoggio!=null)
 					{
@@ -207,7 +236,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 			{
 				Node from = findNodeByNameSyncro(nodi.get(0));
 				Node to = findNodeByNameSyncro(sorgenteAmbigua);
-				path = findPathRels(from,to);
+				path = findPathRels(from,to, 5);
 			}
 			/*else
 			{
@@ -255,6 +284,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 				tarjan(a, V, tdue);	
 			}
 		}
+		
 	}
 	
 	protected static void tarjan(String indexCiclo, HashMap<String, NodoTarjan> sdue, 
@@ -307,7 +337,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		if(sdue.get(indexCiclo).getMinDist()==sdue.get(indexCiclo).getIndex())
 		{
 			adder.clear();
-			System.err.println("trovato insieme di componenti fortemente connessi:");
+			//System.err.println("trovato insieme di componenti fortemente connessi:");
 			//System.err.println("1");
 			String nomeRadice = sdue.get(indexCiclo).getNome();
 			//System.err.println("con radice: " + nomeRadice);
@@ -328,7 +358,6 @@ public class SincronizzaCommon extends GenericGraphHandler{
 					//System.err.println("sgam: ");
 					ancora= false;	
 				}
-				//System.err.println("addo: " + nuovo.getNome());
 				adder.put(nomeNuovo, nomeNuovo);
 				//Globals.inCycleNodes.put(nuovo.getNome(), nuovo.getNome());
 			}while(S.size()>0 && ancora);
@@ -341,7 +370,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 				{ 
 					String chiaveAdder = itera.next();
 					String add = adder.get(chiaveAdder);
-					System.err.println("aggiungo: " + add);
+					System.err.println("aggiungo con tarjan: " + add);
 					Globals.inCycleNodes.put(add, add);
 				};
 			}
@@ -367,37 +396,51 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		return false;
 	}
 	
-	protected static void searchCycle(Vector<String> sdue, String who)
+	protected static void searchOtherCycle(Vector<String> sdue, String who)
 	{
-		Globals.inCycleNodes.clear();
-		for(int i=0; i<sdue.size(); i++)
+		if(who.equalsIgnoreCase("f"))
 		{
-		   if(!InVector.inVettoreHash(sdue.get(i), Globals.inCycleNodes))
-		   {
-			   if(who.equalsIgnoreCase("f"))
-			   {
-				   Node n = findNodeByNameSyncro(sdue.get(i));
-				   findPathNodes(n,n);
-			   }
-			   else
-			   {
-				   Node n = findNodeByNameSyncroSecond(sdue.get(i));
-				   findPathNodesSecond(n,n);
-			   }
-
-		   }
+			for(int i=0; i<sdue.size(); i++)
+			{
+				Node questo = findNodeByNameSyncro(sdue.get(i));
+				HashMap<String, Relationship> appoggio = findPathRels(questo, questo, 2);
+				if(appoggio!=null)
+				{
+					if(appoggio.size()>0)
+					{
+						System.err.println("aggiunto: " + sdue.get(i));
+						Globals.inCycleNodes.put(sdue.get(i), sdue.get(i));					
+					}
+				}
+			}
+		}
+		else
+		{
+			for(int i=0; i<sdue.size(); i++)
+			{
+				Node questo = findNodeByNameSyncroSecond(sdue.get(i));
+				HashMap<String, Relationship> appoggio = findPathRelsSecond(questo, questo, 2);
+				if(appoggio!=null)
+				{
+					if(appoggio.size()>0)
+					{
+						System.err.println("con giochetto dei cappi aggiungo : " + sdue.get(i));
+						Globals.inCycleNodes.put(sdue.get(i), sdue.get(i));					
+					}
+				}
+			}
 		}
 	}
 	
 	
-	public static HashMap<String, Relationship> findPathRelsSecond(Node s, Node e)
+	public static HashMap<String, Relationship> findPathRelsSecond(Node s, Node e, int deep)
 	{
 		HashMap<String, Relationship> ris = new HashMap<String, Relationship>();
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{
 			//System.err.println("n1: " + s.getProperties("name").values().toString() +
 			//		";  n2: " + e.getProperties("name").values().toString());
-			Iterator<Path> iteratore = findPathSecond(s,e);
+			Iterator<Path> iteratore = findPathSecond(s,e, deep);
 			//System.err.println(iteratore.hasNext() + "--");
 			Iterator<Relationship> result = null;
 			if(iteratore.hasNext())
@@ -427,14 +470,14 @@ public class SincronizzaCommon extends GenericGraphHandler{
 		return ris;
 	}
 	
-	public static HashMap<String, Relationship> findPathRels(Node s, Node e)
+	public static HashMap<String, Relationship> findPathRels(Node s, Node e, int deep)
 	{
 		HashMap<String, Relationship> ris = new HashMap<String, Relationship>();
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
 			//System.err.println("n1: " + s.getProperties("name").values().toString() +
 			//		";  n2: " + e.getProperties("name").values().toString());
-			Iterator<Path> iteratore = findPathSyncro(s,e, 5);
+			Iterator<Path> iteratore = findPathSyncro(s,e, deep);
 			//System.err.println(iteratore.hasNext() + "--");
 			Iterator<Relationship> result = null;
 			if(iteratore.hasNext())
@@ -467,7 +510,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 
 	public static void findPathNodes(Node s, Node e)
 	{
-		HashMap<String, Relationship> path = findPathRels(s,e);
+		HashMap<String, Relationship> path = findPathRels(s,e, 5);
 		//System.out.println("ecco un percorso lungo: " + path.size());
 		try ( Transaction tx = Globals.graphDbSyncro.beginTx() )
 		{
@@ -490,7 +533,7 @@ public class SincronizzaCommon extends GenericGraphHandler{
 	
 	public static void findPathNodesSecond(Node s, Node e)
 	{
-		HashMap<String, Relationship> path = findPathRelsSecond(s,e);
+		HashMap<String, Relationship> path = findPathRelsSecond(s,e, 5);
 		//System.out.println("ecco un percorso lungo: " + path.size());
 		try ( Transaction tx = Globals.graphDbSyncroSecond.beginTx() )
 		{

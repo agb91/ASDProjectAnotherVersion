@@ -6,6 +6,7 @@ import letturaXML.Graficatore;
 import letturaXML.readXmlGraph;
 import talkToDb.CheckRequirements;
 import talkToDb.ORM;
+import utility.Reader;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -22,16 +23,29 @@ import global.Globals;
 public class Main {
 	
 	private static String DB_PATH = "/home/andrea/Scrivania/springExample/ZanellaProjectLast/dbBad";
+	private static String question = "Quale livello di diagnosticabilità vuoi verificare?";
 	
 	public static void main(String[] args) {
 		
+		int levelToCheck = Reader.readInt(question);
+		System.out.println("verifico la diagnosticabilità: " + levelToCheck);
+		
 		System.out.println("comincio a cancellare i db "
 				+ "precedenti ed a inizializzare le variabili...");
-		Globals.initialize();
+		Globals.initialize(levelToCheck);
 		System.out.println("costruisco i database e la struttura...");
     	ORM db = new ORM(DB_PATH); //inizializzo il database neo4j
     	System.out.println("leggo da xml...");
-    	db.readXml();// legge l'xml e lo scrive nel db di neo4j
+    	
+    	
+    	String xmlPath="xmls/TestAmanuense.xml";
+    	//String xmlPath="xmls/originalXml.xml";
+    	//String xmlPath="xmls/dilemmaXml.xml";
+    	//String xmlPath="xmls/dilemma2Xml.xml";
+    	//String xmlPath="xmls/dilemma3Xml.xml";
+    	//String xmlPath="xmls/falseOriginalXml.xml";
+    		
+    	db.readXml(xmlPath);// legge l'xml e lo scrive nel db di neo4j
     	//db.readTest(8,11,10);
     	System.out.println("controllo se rispetta i requisiti");
     	CheckRequirements.check();//valuta se il grafo rispetta i requisiti
@@ -48,7 +62,7 @@ public class Main {
     		System.err.println("tempo per il BT level " + i + " : " + diff );
     	}*/
     	
-    	FirstBadTwin.createBadTwinLevel1();
+    	/*FirstBadTwin.createBadTwinLevel1();
     	GoodTwin.createGoodTwin(1);
     	SincronizzaFirst.syncro(1);
 
@@ -58,10 +72,10 @@ public class Main {
     	SincronizzaSecond.syncroSecond(2);
     	GeneralBadTwin.createBadTwinGeneral(3);
     	GoodTwin.createGoodTwin(3);
-    	SincronizzaFirst.syncro(3);
-    	SincronizzaFirst.checkC4(3);
-    	SincronizzaSecond.syncroSecond(3);
-    /*	GeneralBadTwin.createBadTwinGeneral(4);
+        SincronizzaFirst.syncro(3);
+      	SincronizzaSecond.syncroSecond(3);
+    	SincronizzaSecond.checkC4(3);
+    	/*GeneralBadTwin.createBadTwinGeneral(4);
     	GoodTwin.createGoodTwin(4);
     	SincronizzaFirst.syncro(4);
     	SincronizzaSecond.syncroSecond(4);
@@ -69,7 +83,7 @@ public class Main {
     	GoodTwin.createGoodTwin(5);
     	SincronizzaFirst.syncro(5);
     	SincronizzaSecond.syncroSecond(5);
-    	GeneralBadTwin.createBadTwinGeneral(6);
+    	/*GeneralBadTwin.createBadTwinGeneral(6);
     	GoodTwin.createGoodTwin(6);
     	SincronizzaFirst.syncro(6);
     	SincronizzaSecond.syncroSecond(6);
@@ -77,13 +91,12 @@ public class Main {
     	GeneralBadTwin.createBadTwinGeneral(8);
     	GeneralBadTwin.createBadTwinGeneral(9);*/
     	
-    	//Menu.ask();
-    	/*Menu.ask();
-    	Menu.ask();
-    	Menu.ask();
-    	Menu.ask();
-    	Menu.ask();
-    	Menu.ask(); */
+    	Menu.ask(levelToCheck);
+    	Menu.ask(levelToCheck);
+    	Menu.ask(levelToCheck);
+    	Menu.ask(levelToCheck);
+    	Menu.ask(levelToCheck);
+    	Menu.ask(levelToCheck);
     
     	
     	System.out.println("ho finito");

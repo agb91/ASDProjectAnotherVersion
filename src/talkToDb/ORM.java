@@ -228,9 +228,9 @@ public class ORM extends GenericGraphHandler {
 		}
 	}
 	
-	public void readXml()
+	public void readXml(String xmlPath)
 	{
-		Graficatore ldx = new Graficatore(); //lettura iniziale da xml 
+		Graficatore ldx = new Graficatore(xmlPath); //lettura iniziale da xml 
 		Vector<Nodo> n = ldx.getNodesList();
 		Vector<Transizione> t = ldx.getRelationsList();
 		for(int i=0; i<n.size(); i++)

@@ -53,9 +53,9 @@ public class Globals {
 	public static HashMap<String, TransizioneDoppia> primeTransizioniAmbigue =
 			new HashMap<String, TransizioneDoppia>();
 	
-	public static void initialize()
+	public static void initialize(int levelToCheck)
 	{
-		for(int i=0; i<13; i++)
+		for(int i=0; i<(levelToCheck+1); i++)
 		{
 			allRelationsGeneralHash.addElement(new HashMap<String, Relationship>());
 			allRelationsGoodGeneralHash.addElement(new HashMap<String, Relationship>());

@@ -9,13 +9,21 @@ import global.Globals;
 
 public class Risolutori {
 	
-	public static void first()
+	public static void first(int levelMax)
 	{
 		long startTime = System.currentTimeMillis();
 		int level = 1;
 		boolean ancora = true;
 		while(ancora)
 		{
+			if(level==(levelMax+1))
+			{
+				System.out.println("sono arrivato al massimo che hai proposto, si,  è ancora diagnosticabile a questo livello");
+				System.out.println("********************************************************");
+				System.out.println("||    Si, ha livello di diagnosticabilità almeno "+(level-1) + "    ||" );
+				System.out.println("********************************************************");
+				break;
+			}
 			if(level==1)
 			{
 				FirstBadTwin.createBadTwinLevel1();
@@ -28,6 +36,7 @@ public class Risolutori {
 			SincronizzaFirst.syncro(level);
 			if(SincronizzaFirst.checkC4(level))
 			{
+				System.out.println("mi fermo qui:");
 				System.out.println("********************************************************");
 				System.out.println("||    il livello generale di diagnosticabilità è "+(level-1) + "    ||" );
 				System.out.println("********************************************************");
@@ -40,13 +49,21 @@ public class Risolutori {
 		System.out.println("Questo metodo ha rischiesto " + seconds + " milliseconds ;  \n\n\n\n");
 	}
 	
-	public static void second()
+	public static void second(int levelMax)
 	{
 		long startTime = System.currentTimeMillis();
 		int i=1;
 		boolean ancora = true;
 		while(ancora)
 		{
+			if(i==(levelMax+1))
+			{
+				System.out.println("sono arrivato al massimo che hai proposto, SI, è ancora diagnosticabile a questo livello");
+				System.out.println("********************************************************");
+				System.out.println("||     Si, ha livello di diagnosticabilità almeno "+(i-1) + "    ||" );
+				System.out.println("********************************************************");
+				break;
+			}
 			if(i==1)
 			{
 				FirstBadTwin.createBadTwinLevel1();
@@ -73,6 +90,7 @@ public class Risolutori {
 				{
 					if(SincronizzaFirst.checkC4(i))
 					{
+						System.out.println("mi fermo qui:");
 						System.out.println("non posso diagnosticare il livello " + i);
 						System.out.println("********************************************************");
 						System.out.println("||    il livello generale di diagnosticabilità è "+(i-1) + "    ||" );
@@ -136,13 +154,21 @@ public class Risolutori {
 		System.out.println("Questo metodo ha rischiesto " + seconds + ";  \n\n\n\n");
 	}
 	*/
-	public static void third()
+	public static void third(int levelMax)
 	{
 		long startTime = System.currentTimeMillis();
 		int i=1;
 		boolean ancora = true;
 		while(ancora)
 		{		
+			if(i==(levelMax+1))
+			{
+				System.out.println("sono arrivato al massimo che hai proposto, SI, è ancora diagnosticabile a questo livello");
+				System.out.println("********************************************************");
+				System.out.println("||     Si, ha livello di diagnosticabilità almeno "+(i-1) + "    ||" );
+				System.out.println("********************************************************");
+				break;
+			}
 			//System.err.println("VENGO CHIAMATO");
 			if(i>1)
 			{
@@ -206,6 +232,7 @@ public class Risolutori {
 					}
 					if(c4)
 					{
+						System.out.println("mi fermo qui:");
 						System.out.println("non posso diagnosticare il livello " + i);
 						System.out.println("********************************************************");
 						System.out.println("||    il livello generale di diagnosticabilità è "+(i-1) + "    ||" );

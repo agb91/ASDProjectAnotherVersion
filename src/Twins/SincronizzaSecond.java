@@ -207,6 +207,9 @@ public class SincronizzaSecond extends SincronizzaCommon {
 			//System.out.println("scrivo il nodo: " + nome);
 			addNodeSyncroSecond(nome, level);
 		}
+		System.err.println("sincro secondo tipo: al livello: " + level 
+				+ ", ho transizioni: " + secondTdue.size());
+		
 		Iterator<String> ks = secondTdue.keySet().iterator();
 		while(ks.hasNext())
 		{ 
@@ -227,10 +230,11 @@ public class SincronizzaSecond extends SincronizzaCommon {
 	{
 		dbTime = 0;
 		prima = System.currentTimeMillis();
+		//System.err.println("iniziale: " + secondTdue.size());
 		bloccoSuperioreSecondo(level);
-		//System.err.println("dopo algo2-sez1: " + nuovi);
+		//System.err.println("dopo algo2-sez1: " + secondTdue.size());
 		bloccoWhileSecondo(level);
-		//System.err.println("dopo algo2-sez2: " + nuovi);
+		//System.err.println("dopo algo2-sez2: " + secondTdue.size());
 		dopo = System.currentTimeMillis();
 		System.err.println("tempo per la sincronizzazione secondo tipo: "
 					+ ((dopo-prima)-dbTime)	);
@@ -397,6 +401,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 								sorgente2.equalsIgnoreCase(sb);
 						if(bool)
 						{
+
 							TransizioneDoppia tsecondo = new TransizioneDoppia();
 							tsecondo.setSorgente(nomeAttuale);
 							/*if(nomeAttuale.equalsIgnoreCase("n2-n2"))
@@ -412,10 +417,15 @@ public class SincronizzaSecond extends SincronizzaCommon {
 							{
 								secondSdue.add(newName);
 							}
+							int primas = secondTdue.size(); 
 							secondTdue.put(tsecondo.getSorgente() + "-" + 
 									tsecondo.getDestinazione() + "-" 
 									+ tsecondo.getEvento() , tsecondo);
-							nuovi++;
+							int dopos = secondTdue.size();
+							if(primas!=dopos)
+							{
+								nuovi++;
+							}
 							if(guasto1.equalsIgnoreCase("y"))
 							{
 								//System.out.println("QUESTA!!!");
@@ -487,7 +497,7 @@ public class SincronizzaSecond extends SincronizzaCommon {
 				nuova.setDestinazione(destinazione);
 				nuova.setEvento(evento);
 				secondTdue.put(sorgente + "-" + destinazione + "-" + evento, nuova);
-				nuovi++;
+				//nuovi++;
 			}
 			//System.err.println("secondo sistema, leggo dal precedente: " + secondTdue.size());
 			
